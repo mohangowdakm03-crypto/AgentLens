@@ -6,6 +6,12 @@ def step_text(step):
 
 
 def similarity_curve(steps, intent_vec, embed_fn=embed):
-    """One cosine similarity per step against the intent vector."""
+    """One cosine similarity per step against the intent vector.
+
+    Returns an empty list when ``steps`` is empty, so callers that handle
+    zero-length curves gracefully do not need a special branch here.
+    """
+    if not steps:
+        return []
     vecs = embed_fn([step_text(s) for s in steps])
     return [cosine(v, intent_vec) for v in vecs]

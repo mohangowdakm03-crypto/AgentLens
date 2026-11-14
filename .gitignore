@@ -41,3 +41,5 @@ ENV/
 *.bak
 *.tmp
 .env
+# Editor settings
+.vscode/
