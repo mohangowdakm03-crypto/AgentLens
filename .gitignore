@@ -43,3 +43,8 @@ ENV/
 .env
 # Editor settings
 .vscode/
+
+
+# Legacy generated datasets
+data/dataset1_causal_cohere.jsonl
+data/dataset2_rewriter_cohere.jsonl

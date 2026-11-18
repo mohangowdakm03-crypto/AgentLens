@@ -29,14 +29,19 @@
 
 ## 📂 Repository Structure
 ```
-AgentLens/
+detector/
+├── api/
 ├── data/
-│   ├── dataset1_causal_attribution.jsonl    # Causal attribution seeds
-│   ├── dataset1_causal_cohere.jsonl         # 88 causal attribution examples
-│   ├── dataset2_prompt_rewriter.jsonl       # Prompt rewriter seeds
-│   └── dataset2_rewriter_cohere.jsonl       # 90 prompt rewriter examples (with word diff)
-├── dataset_curator.py                       # Interactive Streamlit data curator & analyzer
-├── generate_dataset.py                      # Synthetic training data generation script
+│   ├── Agentlens_detector_input.jsonl
+│   ├── AgentLens_300_Final_Corrected.jsonl
+│   ├── AgentLens_300_Final_Validation_Report.json
+│   ├── AgentLens_58_Permission_Audit.csv
+│   ├── AgentLens_Joyal_Correction_Summary.md
+│   └── AgentLens_Original_10_ID_Mapping.md
+├── ml_core/
+├── tests/
+├── run_server.py
+├── generate_dataset.py
 └── README.md
 ```
 
