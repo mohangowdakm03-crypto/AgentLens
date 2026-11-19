@@ -67,8 +67,11 @@ def _make_gt_record(
     flagged_step_id,
     allowed=None,
     forbidden=None,
+    sample_split="test",
 ) -> dict:
     rec = _make_detector_record(trace_id, steps, allowed=allowed, forbidden=forbidden)
+    if sample_split is not None:
+        rec["sample_split"] = sample_split
     rec["ground_truth"] = {
         "has_deviation": has_deviation,
         "deviation_detected": has_deviation,
@@ -79,6 +82,7 @@ def _make_gt_record(
         "explanation": None,
         "trigger_phrase": None,
         "label_source": "manual_rule_based",
+        "sample_split": sample_split,
     }
     return rec
 
@@ -495,3 +499,311 @@ class TestBatchFixtureAndLimitations:
         assert lims["action_vocabulary_mismatch_al_trace_033"]["count"] == 1
         assert lims["action_vocabulary_mismatch_al_trace_033"]["trace_ids"] == ["al_trace_033"]
         assert lims["action_vocabulary_mismatch_al_trace_033"]["binary_fn"] == 1
+
+
+# ---------------------------------------------------------------------------
+# 7. Split filtering, exclusions, and report metadata
+# ---------------------------------------------------------------------------
+
+class TestSplitFilteringAndExclusions:
+    def test_only_test_records_evaluated(self, tmp_path):
+        det_file = tmp_path / "det.jsonl"
+        gt_file = tmp_path / "gt.jsonl"
+        steps = [{"step_id": 1, "action_type": "read"}]
+
+        _write_jsonl(det_file, [
+            _make_detector_record("t_train_1", steps),
+            _make_detector_record("t_val_1", steps),
+            _make_detector_record("t_review_1", steps),
+            _make_detector_record("t_test_1", steps),
+            _make_detector_record("t_test_2", steps),
+        ])
+        _write_jsonl(gt_file, [
+            _make_gt_record("t_train_1", steps, False, "none", [], None, sample_split="train"),
+            _make_gt_record("t_val_1", steps, False, "none", [], None, sample_split="validation"),
+            _make_gt_record("t_review_1", steps, False, "none", [], None, sample_split="sample_review_only"),
+            _make_gt_record("t_test_1", steps, False, "none", [], None, sample_split="test"),
+            _make_gt_record("t_test_2", steps, True, "drift", [1], 1, sample_split="test"),
+        ])
+
+        repo = TraceRepository(detector_input_path=det_file, corrected_full_path=gt_file)
+        res = evaluate_repository(repo, lambda t: _make_trace_model(t, False, None, []))
+
+        assert res["dataset_count"] == 5
+        assert res["evaluated_count"] == 2
+        assert res["excluded_count"] == 3
+        assert res["evaluation_split"] == "test"
+        eval_ids = [r["trace_id"] for r in res["per_trace"]]
+        assert eval_ids == ["t_test_1", "t_test_2"]
+        assert res["split_class_distribution"] == {"none": 1, "drift": 1, "scope_creep": 0, "misinterpretation": 0}
+
+    def test_training_and_validation_records_excluded(self, tmp_path):
+        det_file = tmp_path / "det.jsonl"
+        gt_file = tmp_path / "gt.jsonl"
+        steps = [{"step_id": 1, "action_type": "read"}]
+
+        _write_jsonl(det_file, [
+            _make_detector_record("train_a", steps),
+            _make_detector_record("val_b", steps),
+            _make_detector_record("test_c", steps),
+        ])
+        _write_jsonl(gt_file, [
+            _make_gt_record("train_a", steps, False, "none", [], None, sample_split="train"),
+            _make_gt_record("val_b", steps, False, "none", [], None, sample_split="validation"),
+            _make_gt_record("test_c", steps, False, "none", [], None, sample_split="test"),
+        ])
+
+        repo = TraceRepository(detector_input_path=det_file, corrected_full_path=gt_file)
+        res = evaluate_repository(repo, lambda t: _make_trace_model(t, False, None, []))
+
+        skip_map = {s["trace_id"]: s["reason"] for s in res["skipped_traces"]}
+        assert skip_map["train_a"] == "excluded_split_train"
+        assert skip_map["val_b"] == "excluded_split_validation"
+        assert "test_c" not in skip_map
+
+    def test_review_only_records_excluded_and_cannot_be_targeted(self, tmp_path):
+        det_file = tmp_path / "det.jsonl"
+        gt_file = tmp_path / "gt.jsonl"
+        steps = [{"step_id": 1, "action_type": "read"}]
+
+        _write_jsonl(det_file, [
+            _make_detector_record("ro_1", steps),
+            _make_detector_record("test_1", steps),
+        ])
+        _write_jsonl(gt_file, [
+            _make_gt_record("ro_1", steps, False, "none", [], None, sample_split="sample_review_only"),
+            _make_gt_record("test_1", steps, False, "none", [], None, sample_split="test"),
+        ])
+
+        repo = TraceRepository(detector_input_path=det_file, corrected_full_path=gt_file)
+        res = evaluate_repository(repo, lambda t: _make_trace_model(t, False, None, []))
+
+        skip_map = {s["trace_id"]: s["reason"] for s in res["skipped_traces"]}
+        assert skip_map["ro_1"] == "review_only_excluded"
+
+        with pytest.raises(ValueError, match="strictly excluded from evaluation"):
+            evaluate_repository(repo, lambda t: _make_trace_model(t, False, None, []), split="sample_review_only")
+
+    def test_review_only_records_excluded_even_if_split_metadata_says_test(self, tmp_path):
+        det_file = tmp_path / "det.jsonl"
+        gt_file = tmp_path / "gt.jsonl"
+        steps = [{"step_id": 1, "action_type": "read"}]
+
+        rec_ro_test = _make_detector_record("t_ro_test", steps)
+        rec_ro_test["sample_review_only"] = True
+
+        gt_ro_test = _make_gt_record("t_ro_test", steps, False, "none", [], None, sample_split="test")
+        gt_ro_test["sample_review_only"] = True
+        gt_ro_test["ground_truth"]["sample_review_only"] = True
+
+        rec_normal_test = _make_detector_record("t_normal_test", steps)
+        gt_normal_test = _make_gt_record("t_normal_test", steps, False, "none", [], None, sample_split="test")
+
+        _write_jsonl(det_file, [rec_ro_test, rec_normal_test])
+        _write_jsonl(gt_file, [gt_ro_test, gt_normal_test])
+
+        repo = TraceRepository(detector_input_path=det_file, corrected_full_path=gt_file)
+        assert repo.is_review_only("t_ro_test") is True
+        assert repo.is_review_only("t_normal_test") is False
+
+        res = evaluate_repository(repo, lambda t: _make_trace_model(t, False, None, []), split="test")
+
+        assert res["evaluated_count"] == 1
+        assert res["per_trace"][0]["trace_id"] == "t_normal_test"
+        skip_map = {s["trace_id"]: s["reason"] for s in res["skipped_traces"]}
+        assert skip_map["t_ro_test"] == "review_only_excluded"
+
+    def test_missing_or_invalid_split_labels_handled_explicitly(self, tmp_path):
+        det_file = tmp_path / "det.jsonl"
+        gt_file = tmp_path / "gt.jsonl"
+        steps = [{"step_id": 1, "action_type": "read"}]
+
+        _write_jsonl(det_file, [
+            _make_detector_record("t_missing", steps),
+            _make_detector_record("t_invalid", steps),
+            _make_detector_record("t_blank", steps),
+            _make_detector_record("t_valid_test", steps),
+        ])
+        _write_jsonl(gt_file, [
+            _make_gt_record("t_missing", steps, False, "none", [], None, sample_split=None),
+            _make_gt_record("t_invalid", steps, False, "none", [], None, sample_split="unknown_split"),
+            _make_gt_record("t_blank", steps, False, "none", [], None, sample_split="   "),
+            _make_gt_record("t_valid_test", steps, False, "none", [], None, sample_split="test"),
+        ])
+
+        repo = TraceRepository(detector_input_path=det_file, corrected_full_path=gt_file)
+        res = evaluate_repository(repo, lambda t: _make_trace_model(t, False, None, []))
+
+        assert res["evaluated_count"] == 1
+        assert res["per_trace"][0]["trace_id"] == "t_valid_test"
+        skip_map = {s["trace_id"]: s["reason"] for s in res["skipped_traces"]}
+        assert skip_map["t_missing"] == "missing_sample_split"
+        assert skip_map["t_blank"] == "missing_sample_split"
+        assert skip_map["t_invalid"] == "invalid_sample_split: unknown_split"
+
+    def test_missing_test_split_raises_clear_error(self, tmp_path):
+        det_file = tmp_path / "det.jsonl"
+        gt_file = tmp_path / "gt.jsonl"
+        steps = [{"step_id": 1, "action_type": "read"}]
+
+        _write_jsonl(det_file, [
+            _make_detector_record("train_1", steps),
+            _make_detector_record("train_2", steps),
+        ])
+        _write_jsonl(gt_file, [
+            _make_gt_record("train_1", steps, False, "none", [], None, sample_split="train"),
+            _make_gt_record("train_2", steps, False, "none", [], None, sample_split="train"),
+        ])
+
+        repo = TraceRepository(detector_input_path=det_file, corrected_full_path=gt_file)
+        with pytest.raises(ValueError, match="Evaluation split 'test' was not found"):
+            evaluate_repository(repo, lambda t: _make_trace_model(t, False, None, []), split="test")
+
+    def test_empty_eligible_test_split_produces_clear_error(self, tmp_path):
+        det_file = tmp_path / "det.jsonl"
+        gt_file = tmp_path / "gt.jsonl"
+        steps = [{"step_id": 1, "action_type": "read"}]
+
+        # Both records have test split, but both are marked sample_review_only
+        rec1 = _make_detector_record("t_ro_1", steps)
+        rec2 = _make_detector_record("t_ro_2", steps)
+        gt1 = _make_gt_record("t_ro_1", steps, False, "none", [], None, sample_split="test")
+        gt2 = _make_gt_record("t_ro_2", steps, False, "none", [], None, sample_split="test")
+        gt1["sample_review_only"] = True
+        gt2["sample_review_only"] = True
+
+        _write_jsonl(det_file, [rec1, rec2])
+        _write_jsonl(gt_file, [gt1, gt2])
+
+        repo = TraceRepository(detector_input_path=det_file, corrected_full_path=gt_file)
+        with pytest.raises(ValueError, match="No eligible records remain for evaluation in split 'test'"):
+            evaluate_repository(repo, lambda t: _make_trace_model(t, False, None, []), split="test")
+
+    def test_empty_dataset_handled_safely(self, tmp_path):
+        det_file = tmp_path / "empty_det.jsonl"
+        gt_file = tmp_path / "empty_gt.jsonl"
+        det_file.write_text("", encoding="utf-8")
+        gt_file.write_text("", encoding="utf-8")
+
+        repo = TraceRepository(detector_input_path=det_file, corrected_full_path=gt_file)
+        res = evaluate_repository(repo, lambda t: _make_trace_model(t, False, None, []), split="test")
+
+        assert res["available"] is True
+        assert res["dataset_count"] == 0
+        assert res["evaluated_count"] == 0
+        assert res["excluded_count"] == 0
+        assert res["evaluation_split"] == "test"
+        assert res["trace_level"]["f1"] == 0.0
+        assert res["step_level"]["f1"] == 0.0
+        assert res["per_trace"] == []
+
+    def test_ground_truth_isolation_intact_during_test_split_evaluation(self, tmp_path):
+        det_file = tmp_path / "det.jsonl"
+        gt_file = tmp_path / "gt.jsonl"
+        steps = [{"step_id": 1, "action_type": "read"}]
+
+        rec_det = _make_detector_record("test_iso", steps)
+        rec_det["sample_split"] = "test"
+        rec_det["sample_review_only"] = "false"
+        rec_det["review_only"] = 0
+        rec_det["is_review_only"] = False
+
+        _write_jsonl(det_file, [rec_det])
+        _write_jsonl(gt_file, [
+            _make_gt_record("test_iso", steps, True, "drift", [1], 1, sample_split="test"),
+        ])
+
+        repo = TraceRepository(detector_input_path=det_file, corrected_full_path=gt_file)
+
+        inspected_traces = []
+
+        def spy_detector(loaded: LoadedTrace) -> TraceModel:
+            inspected_traces.append(loaded)
+            # Detector must receive completely empty ground_truth and no ground-truth or split keys in raw_data
+            assert loaded.ground_truth == {}
+            assert "ground_truth" not in loaded.raw_data
+            assert "sample_split" not in loaded.raw_data
+            assert "sampleSplit" not in loaded.raw_data
+            assert "sample_review_only" not in loaded.raw_data
+            assert "sampleReviewOnly" not in loaded.raw_data
+            assert "review_only" not in loaded.raw_data
+            assert "reviewOnly" not in loaded.raw_data
+            assert "is_review_only" not in loaded.raw_data
+            assert "isReviewOnly" not in loaded.raw_data
+            assert "has_deviation" not in loaded.raw_data
+            assert "drift" not in loaded.label
+            intent = loaded.create_intent()
+            assert not hasattr(intent, "ground_truth")
+            assert not hasattr(intent, "has_deviation")
+            return _make_trace_model(loaded, True, "drift", ["1"])
+
+        res = evaluate_repository(repo, spy_detector, split="test")
+        assert len(inspected_traces) == 1
+        assert res["evaluated_count"] == 1
+        assert res["per_trace"][0]["predicted_type"] == "drift"
+        assert res["per_trace"][0]["ground_truth_type"] == "drift"
+
+    def test_review_only_boolean_string_and_numeric_variations_in_evaluation(self, tmp_path):
+        det_file = tmp_path / "det.jsonl"
+        gt_file = tmp_path / "gt.jsonl"
+        steps = [{"step_id": 1, "action_type": "read"}]
+
+        _write_jsonl(det_file, [
+            _make_detector_record("t_ro_str_true", steps),
+            _make_detector_record("t_ro_num_true", steps),
+            _make_detector_record("t_ro_bool_true", steps),
+            _make_detector_record("t_ro_str_false", steps),
+            _make_detector_record("t_ro_num_false", steps),
+            _make_detector_record("t_ro_bool_false", steps),
+        ])
+        _write_jsonl(gt_file, [
+            # Excluded variations
+            {"trace_id": "t_ro_str_true", "sample_split": "test", "sample_review_only": "  TRUE  ", "ground_truth": {"has_deviation": False}},
+            {"trace_id": "t_ro_num_true", "sample_split": "test", "review_only": 1, "ground_truth": {"has_deviation": False}},
+            {"trace_id": "t_ro_bool_true", "sample_split": "test", "is_review_only": True, "ground_truth": {"has_deviation": False}},
+            # Evaluated variations
+            {"trace_id": "t_ro_str_false", "sample_split": "test", "sample_review_only": "  FALSE  ", "ground_truth": {"has_deviation": False}},
+            {"trace_id": "t_ro_num_false", "sample_split": "test", "review_only": 0, "ground_truth": {"has_deviation": False}},
+            {"trace_id": "t_ro_bool_false", "sample_split": "test", "is_review_only": False, "ground_truth": {"has_deviation": False}},
+        ])
+
+        repo = TraceRepository(detector_input_path=det_file, corrected_full_path=gt_file)
+        res = evaluate_repository(repo, lambda t: _make_trace_model(t, False, None, []), split="test")
+
+        # 3 evaluated, 3 excluded
+        assert res["evaluated_count"] == 3
+        eval_ids = [r["trace_id"] for r in res["per_trace"]]
+        assert eval_ids == ["t_ro_str_false", "t_ro_num_false", "t_ro_bool_false"]
+
+        skip_map = {s["trace_id"]: s["reason"] for s in res["skipped_traces"]}
+        assert skip_map["t_ro_str_true"] == "review_only_excluded"
+        assert skip_map["t_ro_num_true"] == "review_only_excluded"
+        assert skip_map["t_ro_bool_true"] == "review_only_excluded"
+
+    def test_invalid_review_only_metadata_handled_explicitly_in_evaluation(self, tmp_path):
+        det_file = tmp_path / "det.jsonl"
+        gt_file = tmp_path / "gt.jsonl"
+        steps = [{"step_id": 1, "action_type": "read"}]
+
+        _write_jsonl(det_file, [
+            _make_detector_record("t_inv_str", steps),
+            _make_detector_record("t_inv_num", steps),
+            _make_detector_record("t_valid", steps),
+        ])
+        _write_jsonl(gt_file, [
+            {"trace_id": "t_inv_str", "sample_split": "test", "sample_review_only": "maybe_review", "ground_truth": {"has_deviation": False}},
+            {"trace_id": "t_inv_num", "sample_split": "test", "review_only": 42, "ground_truth": {"has_deviation": False}},
+            {"trace_id": "t_valid", "sample_split": "test", "sample_review_only": "false", "ground_truth": {"has_deviation": False}},
+        ])
+
+        repo = TraceRepository(detector_input_path=det_file, corrected_full_path=gt_file)
+        res = evaluate_repository(repo, lambda t: _make_trace_model(t, False, None, []), split="test")
+
+        assert res["evaluated_count"] == 1
+        assert res["per_trace"][0]["trace_id"] == "t_valid"
+
+        skip_map = {s["trace_id"]: s["reason"] for s in res["skipped_traces"]}
+        assert "invalid_review_only_metadata" in skip_map["t_inv_str"]
+        assert "maybe_review" in skip_map["t_inv_str"]
+        assert "invalid_review_only_metadata" in skip_map["t_inv_num"]
+        assert "42" in skip_map["t_inv_num"]

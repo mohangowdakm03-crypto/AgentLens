@@ -23,8 +23,8 @@ from detector.api.models import (
     DetectRequest,
 )
 
-# In-memory cache for the latest real batch evaluation report
-_cached_evaluation: Optional[Dict[str, Any]] = None
+# In-memory cache for the latest real batch evaluation report by split
+_cached_evaluations: Dict[str, Dict[str, Any]] = {}
 
 app = FastAPI(
     title="AgentLens Detector API",
@@ -142,20 +142,26 @@ def detect_custom_trace(req: DetectRequest):
 
 
 @app.get("/api/evaluate", tags=["Evaluation"])
-def evaluate_dataset(refresh: bool = False):
-    """Run batch evaluation on all eligible traces in the active dataset.
+def evaluate_dataset(refresh: bool = False, split: str = "test"):
+    """Run batch evaluation on eligible traces in the requested split (default: 'test').
 
     Executes every eligible trace through detector_service.run_detection() with
     strict ground-truth isolation, then computes trace-level, per-class,
     4-class confusion matrix, step-level, error-list, and limitation metrics.
     """
-    global _cached_evaluation
-    if _cached_evaluation is not None and not refresh:
-        return _cached_evaluation
+    global _cached_evaluations
+    cache_key = str(split)
+    if not refresh and cache_key in _cached_evaluations:
+        return _cached_evaluations[cache_key]
     try:
-        result = evaluate_repository(repository, detector_service.run_detection)
-        _cached_evaluation = result
+        result = evaluate_repository(repository, detector_service.run_detection, split=split)
+        _cached_evaluations[cache_key] = result
         return result
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(ve),
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -164,9 +170,9 @@ def evaluate_dataset(refresh: bool = False):
 
 
 @app.get("/api/performance", tags=["Performance"])
-def get_performance_report(refresh: bool = False):
+def get_performance_report(refresh: bool = False, split: str = "test"):
     """Return real baseline batch evaluation report computed from the ML core.
 
-    Uses the same real computation as GET /api/evaluate (no mock/invented metrics).
+    Uses the same real computation as GET /api/evaluate (default: 'test' split).
     """
-    return evaluate_dataset(refresh=refresh)
+    return evaluate_dataset(refresh=refresh, split=split)

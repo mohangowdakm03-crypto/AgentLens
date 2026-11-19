@@ -23,7 +23,7 @@ import csv
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
 
-from .loader import LoadedTrace, TraceRepository, _DATA_DIR
+from .loader import LoadedTrace, TraceRepository, _DATA_DIR, _GT_RAW_KEYS, normalize_bool
 from .models import TraceModel
 
 # Canonical 4-class AgentLens taxonomy order
@@ -38,6 +38,7 @@ DEVIATION_CLASSES: Tuple[str, ...] = (
     "scope_creep",
     "misinterpretation",
 )
+VALID_SPLITS = frozenset({"train", "validation", "test", "sample_review_only"})
 
 PERMISSION_AUDIT_CSV_PATH = _DATA_DIR / "AgentLens_58_Permission_Audit.csv"
 
@@ -89,7 +90,12 @@ def _strip_ground_truth_for_detection(trace: LoadedTrace) -> LoadedTrace:
     """Create a ground-truth-free copy of LoadedTrace to pass into the detector.
 
     Ensures ground truth cannot leak via trace.ground_truth, trace.label, or trace.raw_data.
+    All split, review-only, and ground-truth metadata keys are strictly excluded.
     """
+    clean_raw = {
+        k: v for k, v in trace.raw_data.items()
+        if k not in _GT_RAW_KEYS
+    }
     return LoadedTrace(
         trace_id=trace.trace_id,
         label=f"Trace {trace.trace_id}",
@@ -99,7 +105,7 @@ def _strip_ground_truth_for_detection(trace: LoadedTrace) -> LoadedTrace:
         steps=list(trace.steps),
         step_id_map=dict(trace.step_id_map),
         ground_truth={},
-        raw_data=dict(trace.raw_data),
+        raw_data=clean_raw,
     )
 
 
@@ -451,12 +457,14 @@ def evaluate_repository(
     repo: TraceRepository,
     run_detection_fn: Callable[[LoadedTrace], TraceModel],
     *,
+    split: str = "test",
     permission_audit_csv: Path = PERMISSION_AUDIT_CSV_PATH,
 ) -> Dict[str, Any]:
-    """Run batch evaluation on all eligible traces in ``repo``.
+    """Run batch evaluation on eligible traces in ``repo`` for the requested split (default: 'test').
 
     Pipeline stages (strict ground-truth isolation):
-      1. Identify eligible traces (must have matching ground truth recorded in repo).
+      1. Identify eligible traces matching the requested split (default: 'test').
+         Records marked 'sample_review_only' or belonging to other splits are excluded.
       2. For each eligible trace, construct a ground-truth-stripped LoadedTrace and
          call ``run_detection_fn(stripped_trace)``.
       3. Store predictions separately (without consulting ground truth).
@@ -468,17 +476,106 @@ def evaluate_repository(
     dataset_count = len(traces)
     unmatched_ids = set(repo.load_report.get("unmatched_detector_ids", []))
 
+    if split == "sample_review_only":
+        raise ValueError(
+            "Records marked 'sample_review_only' are strictly excluded from evaluation."
+        )
+
+    # Collect available splits across all traces with ground truth
+    available_splits: Set[str] = set()
+    for trace in traces:
+        gt = repo.get_ground_truth(trace.trace_id)
+        if gt:
+            s = gt.get("sample_split")
+            if s and str(s).strip():
+                available_splits.add(str(s).strip())
+
+    # If dataset has records, ensure the requested split exists and is not empty
+    if dataset_count > 0 and split not in available_splits:
+        raise ValueError(
+            f"Evaluation split '{split}' was not found in dataset. "
+            f"Available splits: {sorted(list(available_splits)) if available_splits else 'none'}. "
+            f"Cannot fall back to all records."
+        )
+
     skipped_traces: List[Dict[str, str]] = []
     eligible_traces: List[LoadedTrace] = []
 
     for trace in traces:
-        if trace.trace_id in unmatched_ids or repo.get_ground_truth(trace.trace_id) is None:
+        if trace.trace_id in unmatched_ids:
             skipped_traces.append({
                 "trace_id": trace.trace_id,
                 "reason": "missing_ground_truth",
             })
             continue
+
+        gt = repo.get_ground_truth(trace.trace_id)
+        if gt is None:
+            skipped_traces.append({
+                "trace_id": trace.trace_id,
+                "reason": "missing_ground_truth",
+            })
+            continue
+
+        trace_split = gt.get("sample_split")
+        if trace_split is None or not str(trace_split).strip():
+            skipped_traces.append({
+                "trace_id": trace.trace_id,
+                "reason": "missing_sample_split",
+            })
+            continue
+
+        trace_split_clean = str(trace_split).strip()
+        if trace_split_clean not in VALID_SPLITS:
+            skipped_traces.append({
+                "trace_id": trace.trace_id,
+                "reason": f"invalid_sample_split: {trace_split_clean}",
+            })
+            continue
+
+        is_review_only = (trace_split_clean == "sample_review_only")
+        if not is_review_only:
+            for ro_key in ("sample_review_only", "sampleReviewOnly", "review_only", "is_review_only"):
+                val = gt.get(ro_key)
+                if val is not None:
+                    try:
+                        norm = normalize_bool(val)
+                    except ValueError as err:
+                        skipped_traces.append({
+                            "trace_id": trace.trace_id,
+                            "reason": f"invalid_review_only_metadata: {err}",
+                        })
+                        is_review_only = None
+                        break
+                    if norm is True:
+                        is_review_only = True
+                        break
+
+        if is_review_only is None:
+            continue
+
+        if is_review_only:
+            skipped_traces.append({
+                "trace_id": trace.trace_id,
+                "reason": "review_only_excluded",
+            })
+            continue
+
+        if trace_split_clean != split:
+            skipped_traces.append({
+                "trace_id": trace.trace_id,
+                "reason": f"excluded_split_{trace_split_clean}",
+            })
+            continue
+
         eligible_traces.append(trace)
+
+    if dataset_count > 0 and not eligible_traces:
+        raise ValueError(
+            f"No eligible records remain for evaluation in split '{split}'. "
+            f"Excluded {len(skipped_traces)} record(s). "
+            f"Cannot evaluate an empty eligible split."
+        )
 
     # ------------------------------------------------------------------
     # Stage 1: Run detector strictly WITHOUT ground truth
@@ -625,11 +722,20 @@ def evaluate_repository(
         per_trace_results, permission_audit_csv=permission_audit_csv
     )
 
+    split_class_distribution = {c: 0 for c in EVALUATION_CLASSES}
+    for act in actual_labels:
+        if act in split_class_distribution:
+            split_class_distribution[act] += 1
+
     return {
         "available": True,
         "dataset_source": repo.dataset_source,
+        "evaluation_split": split,
         "dataset_count": dataset_count,
         "evaluated_count": len(ordered_evaluated_ids),
+        "excluded_count": len(skipped_traces),
+        "split_class_distribution": split_class_distribution,
+        "class_distribution_in_evaluated_split": split_class_distribution,
         "skipped_count": len(skipped_traces),
         "skipped_traces": skipped_traces,
         "positive_class_convention": POSITIVE_CLASS_CONVENTION,

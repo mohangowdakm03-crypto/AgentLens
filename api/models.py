@@ -8,6 +8,8 @@ class GroundTruthModel(BaseModel):
     flaggedSteps: List[Any] = Field(default_factory=list)
     flaggedStepId: Optional[Any] = None
     annotationExplanation: str = ""
+    sampleSplit: Optional[str] = None
+    sample_split: Optional[str] = None
     notes: str = ""
 
 

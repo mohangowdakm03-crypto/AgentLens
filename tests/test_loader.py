@@ -25,7 +25,9 @@ from api.loader import (
     DEV_TRACES_PATH,
     LoadedTrace,
     TraceRepository,
+    _GT_RAW_KEYS,
     _normalize_trace_dict,
+    normalize_bool,
 )
 
 
@@ -304,6 +306,24 @@ class TestGroundTruthExtraction:
             "misinterpretation": 5,
         }
 
+    def test_sample_split_extraction_and_distribution(self):
+        repo = TraceRepository()
+        split_counts = Counter(
+            repo.get_sample_split(t.trace_id) for t in repo.iter_traces()
+        )
+        assert split_counts == {
+            "train": 231,
+            "test": 28,
+            "validation": 31,
+            "sample_review_only": 10,
+        }
+        assert repo.get_sample_split("al_trace_001") == "sample_review_only"
+        assert repo.is_review_only("al_trace_001") is True
+        assert repo.get_sample_split("al_trace_018") == "test"
+        assert repo.is_review_only("al_trace_018") is False
+        assert repo.get_sample_split("al_trace_011") == "train"
+        assert repo.is_review_only("al_trace_011") is False
+
 
 # ---------------------------------------------------------------------------
 # 6. Missing IDs, duplicate IDs, unmatched records, REVIEW_ONLY filtering
@@ -543,3 +563,157 @@ class TestMissingDatasetFileHandling:
                 dev_traces_path=tmp_path / "missing_dev.json",
                 strict=True,
             )
+
+
+# ---------------------------------------------------------------------------
+# 8. Review-only boolean normalization and detector payload metadata isolation
+# ---------------------------------------------------------------------------
+
+class TestReviewOnlyBooleanNormalizationAndMetadataIsolation:
+    def test_normalize_bool_actual_booleans(self):
+        assert normalize_bool(True) is True
+        assert normalize_bool(False) is False
+
+    def test_normalize_bool_string_values(self):
+        # Truthy strings
+        assert normalize_bool("true") is True
+        assert normalize_bool("True") is True
+        assert normalize_bool("TRUE") is True
+        assert normalize_bool("  true  ") is True
+        assert normalize_bool("\tTrue\n") is True
+
+        # Falsy strings
+        assert normalize_bool("false") is False
+        assert normalize_bool("False") is False
+        assert normalize_bool("FALSE") is False
+        assert normalize_bool("  false  ") is False
+        assert normalize_bool("\tFalse\n") is False
+
+    def test_normalize_bool_numeric_values(self):
+        assert normalize_bool(1) is True
+        assert normalize_bool(1.0) is True
+        assert normalize_bool(0) is False
+        assert normalize_bool(0.0) is False
+
+    def test_normalize_bool_invalid_string_values(self):
+        # Do not interpret arbitrary non-empty strings as True
+        invalid_strings = ["invalid", "maybe", "yes", "no", "t", "f", "1", "0", "", "   ", "null", "undefined"]
+        for s in invalid_strings:
+            with pytest.raises(ValueError, match="Invalid boolean string value"):
+                normalize_bool(s)
+
+    def test_normalize_bool_invalid_non_strings(self):
+        with pytest.raises(ValueError, match="Invalid boolean numeric value"):
+            normalize_bool(2)
+        with pytest.raises(ValueError, match="Invalid boolean numeric value"):
+            normalize_bool(-1)
+        with pytest.raises(ValueError, match="Invalid boolean value of type list"):
+            normalize_bool([True])
+        with pytest.raises(ValueError, match="Invalid boolean value of type dict"):
+            normalize_bool({"key": True})
+
+    def test_normalize_bool_none(self):
+        assert normalize_bool(None) is None
+        assert normalize_bool(None, default=False) is False
+        assert normalize_bool(None, default=True) is True
+
+    def test_metadata_fields_stripped_from_detector_raw_input_payload(self):
+        raw_input = {
+            "trace_id": "al_trace_strip_test",
+            "original_prompt": "Inspect the model metrics.",
+            "intent": {
+                "allowed_actions": ["read"],
+                "forbidden_actions": ["write"],
+            },
+            "steps": [
+                {
+                    "step_id": 1,
+                    "action_type": "read",
+                    "tool_called": "reader",
+                    "tool_input": "metrics.csv",
+                    "tool_output": "acc=0.9",
+                    "agent_reasoning": "read metrics",
+                }
+            ],
+            # Evaluation and split metadata present in raw input
+            "sample_split": "test",
+            "sampleSplit": "test",
+            "sample_review_only": "false",
+            "sampleReviewOnly": False,
+            "review_only": "true",
+            "reviewOnly": 1,
+            "is_review_only": 0,
+            "isReviewOnly": "false",
+            "ground_truth": {"has_deviation": False},
+            "expected_step": None,
+            "expected_type": "none",
+        }
+
+        trace = _normalize_trace_dict(raw_input, default_idx=1, require_trace_id=True)
+
+        # 1. Prompt and steps are preserved
+        assert trace.prompt == "Inspect the model metrics."
+        assert len(trace.steps) == 1
+        assert trace.allowed_verbs == {"read"}
+        assert trace.forbidden_verbs == {"write"}
+
+        # 2. Raw data retains valid input fields
+        assert "original_prompt" in trace.raw_data
+        assert "steps" in trace.raw_data
+        assert "intent" in trace.raw_data
+
+        # 3. All split, review-only, and GT fields are strictly removed from raw_data
+        for forbidden_key in (
+            "sample_split",
+            "sampleSplit",
+            "sample_review_only",
+            "sampleReviewOnly",
+            "review_only",
+            "reviewOnly",
+            "is_review_only",
+            "isReviewOnly",
+            "ground_truth",
+            "expected_step",
+            "expected_type",
+        ):
+            assert forbidden_key not in trace.raw_data
+
+        # 4. Ground truth object is isolated from raw_data
+        assert trace.ground_truth != trace.raw_data
+
+    def test_is_review_only_consistent_with_all_variations(self, tmp_path):
+        det_file = tmp_path / "det.jsonl"
+        gt_file = tmp_path / "gt.jsonl"
+        steps = [{"step_id": 1, "action_type": "read"}]
+
+        _write_jsonl(det_file, [
+            _sample_detector_record("t_bool_true", steps=steps),
+            _sample_detector_record("t_str_true", steps=steps),
+            _sample_detector_record("t_num_true", steps=steps),
+            _sample_detector_record("t_bool_false", steps=steps),
+            _sample_detector_record("t_str_false", steps=steps),
+            _sample_detector_record("t_num_false", steps=steps),
+            _sample_detector_record("t_rev_only_key", steps=steps),
+            _sample_detector_record("t_is_rev_only_key", steps=steps),
+        ])
+        _write_jsonl(gt_file, [
+            {"trace_id": "t_bool_true", "sample_split": "test", "sample_review_only": True},
+            {"trace_id": "t_str_true", "sample_split": "test", "sample_review_only": "true"},
+            {"trace_id": "t_num_true", "sample_split": "test", "sample_review_only": 1},
+            {"trace_id": "t_bool_false", "sample_split": "test", "sample_review_only": False},
+            {"trace_id": "t_str_false", "sample_split": "test", "sample_review_only": "false"},
+            {"trace_id": "t_num_false", "sample_split": "test", "sample_review_only": 0},
+            {"trace_id": "t_rev_only_key", "sample_split": "test", "review_only": "true"},
+            {"trace_id": "t_is_rev_only_key", "sample_split": "test", "is_review_only": 1},
+        ])
+
+        repo = TraceRepository(detector_input_path=det_file, corrected_full_path=gt_file)
+        assert repo.is_review_only("t_bool_true") is True
+        assert repo.is_review_only("t_str_true") is True
+        assert repo.is_review_only("t_num_true") is True
+        assert repo.is_review_only("t_rev_only_key") is True
+        assert repo.is_review_only("t_is_rev_only_key") is True
+
+        assert repo.is_review_only("t_bool_false") is False
+        assert repo.is_review_only("t_str_false") is False
+        assert repo.is_review_only("t_num_false") is False

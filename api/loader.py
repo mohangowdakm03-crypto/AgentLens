@@ -60,7 +60,51 @@ _GT_RAW_KEYS = frozenset({
     "groundTruth",
     "expected_step",
     "expected_type",
+    "sample_split",
+    "sampleSplit",
+    "sample_review_only",
+    "sampleReviewOnly",
+    "review_only",
+    "reviewOnly",
+    "is_review_only",
+    "isReviewOnly",
 })
+
+
+def normalize_bool(val: Any, default: Optional[bool] = None) -> Optional[bool]:
+    """Normalize boolean metadata values for review-only flags.
+
+    - Supports actual JSON booleans: True -> True, False -> False.
+    - Supports string values 'true' and 'false' (case-insensitive, whitespace-trimmed):
+        'true', 'True', ' TRUE ' -> True
+        'false', 'False', ' FALSE ' -> False
+    - Supports numeric 1 and 0:
+        1, 1.0 -> True
+        0, 0.0 -> False
+    - Returns default (None by default) when val is None.
+    - Does not interpret arbitrary non-empty strings as True.
+    - Explicitly raises ValueError for invalid values (arbitrary strings, non-binary numbers, unsupported types).
+    """
+    if val is None:
+        return default
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, (int, float)):
+        if val == 1:
+            return True
+        if val == 0:
+            return False
+        raise ValueError(f"Invalid boolean numeric value: {val!r}. Expected 1 or 0.")
+    if isinstance(val, str):
+        cleaned = val.strip().lower()
+        if cleaned == "true":
+            return True
+        if cleaned == "false":
+            return False
+        raise ValueError(
+            f"Invalid boolean string value: {val!r}. Expected 'true' or 'false'."
+        )
+    raise ValueError(f"Invalid boolean value of type {type(val).__name__}: {val!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -159,7 +203,18 @@ def _load_ground_truth_index(path: Path) -> Dict[str, Any]:
                     continue
 
                 gt_raw = item.get("ground_truth")
-                index[tid] = dict(gt_raw) if isinstance(gt_raw, dict) else {}
+                gt_dict = dict(gt_raw) if isinstance(gt_raw, dict) else {}
+                split_val = item.get("sample_split") or gt_dict.get("sample_split")
+                if split_val is not None:
+                    gt_dict["sample_split"] = str(split_val).strip()
+                for ro_key in ("sample_review_only", "review_only", "is_review_only"):
+                    val = item.get(ro_key) if ro_key in item else gt_dict.get(ro_key)
+                    if val is not None:
+                        try:
+                            gt_dict[ro_key] = normalize_bool(val)
+                        except ValueError:
+                            gt_dict[ro_key] = val
+                index[tid] = gt_dict
     except OSError as exc:
         msg = f"Cannot open {path}: {exc}"
         logger.warning(msg)
@@ -173,12 +228,14 @@ def _build_ground_truth(
     is_deviated: bool = False,
     dev_type: Optional[str] = None,
     expected_step: Any = None,
+    sample_split: Optional[str] = None,
+    sample_review_only: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """Construct the normalized, isolated ground-truth dict stored separately from ML inputs.
 
     Exposes both the canonical dataset keys (has_deviation, deviation_type, flagged_steps,
-    flagged_step_id, annotation_explanation) and the camelCase UI/API keys (isDeviated,
-    deviationType, flaggedSteps, flaggedStepId, annotationExplanation, notes).
+    flagged_step_id, annotation_explanation, sample_split, sample_review_only) and the camelCase UI/API keys
+    (isDeviated, deviationType, flaggedSteps, flaggedStepId, annotationExplanation, sampleSplit, sampleReviewOnly, notes).
     """
     if gt_raw:
         has_dev = bool(gt_raw.get("has_deviation", False))
@@ -192,6 +249,30 @@ def _build_ground_truth(
         flagged_steps = list(gt_raw.get("flagged_steps") or [])
         flagged_step_id = gt_raw.get("flagged_step_id")
         annotation_explanation = str(gt_raw.get("annotation_explanation") or "")
+        split_val = gt_raw.get("sample_split") or sample_split
+        split_str = str(split_val).strip() if split_val is not None and str(split_val).strip() else None
+
+        is_ro = False
+        if split_str == "sample_review_only":
+            is_ro = True
+        else:
+            for ro_key in ("sample_review_only", "review_only", "is_review_only"):
+                v = gt_raw.get(ro_key)
+                if v is None and ro_key == "sample_review_only":
+                    v = sample_review_only
+                if v is not None:
+                    try:
+                        norm = normalize_bool(v)
+                        if norm is True:
+                            is_ro = True
+                            break
+                        elif norm is False:
+                            is_ro = False
+                            break
+                    except ValueError:
+                        is_ro = v
+                        break
+
         notes = str(gt_raw.get("explanation") or annotation_explanation or "")
         if not notes:
             if has_dev:
@@ -206,12 +287,18 @@ def _build_ground_truth(
             "flagged_steps": flagged_steps,
             "flagged_step_id": flagged_step_id,
             "annotation_explanation": annotation_explanation,
+            "sample_split": split_str,
+            "sample_review_only": is_ro,
+            "review_only": gt_raw.get("review_only"),
+            "is_review_only": gt_raw.get("is_review_only"),
             # API / Inspector camelCase keys
             "isDeviated": has_dev,
             "deviationType": api_dev_type,
             "flaggedSteps": flagged_steps,
             "flaggedStepId": flagged_step_id,
             "annotationExplanation": annotation_explanation,
+            "sampleSplit": split_str,
+            "sampleReviewOnly": is_ro,
             "notes": notes,
         }
 
@@ -227,6 +314,16 @@ def _build_ground_truth(
 
     flagged_steps = [expected_step] if (has_dev and expected_step is not None) else []
     flagged_step_id = expected_step if has_dev else None
+    split_str = str(sample_split).strip() if sample_split is not None and str(sample_split).strip() else None
+    is_ro = False
+    if split_str == "sample_review_only":
+        is_ro = True
+    elif sample_review_only is not None:
+        try:
+            norm = normalize_bool(sample_review_only)
+            is_ro = bool(norm)
+        except ValueError:
+            is_ro = sample_review_only
     notes = (
         f"Ground truth annotated: {api_dev_type} at step {expected_step}."
         if has_dev
@@ -238,11 +335,17 @@ def _build_ground_truth(
         "flagged_steps": flagged_steps,
         "flagged_step_id": flagged_step_id,
         "annotation_explanation": "",
+        "sample_split": split_str,
+        "sample_review_only": is_ro,
+        "review_only": None,
+        "is_review_only": None,
         "isDeviated": has_dev,
         "deviationType": api_dev_type,
         "flaggedSteps": flagged_steps,
         "flaggedStepId": flagged_step_id,
         "annotationExplanation": "",
+        "sampleSplit": split_str,
+        "sampleReviewOnly": is_ro,
         "notes": notes,
     }
 
@@ -417,15 +520,17 @@ def _normalize_trace_dict(
     if gt_index is not None:
         gt_raw = gt_index.get(trace_id_str)
 
+    item_split = item.get("sample_split")
+    item_ro = item.get("sample_review_only") or item.get("review_only") or item.get("is_review_only")
     if gt_raw is not None:
-        ground_truth = _build_ground_truth(gt_raw)
+        ground_truth = _build_ground_truth(gt_raw, sample_split=item_split, sample_review_only=item_ro)
     elif allow_inline_ground_truth:
         label_obj = item.get("label") if isinstance(item.get("label"), dict) else {}
         gt_obj = item.get("groundTruth") if isinstance(item.get("groundTruth"), dict) else {}
         inline_gt = item.get("ground_truth") if isinstance(item.get("ground_truth"), dict) else None
 
         if inline_gt is not None:
-            ground_truth = _build_ground_truth(inline_gt)
+            ground_truth = _build_ground_truth(inline_gt, sample_split=item_split, sample_review_only=item_ro)
         else:
             expected_step = next(
                 (
@@ -459,10 +564,10 @@ def _normalize_trace_dict(
             else:
                 is_deviated = True
                 dev_type = str(expected_type).lower().replace(" ", "_") if expected_type else "unknown"
-            ground_truth = _build_ground_truth(None, is_deviated, dev_type, expected_step)
+            ground_truth = _build_ground_truth(None, is_deviated, dev_type, expected_step, sample_split=item_split, sample_review_only=item_ro)
     else:
         # Detector-input record with no matching ground truth in gt_index
-        ground_truth = _build_ground_truth(None, is_deviated=False, dev_type=None, expected_step=None)
+        ground_truth = _build_ground_truth(None, is_deviated=False, dev_type=None, expected_step=None, sample_split=item_split, sample_review_only=item_ro)
 
     # 6. Sanitize raw_data so ground-truth fields are never retained on raw detector payload
     sanitized_raw = {k: v for k, v in item.items() if k not in _GT_RAW_KEYS}
@@ -750,6 +855,8 @@ class TraceRepository:
                     "flaggedSteps": gt.get("flaggedSteps", []),
                     "flaggedStepId": gt.get("flaggedStepId"),
                     "annotationExplanation": gt.get("annotationExplanation", ""),
+                    "sampleSplit": gt.get("sampleSplit") or gt.get("sample_split"),
+                    "sampleReviewOnly": bool(gt.get("sampleReviewOnly") or gt.get("sample_review_only")),
                     "notes": gt.get("notes", ""),
                 },
             })
@@ -765,6 +872,29 @@ class TraceRepository:
         tid = str(trace_id).strip()
         gt = self._ground_truth.get(tid)
         return dict(gt) if gt is not None else None
+
+    def get_sample_split(self, trace_id: str) -> Optional[str]:
+        """Retrieve the dataset split label (e.g. 'test', 'train', 'validation') for a trace."""
+        gt = self.get_ground_truth(trace_id)
+        if gt:
+            return gt.get("sample_split") or gt.get("sampleSplit")
+        return None
+
+    def is_review_only(self, trace_id: str) -> bool:
+        """Return True if trace is marked review-only via split or review flag."""
+        gt = self.get_ground_truth(trace_id)
+        if gt:
+            if gt.get("sample_split") == "sample_review_only" or gt.get("sampleSplit") == "sample_review_only":
+                return True
+            for k in ("sample_review_only", "sampleReviewOnly", "review_only", "is_review_only"):
+                v = gt.get(k)
+                if v is not None:
+                    norm = normalize_bool(v)
+                    if norm is True:
+                        return True
+                    if norm is False:
+                        return False
+        return False
 
     def iter_traces(self) -> List[LoadedTrace]:
         """Return all loaded LoadedTrace objects in load order."""

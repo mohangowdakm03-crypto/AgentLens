@@ -104,22 +104,40 @@ def test_detect_custom_trace_empty_prompt_400():
 
 
 def test_evaluate_and_performance_endpoints_return_real_metrics():
-    res = evaluate_dataset(refresh=False)
+    res = evaluate_dataset(refresh=True)
     assert res["available"] is True
+    assert res["evaluation_split"] == "test"
     assert res["dataset_count"] == 300
-    assert res["evaluated_count"] == 300
-    assert res["skipped_count"] == 0
+    assert res["evaluated_count"] == 28
+    assert res["skipped_count"] == 272
+    assert res["excluded_count"] == 272
+    assert res["split_class_distribution"] == {
+        "none": 14,
+        "drift": 3,
+        "scope_creep": 11,
+        "misinterpretation": 0,
+    }
     assert res["confusion_matrix"]["labels"] == ["none", "drift", "scope_creep", "misinterpretation"]
-    assert res["confusion_matrix"]["total"] == 300
+    assert res["confusion_matrix"]["total"] == 28
     assert set(res["per_class"].keys()) == {"none", "drift", "scope_creep", "misinterpretation"}
-    assert res["trace_level"]["total"] == 300
-    assert res["step_level"]["total_steps"] == 798
-    assert len(res["per_trace"]) == 300
-    assert res["known_limitations"]["short_drift_traces_lt_3_steps"]["count"] == 16
-    assert res["known_limitations"]["resource_scoped_permission_cases"]["count"] == 51
-    assert res["known_limitations"]["misinterpretation_unsupported"]["count"] == 5
-    assert res["known_limitations"]["action_vocabulary_mismatch_al_trace_033"]["count"] == 1
+    assert res["trace_level"]["total"] == 28
+    assert len(res["per_trace"]) == 28
+    assert res["known_limitations"]["short_drift_traces_lt_3_steps"]["count"] == 2
+    assert res["known_limitations"]["resource_scoped_permission_cases"]["count"] == 4
+    assert res["known_limitations"]["misinterpretation_unsupported"]["count"] == 0
+    assert res["known_limitations"]["action_vocabulary_mismatch_al_trace_033"]["count"] == 0
 
     perf = get_performance_report(refresh=False)
-    assert perf["evaluated_count"] == 300
+    assert perf["evaluated_count"] == 28
+    assert perf["evaluation_split"] == "test"
     assert perf["trace_level"] == res["trace_level"]
+
+    # Review-only split cannot be targeted for evaluation
+    with pytest.raises(HTTPException) as exc_info:
+        evaluate_dataset(refresh=True, split="sample_review_only")
+    assert exc_info.value.status_code == 400
+
+    # Non-existent split raises 400
+    with pytest.raises(HTTPException) as exc_info_2:
+        evaluate_dataset(refresh=True, split="non_existent_split")
+    assert exc_info_2.value.status_code == 400

@@ -256,6 +256,8 @@ class DetectorService:
             flaggedSteps=gt_data.get("flaggedSteps", []),
             flaggedStepId=gt_data.get("flaggedStepId"),
             annotationExplanation=gt_data.get("annotationExplanation", ""),
+            sampleSplit=gt_data.get("sampleSplit") or gt_data.get("sample_split"),
+            sample_split=gt_data.get("sample_split") or gt_data.get("sampleSplit"),
             notes=gt_data.get("notes", ""),
         )
 
