@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+:root {
+  --bg-main: #F8F7F3;
+  --bg-sidebar: #F0EFE9;
+  --bg-card: #FFFFFF;
+  --text-primary: #292D32;
+  --text-secondary: #737982;
+  --border: #E6E5DF;
+  --accent-primary: #829581;
+  --accent-drift: #C49A5B;
+  --accent-scope: #B97878;
+  --accent-success: #72947A;
+  --accent-primary-light: #829581/15;
+  --accent-drift-light: rgba(196, 154, 91, 0.12);
+  --accent-scope-light: rgba(185, 120, 120, 0.12);
+  --shadow-sm: 0 1px 3px rgba(41, 45, 50, 0.06), 0 1px 2px rgba(41, 45, 50, 0.04);
+  --shadow-md: 0 4px 12px rgba(41, 45, 50, 0.08), 0 2px 4px rgba(41, 45, 50, 0.04);
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  min-height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-mono {
+  font-family: 'IBM Plex Mono', 'Fira Code', 'Courier New', monospace;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d0cec6;
+}
+
+/* Selection */
+::selection {
+  background: rgba(130, 149, 129, 0.2);
+  color: var(--text-primary);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Transitions */
+button, a, [role="button"] {
+  transition: all 0.15s ease;
+}
+
+/* Chart tooltip override */
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+/* Table styles */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Input base styles */
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}

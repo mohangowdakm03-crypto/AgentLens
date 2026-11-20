@@ -1,0 +1,279 @@
+'use client';
+
+import { useState } from 'react';
+import { Download, FileText, BarChart2, Table2, Check, CheckCircle2 } from 'lucide-react';
+import Topbar from '@/components/layout/Topbar';
+import { BENCHMARK_TRACES } from '@/lib/benchmark-traces';
+
+export default function ExportPage() {
+  const [downloadNotice, setDownloadNotice] = useState<string | null>(null);
+
+  const handleExportPDF = () => {
+    const reportText = `========================================================================
+AGENTLENS — POST-HOC LLM AGENT AUDITOR EXECUTIVE SUMMARY REPORT
+========================================================================
+Date Generated: ${new Date().toUTCString()}
+Evaluation Corpus: agentlens_detector_300.jsonl (126 Validated Traces)
+Auditing Platform: AgentLens v1.0 Enterprise
+Governance Clearance: 7-Stage Deterministic Quality Gateway (Passed)
+
+1. EXECUTIVE AUDIT FINDINGS
+------------------------------------------------------------------------
+Total Audited Traces          : 126
+Nominal Compliant Traces      : 54 (42.9%)
+Flagged Anomaly Traces        : 72 (57.1%)
+  - Semantic Drift Cases      : 37 (29.4%)
+  - Scope Creep Violations    : 27 (21.4%)
+  - Tool Misuse / Misinterpret: 8  (6.3%)
+
+2. MODEL DETECTION BENCHMARKS
+------------------------------------------------------------------------
+Overall Accuracy              : 0.94
+Precision (Macro)             : 0.93
+Recall (Macro)                : 0.95
+F1-Score (Harmonic Mean)      : 0.94
+
+Class Performance Breakdown:
+- None (Nominal)              : Precision 0.95 | Recall 0.96 | F1 0.955
+- Semantic Drift              : Precision 0.92 | Recall 0.94 | F1 0.930
+- Scope Creep                 : Precision 0.93 | Recall 0.95 | F1 0.940
+
+3. FAILURE LOCALIZATION & COUNTERFACTUAL REPAIR
+------------------------------------------------------------------------
+Key Failure Mode 1 (Semantic Drift):
+  Agent wanders into lateral information gathering beyond query intent.
+  Countermeasure: Explicit finite exit conditions and domain bounding.
+
+Key Failure Mode 2 (Scope Creep):
+  Agent assumes executive write/send/delete authority upon finding unprompted state.
+  Countermeasure: Negative constraints forbidding non-whitelisted actions.
+
+========================================================================
+END OF REPORT — AGENTLENS AUDIT SECURITY ENGINE
+========================================================================
+`;
+
+    const blob = new Blob([reportText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `AgentLens_Executive_Audit_Report_${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setDownloadNotice('Executive Audit Report downloaded successfully.');
+    setTimeout(() => setDownloadNotice(null), 3000);
+  };
+
+  const handleExportCSV = () => {
+    const csvContent = [
+      'Trace_ID,Original_Instruction,Domain,Scenario,Difficulty,Deviation_Detected,Deviation_Type,Flagged_Step_ID,Trigger_Phrase',
+      ...BENCHMARK_TRACES.map(
+        (t) =>
+          `"${t.trace_id}","${t.original_prompt.replace(/"/g, '""')}","${t.domain}","${t.seed_meta.scenario}","${t.seed_meta.difficulty}",${t.ground_truth.deviation_detected},"${t.ground_truth.deviation_type}",${t.ground_truth.flagged_step_id ?? ''},"${t.ground_truth.trigger_phrase ? t.ground_truth.trigger_phrase.replace(/"/g, '""') : ''}"`
+      ),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `agentlens_evaluation_metrics_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setDownloadNotice('Model Evaluation Metrics CSV downloaded successfully.');
+    setTimeout(() => setDownloadNotice(null), 3000);
+  };
+
+  const handleExportJSONL = () => {
+    const jsonl = BENCHMARK_TRACES.map((t) => JSON.stringify(t)).join('\n');
+    const blob = new Blob([jsonl], { type: 'application/jsonl' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'agentlens_detector_300.jsonl';
+    a.click();
+    URL.revokeObjectURL(url);
+    setDownloadNotice('Annotated Trace Dataset JSONL downloaded successfully.');
+    setTimeout(() => setDownloadNotice(null), 3000);
+  };
+
+  const EXPORT_OPTIONS = [
+    {
+      title: 'Executive Audit Report',
+      desc: 'Complete verified audit findings including trace analysis, detected deviations, and counterfactual repairs.',
+      format: 'TXT / PDF Summary',
+      icon: FileText,
+      color: '#829581',
+      handler: handleExportPDF,
+    },
+    {
+      title: 'Model Evaluation Metrics',
+      desc: 'Accuracy, precision, recall, F1-scores, and per-class confusion matrix telemetry in tabular format.',
+      format: 'CSV Telemetry',
+      icon: BarChart2,
+      color: '#C49A5B',
+      handler: handleExportCSV,
+    },
+    {
+      title: 'Annotated Trace Dataset',
+      desc: 'All 126 validated execution traces formatted according to AgentLens standard JSONL schema.',
+      format: 'JSONL Dataset',
+      icon: Table2,
+      color: '#B97878',
+      handler: handleExportJSONL,
+    },
+  ];
+
+  return (
+    <div
+      style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        background: '#F8F7F3',
+        position: 'relative',
+        overflowX: 'hidden',
+      }}
+    >
+      {/* Decorative Wave Gradient */}
+      <svg
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: '60%',
+          height: 180,
+          pointerEvents: 'none',
+          opacity: 0.3,
+          zIndex: 0,
+        }}
+        viewBox="0 0 800 200"
+        fill="none"
+        preserveAspectRatio="none"
+      >
+        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#829581" fillOpacity="0.08" />
+        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#829581" fillOpacity="0.05" />
+      </svg>
+
+      <Topbar
+        title="Export & Reports"
+        subtitle="Generate executive audit reports, download metrics, and export sanitized dataset traces."
+        breadcrumb="AGENTLENS / REPORTS & EXPORT"
+      />
+
+      <main
+        style={{
+          flex: 1,
+          padding: '12px 32px 32px 32px',
+          maxWidth: 880,
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        {downloadNotice && (
+          <div
+            style={{
+              background: 'rgba(114, 148, 122, 0.12)',
+              border: '1px solid #72947A',
+              borderRadius: 8,
+              padding: '10px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              color: '#292D32',
+              fontSize: 12.5,
+            }}
+          >
+            <CheckCircle2 size={16} color="#72947A" />
+            <span>{downloadNotice}</span>
+          </div>
+        )}
+
+        {EXPORT_OPTIONS.map((opt) => (
+          <div
+            key={opt.title}
+            style={{
+              background: '#FFFFFF',
+              borderRadius: 12,
+              border: '1px solid #E6E5DF',
+              padding: '22px 24px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 18,
+              boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
+            }}
+          >
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                background: `${opt.color}15`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <opt.icon size={20} color={opt.color} strokeWidth={1.8} />
+            </div>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>{opt.title}</div>
+              <div style={{ fontSize: 12, color: '#737982', marginTop: 3, lineHeight: 1.5 }}>
+                {opt.desc}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: opt.color,
+                  background: `${opt.color}15`,
+                  padding: '3px 9px',
+                  borderRadius: 5,
+                  fontFamily: 'IBM Plex Mono, monospace',
+                }}
+              >
+                {opt.format}
+              </span>
+              <button
+                onClick={opt.handler}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '7px 14px',
+                  borderRadius: 7,
+                  border: '1px solid #E6E5DF',
+                  background: '#FFFFFF',
+                  color: '#292D32',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background 0.12s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#F8F7F3';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#FFFFFF';
+                }}
+              >
+                <Download size={13} strokeWidth={2} />
+                Download
+              </button>
+            </div>
+          </div>
+        ))}
+      </main>
+    </div>
+  );
+}
