@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
 
 from agentlens.schema import Step, Intent
 from agentlens.drift.embed import cosine
-from agentlens.drift.detect import find_drift_step, detect_from_curve, detect_deviation
+from agentlens.drift.detect import analyze_drift_curve, find_drift_step, detect_from_curve, detect_deviation
 from agentlens.drift.curve import similarity_curve, step_text
 
 
@@ -47,6 +47,12 @@ class TestOriginalSuite:
         curve = [0.82, 0.80, 0.81, 0.42, 0.40, 0.41]       # drop at index 3 = step 4
         idx, _ = find_drift_step(curve)
         assert idx == 3
+
+    def test_pelt_analysis_reports_method_and_segment_means(self):
+        analysis = analyze_drift_curve([0.82, 0.80, 0.81, 0.42, 0.40, 0.41])
+        assert analysis.method == "pelt"
+        assert analysis.index == 3
+        assert analysis.similarity_before > analysis.similarity_after
 
     def test_no_drift_on_flat_curve(self):
         assert find_drift_step([0.80, 0.79, 0.81, 0.80, 0.82])[0] is None
@@ -283,9 +289,16 @@ class TestEdgeCases:
 
     # --- Curve shorter than 3 points ---
 
-    def test_two_point_curve_returns_no_drift(self):
-        """A 2-element curve has n < 3; must return (None, 0)."""
-        assert find_drift_step([0.9, 0.3])[0] is None
+    def test_two_point_curve_uses_fallback_detection(self):
+        """A two-point curve can identify a sufficiently large adjacent drop."""
+        idx, drop = find_drift_step([0.9, 0.3])
+        assert idx == 1
+        assert drop == pytest.approx(0.6)
+
+    def test_two_point_curve_below_fallback_threshold_has_no_drift(self):
+        idx, drop = find_drift_step([0.9, 0.71])
+        assert idx is None
+        assert drop == 0.0
 
     def test_one_point_curve_returns_no_drift(self):
         assert find_drift_step([0.5])[0] is None
@@ -392,10 +405,14 @@ class TestDriftAndScopeCoverage:
         assert len(result) == 1
         assert -1.0 <= result[0] <= 1.0
 
-    def test_step_text_prefers_reasoning_and_output(self):
+    def test_step_text_includes_reasoning_input_and_output(self):
         s = Step(1, "read", tool_input="inp", tool_output="out", agent_reasoning="reasoning")
-        assert step_text(s) == "reasoning out"
+        assert step_text(s) == "reasoning inp out"
 
     def test_step_text_falls_back_to_tool_input(self):
         s = Step(1, "read", tool_input="inp", tool_output="", agent_reasoning="")
         assert step_text(s) == "inp"
+
+    def test_step_text_ignores_missing_empty_and_whitespace_fields(self):
+        s = Step(1, "read", tool_input="  input  ", tool_output=" \t ", agent_reasoning=None)
+        assert step_text(s) == "input"

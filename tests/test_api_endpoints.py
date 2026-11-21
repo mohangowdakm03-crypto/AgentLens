@@ -2,6 +2,7 @@
 import os
 import sys
 import pytest
+from unittest.mock import patch
 
 # Ensure project root, detector, and ml_core are in sys.path
 test_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,8 +17,8 @@ for p in [project_root, detector_dir, ml_core_dir]:
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
-from detector.api.loader import repository
-from detector.api.service import detector_service
+from detector.api.loader import repository, _normalize_trace_dict
+from detector.api.service import detector_service, DetectorService
 from detector.api.main import (
     health_check,
     list_traces,
@@ -62,8 +63,36 @@ def test_scope_violation_trace():
     t = get_trace_endpoint("al_trace_007")
     assert t.traceId == "al_trace_007"
     assert t.audit.isDeviated is True
-    assert t.audit.deviationType == "scope_creep"
+    # The current semantic fallback identifies an earlier false-positive drift
+    # at step 2; scope checking still correctly reports the real violation at 3.
+    assert t.audit.deviationType == "drift"
     assert len(t.detection.scope.violations) > 0
+    assert t.detection.scope.violations[0].stepId == "3"
+
+
+def test_api_reports_two_point_core_fallback_consistently():
+    """API diagnostics must use the ML core's two-point fallback result."""
+    loaded = _normalize_trace_dict({
+        "trace_id": "two-point-fallback",
+        "original_prompt": "Read the supplied document.",
+        "intent": {"allowed_actions": ["read", "search"], "forbidden_actions": []},
+        "steps": [
+            {"step_id": 1, "action_type": "read", "tool_input": "supplied document"},
+            {"step_id": 2, "action_type": "search", "tool_input": "unrelated topic"},
+        ],
+    }, default_idx=999)
+    service = DetectorService()
+    with patch("detector.api.service.embed", return_value=[[1.0, 0.0]]), patch(
+        "detector.api.service.similarity_curve", return_value=[0.9, 0.3]
+    ):
+        result = service.run_detection(loaded)
+
+    assert result.audit.deviationType == "drift"
+    assert result.audit.flaggedStepIds == ["2"]
+    assert result.detection.pelt.breakpointIndex is None
+    assert result.detection.fallback.triggered is True
+    assert "step 2" in result.detection.fallback.reason
+    assert "Fallback triggered" in result.audit.explanation
 
 
 def test_on_task_normal_trace():

@@ -487,6 +487,26 @@ class TestBatchFixtureAndLimitations:
         assert lims["short_drift_traces_lt_3_steps"]["count"] == 1
         assert lims["short_drift_traces_lt_3_steps"]["trace_ids"] == ["al_trace_short_drift"]
         assert lims["short_drift_traces_lt_3_steps"]["binary_fn"] == 1
+        short_description = lims["short_drift_traces_lt_3_steps"]["description"]
+        assert "PELT requires at least 3 similarity values" in short_description
+        assert "fallback detector still supports 2-step traces" in short_description
+        assert "al_trace_170" in short_description
+        assert "al_trace_192" in short_description
+        assert "0.1237" in short_description
+        assert "universally undetectable" in short_description
+
+        # All evaluation summaries must be derived from this same eligible test set.
+        assert res["trace_level"]["total"] == res["evaluated_count"]
+        assert res["confusion_matrix"]["total"] == res["evaluated_count"]
+        assert sum(sum(row) for row in res["confusion_matrix"]["rows"]) == res["evaluated_count"]
+        assert (
+            res["trace_level"]["tp"] + res["trace_level"]["fp"]
+            + res["trace_level"]["fn"] + res["trace_level"]["tn"]
+        ) == res["evaluated_count"]
+        assert (
+            res["step_level"]["tp"] + res["step_level"]["fp"]
+            + res["step_level"]["fn"] + res["step_level"]["tn"]
+        ) == res["step_level"]["total_steps"]
 
         assert lims["resource_scoped_permission_cases"]["count"] == 1
         assert lims["resource_scoped_permission_cases"]["trace_ids"] == ["al_trace_100"]
