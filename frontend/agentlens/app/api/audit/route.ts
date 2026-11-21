@@ -376,6 +376,8 @@ export async function POST(request: NextRequest) {
       diff: any[];
       justification: string;
     };
+    detection?: any;
+    audit?: any;
   } = {
     status: "success",
     trace_id: detectorOutput.traceId || `trace_${Date.now()}`,

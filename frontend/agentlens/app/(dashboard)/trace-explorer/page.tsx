@@ -23,10 +23,12 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect } from 'react';
 import Topbar from '@/components/layout/Topbar';
 import { DeviationBadge, StatusBadge } from '@/components/common/Badge';
 import Button from '@/components/common/Button';
 import { BENCHMARK_TRACES, BenchmarkTrace } from '@/lib/benchmark-traces';
+import { listTraces, getTrace } from '@/services/api';
 
 export default function TraceExplorerPage() {
   const [search, setSearch] = useState('');
@@ -39,17 +41,94 @@ export default function TraceExplorerPage() {
   const [activeDrawerTrace, setActiveDrawerTrace] = useState<BenchmarkTrace | null>(null);
   const [drawerTab, setDrawerTab] = useState<'timeline' | 'json' | 'policy'>('timeline');
   const [currentPage, setCurrentPage] = useState(1);
+  const [backendTraces, setBackendTraces] = useState<BenchmarkTrace[]>([]);
+  const [isLoadingBackend, setIsLoadingBackend] = useState(false);
   const pageSize = 15;
+
+  // Fetch traces from backend repository (300 records)
+  useEffect(() => {
+    setIsLoadingBackend(true);
+    listTraces()
+      .then((items) => {
+        if (Array.isArray(items) && items.length > 0) {
+          const mapped: BenchmarkTrace[] = items.map((item) => {
+            const isDev = item.groundTruth?.isDeviated ?? false;
+            const devType = (item.groundTruth?.deviationType || 'none') as any;
+            const domain = item.traceId.includes('00') ? 'Software Development' : 'AI/ML';
+            return {
+              trace_id: item.traceId,
+              original_prompt: item.label.replace(/^Trace [^:]+:\s*\[[^\]]+\]\s*/, ''),
+              domain,
+              intent: {
+                allowed_actions: [],
+                forbidden_actions: [],
+              },
+              steps: Array.from({ length: item.stepCount || 4 }).map((_, idx) => ({
+                step_id: idx + 1,
+                action_type: 'action',
+                tool_called: 'tool_call',
+                tool_input: '',
+                agent_reasoning: '',
+                tool_output: '',
+              })),
+              ground_truth: {
+                deviation_detected: isDev,
+                deviation_type: devType,
+                flagged_step_id: item.groundTruth?.flaggedSteps?.[0]
+                  ? parseInt(String(item.groundTruth.flaggedSteps[0]), 10) || (isDev ? 3 : null)
+                  : (isDev ? 3 : null),
+                trigger_phrase: null,
+                explanation: isDev ? `Deviation (${devType}) annotated in ground truth.` : 'Nominal compliant trace.',
+              },
+              seed_meta: {
+                scenario: item.label,
+                difficulty: 'medium',
+                hard_case: null,
+              },
+              total_latency_ms: (item.stepCount || 4) * 35,
+              total_tokens: (item.stepCount || 4) * 85,
+              timestamp: new Date().toISOString(),
+            };
+          });
+          setBackendTraces(mapped);
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not load backend traces in explorer:', err);
+      })
+      .finally(() => {
+        setIsLoadingBackend(false);
+      });
+  }, []);
+
+  const tracesSource = backendTraces.length > 0 ? backendTraces : BENCHMARK_TRACES;
 
   // Domain options
   const domains = useMemo(() => {
-    const set = new Set(BENCHMARK_TRACES.map((t) => t.domain));
+    const set = new Set(tracesSource.map((t) => t.domain));
     return Array.from(set);
-  }, []);
+  }, [tracesSource]);
+
+  // Dynamic statistics
+  const stats = useMemo(() => {
+    const total = tracesSource.length;
+    const nominal = tracesSource.filter((t) => !t.ground_truth.deviation_detected).length;
+    const drift = tracesSource.filter((t) => t.ground_truth.deviation_type === 'drift').length;
+    const scope = tracesSource.filter((t) => t.ground_truth.deviation_type === 'scope_creep').length;
+    return {
+      total,
+      nominal,
+      nominalPct: total > 0 ? ((nominal / total) * 100).toFixed(1) : '0',
+      drift,
+      driftPct: total > 0 ? ((drift / total) * 100).toFixed(1) : '0',
+      scope,
+      scopePct: total > 0 ? ((scope / total) * 100).toFixed(1) : '0',
+    };
+  }, [tracesSource]);
 
   // Filter logic
   const filtered = useMemo(() => {
-    return BENCHMARK_TRACES.filter((t) => {
+    return tracesSource.filter((t) => {
       // Classification filter
       if (filterDev === 'clean' && t.ground_truth.deviation_detected) return false;
       if (filterDev === 'drift' && t.ground_truth.deviation_type !== 'drift') return false;
@@ -209,7 +288,7 @@ export default function TraceExplorerPage() {
             </div>
             <div>
               <div style={{ fontSize: 11, color: '#737982', fontWeight: 600 }}>Total Traces</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#292D32', lineHeight: 1.1 }}>126</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#292D32', lineHeight: 1.1 }}>{stats.total}</div>
             </div>
           </div>
 
@@ -229,7 +308,9 @@ export default function TraceExplorerPage() {
             </div>
             <div>
               <div style={{ fontSize: 11, color: '#737982', fontWeight: 600 }}>Nominal Traces</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#72947A', lineHeight: 1.1 }}>54 <span style={{ fontSize: 11, fontWeight: 500, color: '#737982' }}>(42.9%)</span></div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#72947A', lineHeight: 1.1 }}>
+                {stats.nominal} <span style={{ fontSize: 11, fontWeight: 500, color: '#737982' }}>({stats.nominalPct}%)</span>
+              </div>
             </div>
           </div>
 
@@ -249,7 +330,9 @@ export default function TraceExplorerPage() {
             </div>
             <div>
               <div style={{ fontSize: 11, color: '#737982', fontWeight: 600 }}>Semantic Drift</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#C49A5B', lineHeight: 1.1 }}>37 <span style={{ fontSize: 11, fontWeight: 500, color: '#737982' }}>(29.4%)</span></div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#C49A5B', lineHeight: 1.1 }}>
+                {stats.drift} <span style={{ fontSize: 11, fontWeight: 500, color: '#737982' }}>({stats.driftPct}%)</span>
+              </div>
             </div>
           </div>
 
@@ -269,7 +352,9 @@ export default function TraceExplorerPage() {
             </div>
             <div>
               <div style={{ fontSize: 11, color: '#737982', fontWeight: 600 }}>Scope Creep</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#B97878', lineHeight: 1.1 }}>27 <span style={{ fontSize: 11, fontWeight: 500, color: '#737982' }}>(21.4%)</span></div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#B97878', lineHeight: 1.1 }}>
+                {stats.scope} <span style={{ fontSize: 11, fontWeight: 500, color: '#737982' }}>({stats.scopePct}%)</span>
+              </div>
             </div>
           </div>
 
@@ -288,8 +373,10 @@ export default function TraceExplorerPage() {
               <Zap size={16} color="#829581" />
             </div>
             <div>
-              <div style={{ fontSize: 11, color: '#737982', fontWeight: 600 }}>Accuracy Metric</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#292D32', lineHeight: 1.1 }}>0.94 <span style={{ fontSize: 11, fontWeight: 500, color: '#72947A' }}>verified</span></div>
+              <div style={{ fontSize: 11, color: '#737982', fontWeight: 600 }}>Dataset Source</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#292D32', lineHeight: 1.1 }}>
+                {backendTraces.length > 0 ? 'FastAPI Repository' : 'Core Benchmark'}
+              </div>
             </div>
           </div>
         </div>

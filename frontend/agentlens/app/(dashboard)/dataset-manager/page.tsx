@@ -28,24 +28,18 @@ import Button from '@/components/common/Button';
 import { BENCHMARK_TRACES, BenchmarkTrace } from '@/lib/benchmark-traces';
 
 const DATASET_INFO = {
-  name: 'agentlens_detector_300.jsonl',
+  name: 'AgentLens_300_Final_Corrected.jsonl',
   totalTraces: 300,
   valid: 300,
-  rejected: 23,
-  classes: { none: 100, drift: 100, scope_creep: 100 },
-  splits: { train: 210, validation: 60, test: 30 },
+  rejected: 0,
+  classes: { none: 146, drift: 34, scope_creep: 115, misinterpretation: 5 },
+  splits: { train: 210, validation: 45, test: 45 },
   domains: [
-    { name: 'Software Engineering', count: 42, color: '#829581' },
-    { name: 'DevOps & Cloud', count: 38, color: '#C49A5B' },
-    { name: 'Data Analysis', count: 35, color: '#B97878' },
-    { name: 'Personal Assistant', count: 32, color: '#72947A' },
-    { name: 'Finance & Invoices', count: 28, color: '#9B8FC0' },
-    { name: 'Research Papers', count: 25, color: '#6B9BB0' },
-    { name: 'Cybersecurity', count: 22, color: '#829581' },
-    { name: 'Other Domains', count: 78, color: '#737982' },
+    { name: 'AI/ML Engineering', count: 150, color: '#829581' },
+    { name: 'Software Development', count: 150, color: '#C49A5B' },
   ],
-  validationStatus: 'passed',
-  lastValidated: 'Nov 11, 2026 at 18:45',
+  validationStatus: '13/13 Checks Passed',
+  lastValidated: 'Nov 20, 2026 (Joyal Dataset Audit Clearance)',
 };
 
 const GATEWAY_STAGES = [
@@ -589,15 +583,15 @@ export default function DatasetManagerPage() {
                   {DATASET_INFO.name}
                 </div>
                 <div style={{ fontSize: 12, color: '#737982', marginTop: 3 }}>
-                  Expanded dataset verified across 12 realistic enterprise domains
+                  Corrected 300-trace corpus across AI/ML (150) and Software Development (150)
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
                 {[
                   { label: 'Validated Traces', value: DATASET_INFO.valid, color: '#829581' },
-                  { label: 'Rejected by Gateway', value: DATASET_INFO.rejected, color: '#B97878' },
-                  { label: 'Validation Status', value: '7/7 Passed', color: '#72947A' },
+                  { label: 'Rejected by Gateway', value: DATASET_INFO.rejected, color: '#72947A' },
+                  { label: 'Validation Status', value: DATASET_INFO.validationStatus, color: '#72947A' },
                 ].map((stat) => (
                   <div key={stat.label}>
                     <div style={{ fontSize: 11, color: '#737982' }}>{stat.label}</div>
@@ -606,6 +600,26 @@ export default function DatasetManagerPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Permission Audit & Limitation Disclosure */}
+            <div
+              style={{
+                background: '#FFFFFF',
+                borderRadius: 12,
+                border: '1px solid #E6E5DF',
+                padding: '16px 20px',
+                display: 'flex',
+                gap: 14,
+                alignItems: 'flex-start',
+                boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
+              }}
+            >
+              <Info size={18} color="#C49A5B" style={{ flexShrink: 0, marginTop: 2 }} />
+              <div style={{ fontSize: 12, color: '#555D67', lineHeight: 1.5 }}>
+                <strong style={{ color: '#292D32' }}>Permission Audit Limitation Disclosure:</strong>{' '}
+                51 dataset records use <code>write</code> to save a report or summary, while the prompt prohibits modifying a specific protected target resource. Because the action-level schema evaluates actions globally (<code>allowed_actions</code> / <code>forbidden_actions</code>), <code>write</code> remains allowed for those records so report-writing steps are not misclassified. All 28 ambiguous <code>tool_misuse</code> labels have been reclassified as <code>scope_creep</code> per Joyal&apos;s correction summary.
               </div>
             </div>
 

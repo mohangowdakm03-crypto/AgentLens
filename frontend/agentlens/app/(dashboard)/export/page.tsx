@@ -13,40 +13,34 @@ export default function ExportPage() {
 AGENTLENS — POST-HOC LLM AGENT AUDITOR EXECUTIVE SUMMARY REPORT
 ========================================================================
 Date Generated: ${new Date().toUTCString()}
-Evaluation Corpus: agentlens_detector_300.jsonl (126 Validated Traces)
+Evaluation Corpus: AgentLens_300_Final_Corrected.jsonl (300 Validated Traces)
 Auditing Platform: AgentLens v1.0 Enterprise
-Governance Clearance: 7-Stage Deterministic Quality Gateway (Passed)
+Governance Clearance: 13/13 Checks Passed (Joyal Dataset Audit Clearance)
 
-1. EXECUTIVE AUDIT FINDINGS
+1. EXECUTIVE AUDIT CORPUS FINDINGS
 ------------------------------------------------------------------------
-Total Audited Traces          : 126
-Nominal Compliant Traces      : 54 (42.9%)
-Flagged Anomaly Traces        : 72 (57.1%)
-  - Semantic Drift Cases      : 37 (29.4%)
-  - Scope Creep Violations    : 27 (21.4%)
-  - Tool Misuse / Misinterpret: 8  (6.3%)
+Total Audited Traces          : 300
+Nominal Compliant Traces      : 146 (48.7%)
+Flagged Anomaly Traces        : 154 (51.3%)
+  - Scope Creep Violations    : 115 (38.3%)
+  - Semantic Drift Cases      : 34  (11.3%)
+  - Misinterpretation Cases   : 5   (1.7%)
 
-2. MODEL DETECTION BENCHMARKS
+Domain Distribution:
+  - AI/ML Engineering         : 150 (50.0%)
+  - Software Development      : 150 (50.0%)
+
+2. STATISTICAL DETECTOR ARCHITECTURE
 ------------------------------------------------------------------------
-Overall Accuracy              : 0.94
-Precision (Macro)             : 0.93
-Recall (Macro)                : 0.95
-F1-Score (Harmonic Mean)      : 0.94
+Model Engine                  : SentenceTransformers (all-MiniLM-L6-v2) + ruptures PELT
+Fixed Hyperparameters         : PEN=0.05, MIN_DROP=0.15, FALLBACK_DROP=0.20
+Scope Policy Engine           : Exact action whitelist/blacklist containment check
+Permission Schema Limitation  : Action-level schema (disclosed in AgentLens_58_Permission_Audit.csv)
 
-Class Performance Breakdown:
-- None (Nominal)              : Precision 0.95 | Recall 0.96 | F1 0.955
-- Semantic Drift              : Precision 0.92 | Recall 0.94 | F1 0.930
-- Scope Creep                 : Precision 0.93 | Recall 0.95 | F1 0.940
-
-3. FAILURE LOCALIZATION & COUNTERFACTUAL REPAIR
+3. ROADMAP NOTICE — GENERATIVE CAPABILITIES
 ------------------------------------------------------------------------
-Key Failure Mode 1 (Semantic Drift):
-  Agent wanders into lateral information gathering beyond query intent.
-  Countermeasure: Explicit finite exit conditions and domain bounding.
-
-Key Failure Mode 2 (Scope Creep):
-  Agent assumes executive write/send/delete authority upon finding unprompted state.
-  Countermeasure: Negative constraints forbidding non-whitelisted actions.
+Generative Prompt Repair      : Phase 4 (Offline — fine-tuned Mistral-7B QLoRA in development)
+Causal Token Attribution      : Phase 4 (Offline — word-level gradient attribution)
 
 ========================================================================
 END OF REPORT — AGENTLENS AUDIT SECURITY ENGINE

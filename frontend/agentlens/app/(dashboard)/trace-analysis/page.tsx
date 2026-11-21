@@ -28,12 +28,13 @@ import {
   FileText,
   LoaderCircle,
   HelpCircle,
+  Info,
 } from 'lucide-react';
 import Link from 'next/link';
 import Topbar from '@/components/layout/Topbar';
 import { BENCHMARK_TRACES, BenchmarkTrace, getTraceById } from '@/lib/benchmark-traces';
-import { runAudit } from '@/services/api';
-import type { AuditResult } from '@/lib/types';
+import { runAudit, getTrace, listTraces, backendTraceToAuditResult } from '@/services/api';
+import type { AuditResult, BackendTraceListItem } from '@/lib/types';
 
 function TraceAnalysisContent() {
   const searchParams = useSearchParams();
@@ -84,7 +85,91 @@ function TraceAnalysisContent() {
     }
   }, [queryId, searchParams]);
 
+  const [repositoryTrace, setRepositoryTrace] = useState<BenchmarkTrace | null>(null);
+  const [availableTraces, setAvailableTraces] = useState<BackendTraceListItem[]>([]);
+  const [isLoadingTrace, setIsLoadingTrace] = useState(false);
+
+  // Fetch list of available dataset traces for quick switcher
+  useEffect(() => {
+    listTraces()
+      .then((items) => {
+        if (Array.isArray(items) && items.length > 0) {
+          setAvailableTraces(items);
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not load backend traces list:', err);
+      });
+  }, []);
+
+  // Fetch individual trace from backend repository if not in static benchmark list
+  useEffect(() => {
+    if (!queryId) return;
+    if (getTraceById(queryId)) {
+      setRepositoryTrace(null);
+      return;
+    }
+    if (activeLiveAudit && activeLiveAudit.traceId === queryId) return;
+
+    let isMounted = true;
+    setIsLoadingTrace(true);
+    getTrace(queryId)
+      .then((backendModel) => {
+        if (!isMounted) return;
+        const mapped: BenchmarkTrace = {
+          trace_id: backendModel.traceId,
+          original_prompt: backendModel.prompt,
+          domain: backendModel.traceId.includes('00') ? 'Software Development' : 'AI/ML',
+          intent: {
+            allowed_actions: backendModel.detection?.scope?.allowedActions || [],
+            forbidden_actions: backendModel.detection?.scope?.forbiddenActions || [],
+          },
+          steps: backendModel.steps.map((s, idx) => ({
+            step_id: parseInt(s.stepId, 10) || idx + 1,
+            action_type: s.action || 'tool_call',
+            tool_called: (s as any).tool_called || s.action || null,
+            tool_input: s.tool_input || null,
+            agent_reasoning: s.reasoning || null,
+            tool_output: s.tool_output || null,
+          })),
+          ground_truth: {
+            deviation_detected: backendModel.groundTruth?.isDeviated ?? false,
+            deviation_type: (backendModel.groundTruth?.deviationType || 'none') as any,
+            flagged_step_id: typeof backendModel.groundTruth?.flaggedStepId === 'number'
+              ? backendModel.groundTruth.flaggedStepId
+              : (backendModel.groundTruth?.flaggedSteps?.[0] ? Number(backendModel.groundTruth.flaggedSteps[0]) : null),
+            trigger_phrase: null,
+            explanation: backendModel.groundTruth?.annotationExplanation || backendModel.groundTruth?.notes || 'Dataset ground truth annotation',
+          },
+          seed_meta: {
+            scenario: backendModel.label || 'Repository Dataset Trace',
+            difficulty: 'medium',
+            hard_case: null,
+          },
+          total_latency_ms: 120,
+          total_tokens: backendModel.steps.length * 80,
+          timestamp: new Date().toISOString(),
+        };
+        setRepositoryTrace(mapped);
+        setAuditResponse(backendTraceToAuditResult(backendModel));
+        setAuditSuccessNotice(`Loaded trace ${backendModel.traceId} from FastAPI repository with real ML Core detection.`);
+      })
+      .catch((err) => {
+        console.warn(`Could not load trace ${queryId} from backend:`, err);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingTrace(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [queryId, activeLiveAudit]);
+
   const currentTrace: BenchmarkTrace = useMemo(() => {
+    if (repositoryTrace && repositoryTrace.trace_id === queryId) {
+      return repositoryTrace;
+    }
     const benchmark = getTraceById(queryId);
     if (benchmark) return benchmark;
 
@@ -394,11 +479,28 @@ function TraceAnalysisContent() {
                   cursor: 'pointer',
                 }}
               >
-                {BENCHMARK_TRACES.map((t) => (
-                  <option key={t.trace_id} value={t.trace_id}>
-                    {t.trace_id} — {t.original_prompt.slice(0, 36)}... ({t.ground_truth.deviation_type})
-                  </option>
-                ))}
+                <optgroup label="Core Benchmark Traces">
+                  {BENCHMARK_TRACES.map((t) => (
+                    <option key={t.trace_id} value={t.trace_id}>
+                      {t.trace_id} — {t.original_prompt.slice(0, 32)}... ({t.ground_truth.deviation_type})
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Repository Traces (GET /api/traces)">
+                  {availableTraces.length > 0 ? (
+                    availableTraces.slice(0, 50).map((t) => (
+                      <option key={t.traceId} value={t.traceId}>
+                        {t.traceId} — {t.label.slice(0, 34)}... ({t.stepCount} steps)
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="al_trace_001">al_trace_001 — Nominal Compliant (AI/ML)</option>
+                      <option value="al_trace_006">al_trace_006 — Semantic Drift (YOLOv8)</option>
+                      <option value="al_trace_007">al_trace_007 — Scope Creep (Database drop)</option>
+                    </>
+                  )}
+                </optgroup>
               </select>
             </div>
           </div>
@@ -848,6 +950,136 @@ function TraceAnalysisContent() {
             })}
           </div>
         </div>
+
+        {/* Live Detector Diagnostic Details Panel (Joyal Correction 2 & 5) */}
+        {auditResponse?.detectorAnalysis && (
+          <div
+            style={{
+              background: '#FFFFFF',
+              borderRadius: 12,
+              border: '1px solid #E6E5DF',
+              padding: '18px 24px',
+              boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Terminal size={16} color="#829581" />
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+                  ML Core Diagnostic Breakdown (Verified FastAPI Contract)
+                </span>
+              </div>
+              <span style={{ fontSize: 11, color: '#737982' }}>
+                Statistical Change-Point &amp; Scope Policy Engine
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              {/* PELT & Drift Section */}
+              <div style={{ background: '#F8F7F3', borderRadius: 8, padding: '12px 14px', border: '1px solid #EBEAE4' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#292D32', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <GitBranch size={13} color="#C49A5B" />
+                  PELT Cosine Drift Diagnostics
+                </div>
+                {auditResponse.detectorAnalysis.pelt ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, fontSize: 11 }}>
+                    <div>
+                      <div style={{ color: '#737982' }}>Breakpoint Step</div>
+                      <div style={{ fontWeight: 600, color: '#292D32' }}>
+                        {auditResponse.detectorAnalysis.pelt.breakpointStepId ? `Step ${auditResponse.detectorAnalysis.pelt.breakpointStepId}` : 'None'}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ color: '#737982' }}>Similarity Before</div>
+                      <div style={{ fontWeight: 600, color: '#292D32' }}>
+                        {auditResponse.detectorAnalysis.pelt.similarityBefore !== null ? auditResponse.detectorAnalysis.pelt.similarityBefore.toFixed(3) : '—'}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ color: '#737982' }}>Similarity After</div>
+                      <div style={{ fontWeight: 600, color: '#292D32' }}>
+                        {auditResponse.detectorAnalysis.pelt.similarityAfter !== null ? auditResponse.detectorAnalysis.pelt.similarityAfter.toFixed(3) : '—'}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ color: '#737982' }}>Sustained Drop</div>
+                      <div style={{ fontWeight: 600, color: '#C49A5B' }}>
+                        {auditResponse.detectorAnalysis.pelt.difference !== null ? auditResponse.detectorAnalysis.pelt.difference.toFixed(3) : '—'}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ color: '#737982' }}>Threshold Used</div>
+                      <div style={{ fontWeight: 600, color: '#292D32' }}>
+                        {auditResponse.detectorAnalysis.pelt.thresholdUsed ?? 0.15}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ color: '#737982' }}>Fallback Drop</div>
+                      <div style={{ fontWeight: 600, color: '#292D32' }}>
+                        {auditResponse.detectorAnalysis.fallback?.triggered ? 'Triggered (≥0.20)' : 'Inactive'}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 11, color: '#737982', fontStyle: 'italic' }}>
+                    No change-point breakpoint detected by PELT algorithm (sustained cosine similarity maintained).
+                  </div>
+                )}
+              </div>
+
+              {/* Scope & Policy Section */}
+              <div style={{ background: '#F8F7F3', borderRadius: 8, padding: '12px 14px', border: '1px solid #EBEAE4' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#292D32', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <ShieldAlert size={13} color="#B97878" />
+                  Scope Boundary Policy Diagnostics
+                </div>
+                {auditResponse.detectorAnalysis.scopeDetails ? (
+                  <div>
+                    <div style={{ display: 'flex', gap: 12, marginBottom: 8, fontSize: 11 }}>
+                      <div>
+                        <span style={{ color: '#737982' }}>Allowed: </span>
+                        <span style={{ fontWeight: 600, color: '#72947A' }}>
+                          {auditResponse.detectorAnalysis.scopeDetails.allowedActions.length > 0 ? auditResponse.detectorAnalysis.scopeDetails.allowedActions.join(', ') : 'None'}
+                        </span>
+                      </div>
+                      <div>
+                        <span style={{ color: '#737982' }}>Forbidden: </span>
+                        <span style={{ fontWeight: 600, color: '#B97878' }}>
+                          {auditResponse.detectorAnalysis.scopeDetails.forbiddenActions.length > 0 ? auditResponse.detectorAnalysis.scopeDetails.forbiddenActions.join(', ') : 'None'}
+                        </span>
+                      </div>
+                    </div>
+                    {auditResponse.detectorAnalysis.scopeDetails.violations.length > 0 ? (
+                      <div style={{ fontSize: 10.5, color: '#B97878', background: 'rgba(185,120,120,0.1)', padding: '6px 8px', borderRadius: 6 }}>
+                        {auditResponse.detectorAnalysis.scopeDetails.violations.map((v, i) => (
+                          <div key={i}>
+                            <strong>Violation at Step {v.stepId}:</strong> Action &apos;{v.action}&apos; ({v.reason})
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 11, color: '#72947A', fontStyle: 'italic' }}>
+                        ✓ Zero forbidden tool actions executed. Conforms to intent whitelist.
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 11, color: '#737982', fontStyle: 'italic' }}>
+                    No explicit action constraints supplied or policy analysis unavailable.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Phase 4 Status Disclaimer */}
+            <div style={{ marginTop: 12, padding: '8px 12px', background: 'rgba(130,149,129,0.08)', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#555D67' }}>
+              <Info size={13} color="#829581" />
+              <span>
+                <strong>System Transparency:</strong> Statistical ML Core is actively detecting deviations and change-points. Generative features (Mistral-7B QLoRA prompt repair and token attribution) are scheduled for Phase 4 offline deployment.
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Execution Span Waterfall (LangSmith / Phoenix style) */}
         <div

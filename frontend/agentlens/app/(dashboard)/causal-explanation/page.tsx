@@ -109,6 +109,23 @@ function CausalExplanationContent() {
           zIndex: 1,
         }}
       >
+        {/* Phase 4 Offline Status Banner */}
+        <div
+          style={{
+            background: 'rgba(196, 154, 91, 0.08)',
+            border: '1px solid rgba(196, 154, 91, 0.3)',
+            borderRadius: 10,
+            padding: '14px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+          }}
+        >
+          <AlertTriangle size={18} color="#C49A5B" style={{ flexShrink: 0 }} />
+          <div style={{ fontSize: 12, color: '#292D32', lineHeight: 1.5 }}>
+            <strong>Phase 4 Generative Feature Status (Offline):</strong> Word-level causal trigger token attribution is powered by fine-tuned Mistral-7B QLoRA, scheduled for Phase 4 deployment. The current production detector operates via statistical sentence embeddings (<code>all-MiniLM-L6-v2</code>) and ruptures PELT change-point detection.
+          </div>
+        </div>
         {/* Context Summary Card */}
         <div
           style={{

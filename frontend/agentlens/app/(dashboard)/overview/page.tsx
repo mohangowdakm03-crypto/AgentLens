@@ -75,9 +75,10 @@ const ACTIVITY_BY_RANGE: Record<string, { date: string; audits: number }[]> = {
 };
 
 const OUTCOME_DATA = [
-  { name: 'None (Correct)', value: 100, color: '#829581', pct: '33.3%' },
-  { name: 'Drift', value: 100, color: '#C49A5B', pct: '33.3%' },
-  { name: 'Scope Creep', value: 100, color: '#B97878', pct: '33.3%' },
+  { name: 'None (Nominal)', value: 146, color: '#72947A', pct: '48.7%' },
+  { name: 'Scope Creep', value: 115, color: '#B97878', pct: '38.3%' },
+  { name: 'Semantic Drift', value: 34, color: '#C49A5B', pct: '11.3%' },
+  { name: 'Misinterpretation', value: 5, color: '#9B8FC0', pct: '1.7%' },
 ];
 
 const RECENT_TRACES = [
@@ -219,11 +220,11 @@ export default function OverviewPage() {
           }}
         >
           <StatCard
-            title="Total Audits"
+            title="Total Corpus Traces"
             value="300"
-            change="+14%"
+            change="13/13 Checks"
             changePositive
-            subtitle="vs. previous 30 days"
+            subtitle="150 AI/ML, 150 Software Dev"
             icon={<Layers size={22} strokeWidth={1.8} />}
             accentColor="#829581"
             accentBg="rgba(130, 149, 129, 0.12)"
@@ -231,36 +232,36 @@ export default function OverviewPage() {
           />
           <StatCard
             title="Deviations Detected"
-            value="200"
-            change="+10%"
-            changePositive
-            subtitle="66.7% of total audits"
+            value="154"
+            change="51.3%"
+            changePositive={false}
+            subtitle="Total ground truth anomalies"
             icon={<AlertTriangle size={22} strokeWidth={1.8} />}
             accentColor="#B97878"
             accentBg="rgba(185, 120, 120, 0.12)"
             bottomBarColor="#B97878"
           />
           <StatCard
-            title="Drift Cases"
-            value="100"
-            change="+8%"
-            changePositive
-            subtitle="33.3% of total audits"
-            icon={<GitBranch size={22} strokeWidth={1.8} />}
-            accentColor="#C49A5B"
-            accentBg="rgba(196, 154, 91, 0.12)"
-            bottomBarColor="#C49A5B"
-          />
-          <StatCard
             title="Scope Creep Cases"
-            value="100"
-            change="+12%"
-            changePositive
-            subtitle="33.3% of total audits"
+            value="115"
+            change="38.3%"
+            changePositive={false}
+            subtitle="Action whitelist breaches"
             icon={<Layers size={22} strokeWidth={1.8} />}
             accentColor="#B97878"
             accentBg="rgba(185, 120, 120, 0.12)"
             bottomBarColor="#B97878"
+          />
+          <StatCard
+            title="Semantic Drift Cases"
+            value="34"
+            change="11.3%"
+            changePositive
+            subtitle="PELT change-point drops"
+            icon={<GitBranch size={22} strokeWidth={1.8} />}
+            accentColor="#C49A5B"
+            accentBg="rgba(196, 154, 91, 0.12)"
+            bottomBarColor="#C49A5B"
           />
         </div>
 

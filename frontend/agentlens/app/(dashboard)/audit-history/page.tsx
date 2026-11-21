@@ -1,19 +1,73 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Calendar, Download, Eye, MoreHorizontal, Clock, ArrowRight, X } from 'lucide-react';
 import Link from 'next/link';
 import Topbar from '@/components/layout/Topbar';
 import { DeviationBadge, StatusBadge } from '@/components/common/Badge';
-import { BENCHMARK_TRACES } from '@/lib/benchmark-traces';
+import { BENCHMARK_TRACES, BenchmarkTrace } from '@/lib/benchmark-traces';
 
 export default function AuditHistoryPage() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [dateFilter, setDateFilter] = useState<'all' | '7d' | '30d'>('all');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [liveTrace, setLiveTrace] = useState<BenchmarkTrace | null>(null);
 
-  const historyTraces = BENCHMARK_TRACES.slice(0, 24);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = sessionStorage.getItem('agentlens_active_audit');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.result) {
+          const isDev = Boolean(
+            parsed.result.detectorAnalysis?.result &&
+            parsed.result.detectorAnalysis.result !== 'none'
+          );
+          const devType = (parsed.result.detectorAnalysis?.result || 'none') as any;
+          setLiveTrace({
+            trace_id: parsed.traceId || 'live_audit_current',
+            original_prompt: parsed.prompt || 'Custom Execution Audit',
+            domain: 'Live Session',
+            intent: {
+              allowed_actions: parsed.allowedActions || [],
+              forbidden_actions: parsed.forbiddenActions || [],
+            },
+            steps: (parsed.steps || []).map((s: any, idx: number) => ({
+              step_id: s.stepNumber ?? s.step_id ?? idx + 1,
+              action_type: s.actionType ?? s.action_type ?? 'tool_call',
+              tool_called: s.toolCalled ?? s.tool_called ?? null,
+              tool_input: s.toolInput ?? s.tool_input ?? null,
+              agent_reasoning: s.agentReasoning ?? s.agent_reasoning ?? null,
+              tool_output: s.toolOutput ?? s.tool_output ?? null,
+            })),
+            ground_truth: {
+              deviation_detected: isDev,
+              deviation_type: devType,
+              flagged_step_id: parsed.result.detectorAnalysis?.step_id ?? (isDev ? 1 : null),
+              trigger_phrase: null,
+              explanation: parsed.result.causalExplanation || 'Live ML Core audit session result',
+            },
+            seed_meta: {
+              scenario: 'Live Session Execution',
+              difficulty: 'medium',
+              hard_case: null,
+            },
+            total_latency_ms: 120,
+            total_tokens: 350,
+            timestamp: new Date(parsed.timestamp || Date.now()).toISOString(),
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse active audit in history:', e);
+    }
+  }, []);
+
+  const historyTraces = liveTrace
+    ? [liveTrace, ...BENCHMARK_TRACES.slice(0, 23)]
+    : BENCHMARK_TRACES.slice(0, 24);
 
   const filtered = historyTraces.filter((h) => {
     const isDev = h.ground_truth.deviation_detected;

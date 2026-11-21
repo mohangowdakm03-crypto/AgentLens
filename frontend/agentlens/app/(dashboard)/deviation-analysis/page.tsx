@@ -145,11 +145,12 @@ export default function DeviationAnalysisPage() {
         }}
       >
         {/* KPI Ribbon */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
           {[
-            { label: 'Total Deviations in Benchmark', value: '72', pct: '57.1% of audited traces', color: '#292D32', bar: '#829581' },
-            { label: 'Semantic Drift Cases', value: '37', pct: '29.4% failure frequency', color: '#C49A5B', bar: '#C49A5B' },
-            { label: 'Scope Creep Violations', value: '27', pct: '21.4% failure frequency', color: '#B97878', bar: '#B97878' },
+            { label: 'Total Deviations in Corpus', value: '154', pct: '51.3% of 300 traces', color: '#292D32', bar: '#829581' },
+            { label: 'Scope Creep Violations', value: '115', pct: '38.3% failure frequency', color: '#B97878', bar: '#B97878' },
+            { label: 'Semantic Drift Cases', value: '34', pct: '11.3% failure frequency', color: '#C49A5B', bar: '#C49A5B' },
+            { label: 'Misinterpretations', value: '5', pct: '1.7% failure frequency', color: '#9B8FC0', bar: '#9B8FC0' },
           ].map((s) => (
             <div
               key={s.label}
