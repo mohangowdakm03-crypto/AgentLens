@@ -26,6 +26,8 @@ type UploadStatus = 'idle' | 'validating' | 'valid' | 'error';
 interface ParsedTrace {
   traceId?: string;
   originalPrompt: string;
+  allowedActions?: string[];
+  forbiddenActions?: string[];
   steps: Array<{
     stepNumber: number;
     actionType: string;
@@ -91,6 +93,12 @@ function NewAuditContent() {
     setParsedTrace({
       traceId: realTrace.trace_id,
       originalPrompt: realTrace.original_prompt,
+      allowedActions: Array.isArray(realTrace.intent?.allowed_actions)
+        ? [...realTrace.intent.allowed_actions]
+        : undefined,
+      forbiddenActions: Array.isArray(realTrace.intent?.forbidden_actions)
+        ? [...realTrace.intent.forbidden_actions]
+        : undefined,
       steps: realTrace.steps.map((s) => ({
         stepNumber: s.step_id,
         actionType: s.action_type,
@@ -125,9 +133,28 @@ function NewAuditContent() {
         const lines = text.trim().split('\n').filter(Boolean);
         if (!lines.length) throw new Error('File is empty');
         const first = JSON.parse(lines[0]);
+
+        const rawAllowed =
+          first.intent?.allowed_actions ??
+          first.intent?.allowed_verbs ??
+          first.allowed_actions ??
+          first.allowedActions ??
+          first.traceInfo?.allowedActions;
+        const rawForbidden =
+          first.intent?.forbidden_actions ??
+          first.intent?.forbidden_verbs ??
+          first.forbidden_actions ??
+          first.forbiddenActions ??
+          first.traceInfo?.forbiddenActions;
+
+        const allowedActions = Array.isArray(rawAllowed) ? rawAllowed : undefined;
+        const forbiddenActions = Array.isArray(rawForbidden) ? rawForbidden : undefined;
+
         const trace: ParsedTrace = {
           traceId: first.trace_id,
           originalPrompt: first.original_prompt || first.user_instruction || prompt || 'Unknown',
+          allowedActions,
+          forbiddenActions,
           steps: (first.steps || first.trace || []).map((s: any, idx: number) => ({
             stepNumber: s.step_id ?? s.step_number ?? idx + 1,
             actionType: s.action_type ?? 'tool_call',
@@ -183,21 +210,41 @@ function NewAuditContent() {
       setTimeout(() => setAuditStage(3), 600);
       setTimeout(() => setAuditStage(4), 900);
 
-      await runAudit({
+      const result = await runAudit({
         userInstruction: prompt || parsedTrace?.originalPrompt || 'Audit agent execution',
         traceSteps: stepsText,
-        deviationStep: parsedTrace?.steps?.findIndex((s) => s.toolCalled === 'send_email' || s.toolCalled === 'web_search') !== -1
-          ? (parsedTrace?.steps?.findIndex((s) => s.toolCalled === 'send_email' || s.toolCalled === 'web_search')! + 1)
-          : 3,
-        failureType: (parsedTrace?.groundTruth?.deviationType === 'drift' ? 'Semantic Drift' : 'Scope Creep') as any,
+        steps: parsedTrace?.steps,
+        allowedActions: parsedTrace?.allowedActions,
+        forbiddenActions: parsedTrace?.forbiddenActions,
       });
 
+      const targetTraceId = parsedTrace?.traceId || `custom_${Date.now()}`;
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(
+          'agentlens_active_audit',
+          JSON.stringify({
+            result,
+            traceId: targetTraceId,
+            prompt: prompt || parsedTrace?.originalPrompt,
+            steps: parsedTrace?.steps,
+            allowedActions: parsedTrace?.allowedActions,
+            forbiddenActions: parsedTrace?.forbiddenActions,
+            timestamp: Date.now(),
+          })
+        );
+      }
+
       setTimeout(() => {
-        router.push('/trace-analysis?id=' + (parsedTrace?.traceId || 'seed_003'));
+        router.push(`/trace-analysis?id=${encodeURIComponent(targetTraceId)}&source=live`);
       }, 1200);
-    } catch (e) {
-      console.error(e);
-      router.push('/trace-analysis?id=seed_003');
+    } catch (e: any) {
+      console.error('Audit execution failed:', e);
+      setUploadStatus('error');
+      setUploadError(
+        e?.response?.data?.message ||
+        e?.message ||
+        'Audit execution failed. Ensure the ML backend is reachable.'
+      );
     } finally {
       setTimeout(() => setIsRunning(false), 1400);
     }

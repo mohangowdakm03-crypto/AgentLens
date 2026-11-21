@@ -1,0 +1,35 @@
+# AgentLens — Core Backend & ML Detection Dependencies
+# Python Compatibility: >=3.10, <=3.11 (Verified on Python 3.11.9)
+#
+# Installation Guide:
+# 1. Standard CPU Installation (Cross-platform: Windows, macOS, Linux):
+#      pip install -r requirements.txt
+#
+# 2. Optional NVIDIA GPU Installation (CUDA 12.4 on Windows/Linux):
+#      pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+#      pip install -r requirements.txt
+
+# ==============================================================================
+# Web Backend & API Server (Runtime)
+# ==============================================================================
+fastapi==0.163.1
+uvicorn==0.54.0
+pydantic==2.14.3
+
+# ==============================================================================
+# ML Core Detection Engine (Runtime)
+# ==============================================================================
+# Standard PyPI wheel provides portable CPU execution without CUDA driver requirements.
+# detector/ml_core defaults to CPU execution (all-MiniLM-L6-v2 embeddings).
+torch==2.6.0
+sentence-transformers==6.1.0
+ruptures==1.1.10
+numpy==2.4.6
+scipy==1.17.1
+scikit-learn==1.9.1
+
+# ==============================================================================
+# Testing & Quality Assurance (Development / Test)
+# ==============================================================================
+pytest==9.1.1
+httpx==0.28.1

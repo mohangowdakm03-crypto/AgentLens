@@ -1,6 +1,6 @@
 /**
- * AgentLens — Authoritative API Service Layer
- * Connects directly to the FastAPI Backend and AgentLens ML Core.
+ * AgentLens — Enterprise API Service Layer
+ * Connects to both the Next.js API Gateway (/api/audit) and direct FastAPI ML Core endpoints.
  */
 
 import axios from 'axios';
@@ -14,27 +14,43 @@ import type {
   AuditResult,
   FailureType,
 } from '@/lib/types';
-import { MOCK_AUDIT_RESULT } from '@/lib/mock-data';
 
-const BACKEND_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (typeof window !== 'undefined' ? 'http://127.0.0.1:8000' : 'http://127.0.0.1:8000');
+// Client for Next.js internal API routes (such as /api/audit, /api/health)
+const NEXTJS_BASE_URL =
+  typeof window !== 'undefined'
+    ? ''
+    : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000');
 
 export const apiClient = axios.create({
-  baseURL: BACKEND_BASE_URL,
+  baseURL: NEXTJS_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000,
+  timeout: 35000,
+});
+
+// Client for direct FastAPI ML backend (port 8000)
+const FASTAPI_BASE_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.BACKEND_API_URL ||
+  'http://127.0.0.1:8000';
+
+export const backendClient = axios.create({
+  baseURL: FASTAPI_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 35000,
 });
 
 export interface RunAuditParams {
   userInstruction: string;
-  traceSteps: string[];
-  deviationStep?: number;
-  failureType?: FailureType;
+  traceSteps?: string[];
+  steps?: any[];
   allowedActions?: string[];
   forbiddenActions?: string[];
+  deviationStep?: number;
+  failureType?: FailureType;
 }
 
 // ============================================================================
@@ -46,7 +62,7 @@ export interface RunAuditParams {
  * Verify backend status, ML core availability, and loaded trace count.
  */
 export async function getHealth(): Promise<BackendHealthResponse> {
-  const res = await apiClient.get<BackendHealthResponse>('/api/health');
+  const res = await backendClient.get<BackendHealthResponse>('/api/health');
   return res.data;
 }
 
@@ -55,7 +71,7 @@ export async function getHealth(): Promise<BackendHealthResponse> {
  * List available traces from the active 300-record dataset.
  */
 export async function listTraces(): Promise<BackendTraceListItem[]> {
-  const res = await apiClient.get<BackendTraceListItem[]>('/api/traces');
+  const res = await backendClient.get<BackendTraceListItem[]>('/api/traces');
   return res.data;
 }
 
@@ -65,7 +81,7 @@ export async function listTraces(): Promise<BackendTraceListItem[]> {
  */
 export async function getTrace(traceId: string): Promise<BackendTraceModel> {
   const cleanId = encodeURIComponent(traceId.trim());
-  const res = await apiClient.get<BackendTraceModel>(`/api/traces/${cleanId}`);
+  const res = await backendClient.get<BackendTraceModel>(`/api/traces/${cleanId}`);
   return res.data;
 }
 
@@ -75,7 +91,7 @@ export async function getTrace(traceId: string): Promise<BackendTraceModel> {
  */
 export async function runDetectOnTrace(traceId: string): Promise<BackendTraceModel> {
   const cleanId = encodeURIComponent(traceId.trim());
-  const res = await apiClient.post<BackendTraceModel>(`/api/traces/${cleanId}/detect`);
+  const res = await backendClient.post<BackendTraceModel>(`/api/traces/${cleanId}/detect`);
   return res.data;
 }
 
@@ -84,7 +100,7 @@ export async function runDetectOnTrace(traceId: string): Promise<BackendTraceMod
  * Run ML detector on an arbitrary or user-uploaded trace payload.
  */
 export async function detectTrace(payload: BackendDetectRequest): Promise<BackendTraceModel> {
-  const res = await apiClient.post<BackendTraceModel>('/api/detect', payload);
+  const res = await backendClient.post<BackendTraceModel>('/api/detect', payload);
   return res.data;
 }
 
@@ -100,7 +116,7 @@ export async function getEvaluation(params?: {
   if (params?.refresh) query.set('refresh', 'true');
   if (params?.split) query.set('split', params.split);
   const qs = query.toString() ? `?${query.toString()}` : '';
-  const res = await apiClient.get<EvaluationReport>(`/api/evaluate${qs}`);
+  const res = await backendClient.get<EvaluationReport>(`/api/evaluate${qs}`);
   return res.data;
 }
 
@@ -116,7 +132,7 @@ export async function getPerformance(params?: {
   if (params?.refresh) query.set('refresh', 'true');
   if (params?.split) query.set('split', params.split);
   const qs = query.toString() ? `?${query.toString()}` : '';
-  const res = await apiClient.get<EvaluationReport>(`/api/performance${qs}`);
+  const res = await backendClient.get<EvaluationReport>(`/api/performance${qs}`);
   return res.data;
 }
 
@@ -129,7 +145,7 @@ export async function getPerformance(params?: {
  */
 export function backendTraceToAgentTrace(trace: BackendTraceModel): AgentTrace {
   const flaggedSet = new Set(trace.audit.flaggedStepIds.map((s) => String(s)));
-  
+
   const steps = trace.steps.map((s, idx) => {
     const isDev = flaggedSet.has(String(s.stepId));
     return {
@@ -143,7 +159,7 @@ export function backendTraceToAgentTrace(trace: BackendTraceModel): AgentTrace {
       similarityScore: s.similarityScore,
       rawText: JSON.stringify(s),
       isDeviation: isDev,
-      status: isDev ? 'flagged' : 'nominal',
+      status: isDev ? ('flagged' as const) : ('nominal' as const),
     };
   });
 
@@ -224,46 +240,58 @@ export function backendTraceToAuditResult(trace: BackendTraceModel): AuditResult
 }
 
 /**
- * Execute an audit against the real POST /api/detect contract with graceful error reporting.
+ * Execute an audit against the POST /api/audit endpoint (or fallback to /api/detect).
  */
 export async function runAudit(params: RunAuditParams): Promise<AuditResult> {
-  const detectPayload: BackendDetectRequest = {
-    prompt: params.userInstruction,
-    original_prompt: params.userInstruction,
+  const payload: any = {
+    user_instruction: params.userInstruction,
+    trace: params.traceSteps,
+    steps: params.steps,
     allowed_actions: params.allowedActions,
     forbidden_actions: params.forbiddenActions,
-    steps: params.traceSteps.map((s, idx) => {
-      try {
-        const parsed = JSON.parse(s);
-        if (typeof parsed === 'object' && parsed !== null) {
-          return {
-            step_id: parsed.step_id ?? parsed.stepId ?? idx + 1,
-            action_type: parsed.action_type ?? parsed.action ?? 'action',
-            tool_called: parsed.tool_called ?? parsed.toolName ?? null,
-            tool_input: parsed.tool_input ?? parsed.toolInput ?? '',
-            tool_output: parsed.tool_output ?? parsed.observation ?? '',
-            agent_reasoning: parsed.agent_reasoning ?? parsed.reasoning ?? '',
-          };
-        }
-      } catch {
-        // Fallback for plain string step
-      }
-      return {
-        step_id: idx + 1,
-        action_type: 'action',
-        tool_input: s,
-        agent_reasoning: s,
-      };
-    }),
   };
 
-  try {
-    const backendTrace = await detectTrace(detectPayload);
-    return backendTraceToAuditResult(backendTrace);
-  } catch (err: unknown) {
-    console.warn('Real detector API call failed, falling back safely:', err);
-    return MOCK_AUDIT_RESULT;
+  const response = await apiClient.post<any>('/api/audit', payload);
+  if (response.data && response.data.status === 'success') {
+    const res = response.data;
+    const auditResult: AuditResult = {
+      causalExplanation:
+        res.causal_attribution?.explanation ||
+        res.audit?.explanation ||
+        (res.result?.type !== 'none'
+          ? `Deviation (${res.result?.type}) detected by ML core.`
+          : 'No deviation detected by ML core.'),
+      triggerTokens: res.causal_attribution?.trigger_tokens || [],
+      correctedPrompt: res.prompt_repair?.corrected_prompt || 'Unavailable',
+      diff: res.prompt_repair?.diff || [],
+      justification:
+        res.prompt_repair?.justification ||
+        'Prompt repair is unavailable in statistical ML detector mode.',
+    };
+
+    if (res.result) {
+      auditResult.detectorAnalysis = {
+        confidence: res.result.confidence,
+        result: res.result.type,
+        step_id: res.result.step_id,
+        flagged_steps: res.result.flagged_steps,
+        drift: res.drift_analysis?.difference ?? null,
+        similarityCurve: (res.result.similarity_curve || []).map(
+          (score: number, idx: number) => ({ stepNumber: idx + 1, score })
+        ),
+        pelt: res.detection?.pelt || res.drift_analysis || null,
+        fallback: res.detection?.fallback || null,
+        scopeDetails: res.detection?.scope || res.scope_analysis || null,
+      };
+    }
+    if (res.audit) {
+      auditResult.backendAudit = res.audit;
+    }
+    return auditResult;
   }
+  throw new Error(
+    response.data?.message || 'Audit API returned non-success status'
+  );
 }
 
 /**

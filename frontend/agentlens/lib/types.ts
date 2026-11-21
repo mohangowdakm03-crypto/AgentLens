@@ -61,6 +61,8 @@ export interface DetectorAnalysis {
   result?: string | null;
   model?: string | null;
   confidence?: number | null;
+  step_id?: number | null;
+  flagged_steps?: number[] | null;
   similarityCurve?: { stepNumber: number; score: number; stepId?: string }[] | null;
   pelt?: BackendPeltResultModel | null;
   fallback?: BackendFallbackResultModel | null;
