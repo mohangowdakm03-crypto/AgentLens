@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useMemo } from 'react';
+import { Suspense, useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
   ChevronDown,
@@ -42,9 +42,96 @@ function TraceAnalysisContent() {
   // Read trace id from query string or default to seed_002
   const queryId = searchParams.get('id') || 'seed_002';
 
+  // Live Audit Execution & Persisted State
+  const [isAuditing, setIsAuditing] = useState(false);
+  const [auditResponse, setAuditResponse] = useState<AuditResult | null>(null);
+  const [auditSuccessNotice, setAuditSuccessNotice] = useState<string | null>(null);
+  const [showContractPayload, setShowContractPayload] = useState(false);
+  const [copiedContract, setCopiedContract] = useState(false);
+  const [activeLiveAudit, setActiveLiveAudit] = useState<{
+    result: AuditResult;
+    traceId: string;
+    prompt?: string;
+    steps?: any[];
+    allowedActions?: string[];
+    forbiddenActions?: string[];
+    timestamp: number;
+  } | null>(null);
+
+  // Restore live audit result if arriving from New Audit submission
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = sessionStorage.getItem('agentlens_active_audit');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.result) {
+          const isMatch =
+            !queryId ||
+            queryId === parsed.traceId ||
+            searchParams.get('source') === 'live';
+          if (isMatch) {
+            setActiveLiveAudit(parsed);
+            setAuditResponse(parsed.result);
+            setAuditSuccessNotice(
+              `Live audit completed successfully for ${parsed.traceId}. Analysis synchronized with ML Core.`
+            );
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse active audit session:', e);
+    }
+  }, [queryId, searchParams]);
+
   const currentTrace: BenchmarkTrace = useMemo(() => {
-    return getTraceById(queryId) || BENCHMARK_TRACES[1];
-  }, [queryId]);
+    const benchmark = getTraceById(queryId);
+    if (benchmark) return benchmark;
+
+    if (activeLiveAudit && activeLiveAudit.steps && activeLiveAudit.steps.length > 0) {
+      const isDev = Boolean(
+        activeLiveAudit.result.detectorAnalysis?.result &&
+        activeLiveAudit.result.detectorAnalysis.result !== 'none'
+      );
+      const devType = (activeLiveAudit.result.detectorAnalysis?.result || 'none') as any;
+      const flaggedId = activeLiveAudit.result.detectorAnalysis?.step_id ?? (isDev ? 1 : null);
+
+      return {
+        trace_id: activeLiveAudit.traceId || queryId,
+        original_prompt: activeLiveAudit.prompt || 'Custom Execution Trace',
+        domain: 'Custom Audit',
+        intent: {
+          allowed_actions: activeLiveAudit.allowedActions || [],
+          forbidden_actions: activeLiveAudit.forbiddenActions || [],
+        },
+        steps: activeLiveAudit.steps.map((s: any, idx: number) => ({
+          step_id: s.stepNumber ?? s.step_id ?? idx + 1,
+          action_type: s.actionType ?? s.action_type ?? 'tool_call',
+          tool_called: s.toolCalled ?? s.tool_called ?? null,
+          tool_input: s.toolInput ?? s.tool_input ?? null,
+          agent_reasoning: s.agentReasoning ?? s.agent_reasoning ?? null,
+          tool_output: s.toolOutput ?? s.tool_output ?? null,
+        })),
+        ground_truth: {
+          deviation_detected: isDev,
+          deviation_type: devType,
+          flagged_step_id: flaggedId,
+          trigger_phrase: null,
+          explanation: activeLiveAudit.result.causalExplanation,
+        },
+        seed_meta: {
+          scenario: 'Custom Execution Audit',
+          difficulty: 'medium',
+          hard_case: null,
+        },
+        total_latency_ms: 120,
+        total_tokens: 350,
+        timestamp: new Date(activeLiveAudit.timestamp || Date.now()).toISOString(),
+      };
+    }
+
+    return BENCHMARK_TRACES[1];
+  }, [queryId, activeLiveAudit]);
 
   // Expanded steps set
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(
@@ -57,13 +144,6 @@ function TraceAnalysisContent() {
   // Copied states
   const [copiedStep, setCopiedStep] = useState<number | null>(null);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
-
-  // Live Audit Execution State
-  const [isAuditing, setIsAuditing] = useState(false);
-  const [auditResponse, setAuditResponse] = useState<AuditResult | null>(null);
-  const [auditSuccessNotice, setAuditSuccessNotice] = useState<string | null>(null);
-  const [showContractPayload, setShowContractPayload] = useState(false);
-  const [copiedContract, setCopiedContract] = useState(false);
 
   const toggleStep = (stepNumber: number) => {
     const next = new Set(expandedSteps);
@@ -98,9 +178,18 @@ function TraceAnalysisContent() {
   const prevTrace = currentIndex > 0 ? BENCHMARK_TRACES[currentIndex - 1] : null;
   const nextTrace = currentIndex < BENCHMARK_TRACES.length - 1 ? BENCHMARK_TRACES[currentIndex + 1] : null;
 
-  const isDeviation = currentTrace.ground_truth.deviation_detected;
-  const devType = currentTrace.ground_truth.deviation_type;
-  const flaggedStepId = currentTrace.ground_truth.flagged_step_id;
+  // Actual detector finding prioritized over static benchmark annotation
+  const isDeviation = auditResponse?.detectorAnalysis?.result !== undefined
+    ? auditResponse.detectorAnalysis.result !== 'none'
+    : currentTrace.ground_truth.deviation_detected;
+  const devType = auditResponse?.detectorAnalysis?.result !== undefined
+    ? (auditResponse.detectorAnalysis.result as any)
+    : currentTrace.ground_truth.deviation_type;
+  const flaggedStepId = auditResponse?.detectorAnalysis?.result !== undefined
+    ? (auditResponse.detectorAnalysis.result !== 'none'
+        ? (auditResponse.detectorAnalysis.step_id ?? currentTrace.ground_truth.flagged_step_id)
+        : null)
+    : currentTrace.ground_truth.flagged_step_id;
 
   const statusColor = !isDeviation ? '#72947A' : devType === 'drift' ? '#C49A5B' : '#B97878';
   const statusBg = !isDeviation ? 'rgba(114, 148, 122, 0.12)' : devType === 'drift' ? 'rgba(196, 154, 91, 0.12)' : 'rgba(185, 120, 120, 0.12)';
@@ -117,8 +206,9 @@ function TraceAnalysisContent() {
       const result = await runAudit({
         userInstruction: currentTrace.original_prompt,
         traceSteps: stepStrings,
-        deviationStep: flaggedStepId || 3,
-        failureType: devType === 'drift' ? 'Semantic Drift' : 'Scope Creep',
+        steps: currentTrace.steps,
+        allowedActions: currentTrace.intent?.allowed_actions,
+        forbiddenActions: currentTrace.intent?.forbidden_actions,
       });
 
       setAuditResponse(result);
@@ -161,6 +251,7 @@ function TraceAnalysisContent() {
 
   // Detector Output Contract V1 consumer representation (Member C integration)
   const detectorContractPayload = useMemo(() => {
+    const rawCurve = auditResponse?.detectorAnalysis?.similarityCurve?.map((s) => s.score);
     return {
       status: "success",
       contract: "Detector Output Contract V1",
@@ -171,13 +262,20 @@ function TraceAnalysisContent() {
       result: {
         step_id: flaggedStepId || null,
         type: isDeviation ? devType : "none",
-        confidence: isDeviation ? (currentTrace.trace_id === 'seed_003' ? 0.97 : currentTrace.trace_id === 'seed_002' ? 0.94 : 0.91) : 0.96,
+        confidence:
+          auditResponse?.detectorAnalysis?.confidence ??
+          (isDeviation
+            ? (currentTrace.trace_id === 'seed_003' ? 0.97 : currentTrace.trace_id === 'seed_002' ? 0.94 : 0.91)
+            : 0.96),
         flagged_steps: flaggedStepId ? [flaggedStepId] : [],
-        similarity_curve: currentTrace.steps.map((s, idx) => {
-          if (!isDeviation) return Number((0.95 - idx * 0.01).toFixed(2));
-          if (idx + 1 < (flaggedStepId || 3)) return Number((0.95 - idx * 0.02).toFixed(2));
-          return Number((0.44 - (idx + 1 - (flaggedStepId || 3)) * 0.06).toFixed(2));
-        }),
+        similarity_curve:
+          rawCurve && rawCurve.length > 0
+            ? rawCurve
+            : currentTrace.steps.map((s, idx) => {
+                if (!isDeviation) return Number((0.95 - idx * 0.01).toFixed(2));
+                if (idx + 1 < (flaggedStepId || 3)) return Number((0.95 - idx * 0.02).toFixed(2));
+                return Number((0.44 - (idx + 1 - (flaggedStepId || 3)) * 0.06).toFixed(2));
+              }),
       },
       causal_attribution: {
         explanation: causalExplanationForTrace,
@@ -277,6 +375,10 @@ function TraceAnalysisContent() {
                 onChange={(e) => {
                   setAuditResponse(null);
                   setAuditSuccessNotice(null);
+                  setActiveLiveAudit(null);
+                  if (typeof window !== 'undefined') {
+                    sessionStorage.removeItem('agentlens_active_audit');
+                  }
                   router.push(`/trace-analysis?id=${e.target.value}`);
                 }}
                 style={{
@@ -308,6 +410,10 @@ function TraceAnalysisContent() {
                 onClick={() => {
                   setAuditResponse(null);
                   setAuditSuccessNotice(null);
+                  setActiveLiveAudit(null);
+                  if (typeof window !== 'undefined') {
+                    sessionStorage.removeItem('agentlens_active_audit');
+                  }
                 }}
                 style={{
                   display: 'flex',
@@ -332,6 +438,10 @@ function TraceAnalysisContent() {
                 onClick={() => {
                   setAuditResponse(null);
                   setAuditSuccessNotice(null);
+                  setActiveLiveAudit(null);
+                  if (typeof window !== 'undefined') {
+                    sessionStorage.removeItem('agentlens_active_audit');
+                  }
                 }}
                 style={{
                   display: 'flex',
