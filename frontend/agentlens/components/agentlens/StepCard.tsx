@@ -114,6 +114,7 @@ export const StepCard = memo(function StepCard({ step, isDeviationStep, deviatio
         >
           <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
             <Detail label="Action type" value={step.actionType} />
+            <Detail label="Step identifier" value={step.stepId || `Step ${step.stepNumber}`} />
             <Detail label="Execution status" value={status || "Not provided"} muted={!status} />
             {step.toolName && <Detail label="Tool" value={step.toolName} />}
             {step.toolInput && <Detail label="Tool input" value={step.toolInput} />}
