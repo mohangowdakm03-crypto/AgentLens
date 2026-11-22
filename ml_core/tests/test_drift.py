@@ -416,3 +416,54 @@ class TestDriftAndScopeCoverage:
     def test_step_text_ignores_missing_empty_and_whitespace_fields(self):
         s = Step(1, "read", tool_input="  input  ", tool_output=" \t ", agent_reasoning=None)
         assert step_text(s) == "input"
+
+
+class TestArbitrationAndOrdering:
+    """Regression tests for same-step arbitration and candidate ordering."""
+
+    def test_drift_earlier_than_scope_creep(self):
+        # 1. Drift at step 2, scope violation at step 3: primary is drift.
+        steps = make_steps(["read", "read", "delete", "read"])
+        intent = Intent("task", allowed_verbs={"read"}, forbidden_verbs={"delete"})
+        # Large drop from step 1 (0.85) to step 2 (0.40) -> drift at step 2 (index 1)
+        curve = [0.85, 0.40, 0.38, 0.37]
+        dev = detect_from_curve(steps, curve, intent)
+        assert dev.type == "drift"
+        assert dev.step_id == 2
+
+    def test_scope_creep_earlier_than_drift(self):
+        # 2. Scope violation at step 2, drift at step 3: primary is scope_creep.
+        steps = make_steps(["read", "delete", "read", "read"])
+        intent = Intent("task", allowed_verbs={"read"}, forbidden_verbs={"delete"})
+        # Flat curve at step 1-2, drop from step 2 (0.85) to step 3 (0.40) -> drift at step 3 (index 2)
+        curve = [0.86, 0.85, 0.40, 0.38]
+        dev = detect_from_curve(steps, curve, intent)
+        assert dev.type == "scope_creep"
+        assert dev.step_id == 2
+
+    def test_both_drift_and_scope_creep_at_same_step_arbitration(self):
+        # 3. Both at step 3: primary is scope_creep.
+        steps = make_steps(["read", "read", "delete", "read"])
+        intent = Intent("task", allowed_verbs={"read"}, forbidden_verbs={"delete"})
+        # Flat curve at step 1-2, drop from step 2 (0.85) to step 3 (0.40) -> drift at step 3 (index 2)
+        # Scope violation at step 3 ("delete")
+        curve = [0.86, 0.85, 0.40, 0.38]
+        dev = detect_from_curve(steps, curve, intent)
+        assert dev.type == "scope_creep"
+        assert dev.step_id == 3
+        # Confidence calculation boosted when both are present
+        assert dev.confidence == 0.9
+
+    def test_non_consecutive_or_string_step_ids_detect_from_curve(self):
+        # Steps with non-consecutive or string step IDs
+        steps = [
+            Step("step_alpha", "read"),
+            Step("step_gamma", "read"),
+            Step("step_beta", "delete"),
+        ]
+        intent = Intent("task", allowed_verbs={"read"}, forbidden_verbs={"delete"})
+        # Drift at step 2 ("step_gamma") via fallback drop: 0.85 -> 0.40
+        curve = [0.85, 0.40, 0.38]
+        dev = detect_from_curve(steps, curve, intent)
+        assert dev.type == "drift"
+        assert dev.step_id == "step_gamma"

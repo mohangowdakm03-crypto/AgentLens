@@ -10,13 +10,18 @@ import urllib.request
 import urllib.error
 import pytest
 
+FASTAPI_HEALTH_URL = "http://127.0.0.1:8000/api/health"
 NEXTJS_AUDIT_URL = "http://localhost:3000/api/audit"
 
 
 def _servers_available() -> bool:
     try:
-        req = urllib.request.Request(NEXTJS_AUDIT_URL)
-        with urllib.request.urlopen(req, timeout=1) as resp:
+        req_next = urllib.request.Request(NEXTJS_AUDIT_URL)
+        with urllib.request.urlopen(req_next, timeout=1) as resp:
+            if resp.status != 200:
+                return False
+        req_fastapi = urllib.request.Request(FASTAPI_HEALTH_URL)
+        with urllib.request.urlopen(req_fastapi, timeout=1) as resp:
             return resp.status == 200
     except Exception:
         return False
@@ -26,7 +31,7 @@ pytestmark = [
     pytest.mark.integration,
     pytest.mark.skipif(
         not _servers_available(),
-        reason="Integration test skipped: Next.js server (http://localhost:3000/api/audit) is offline."
+        reason="Integration test skipped: Live servers (Next.js http://localhost:3000/api/audit or FastAPI http://127.0.0.1:8000/api/health) are offline."
     ),
 ]
 

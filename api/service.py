@@ -120,24 +120,36 @@ class DetectorService:
         )
 
         # 6. Build flagged step IDs
-        flagged_step_ids: List[str] = []
-        # Add scope violations
-        for v in raw_violation_ids:
-            s_label = loaded_trace.step_id_map.get(v, str(v))
-            if s_label not in flagged_step_ids:
-                flagged_step_ids.append(s_label)
-
-        # If drift detected, flag drift step and downstream steps
+        # Flagged step IDs are ordered according to their original position in
+        # the execution trace (never numerically sorted), supporting non-consecutive
+        # and string step IDs while ensuring the first flagged step matches the
+        # primary deviation's step ID.
+        violation_step_ids = set(raw_violation_ids)
         drift_step_idx = drift_analysis.index
-        if drift_step_idx is not None and drift_step_idx < n:
-            for k in range(drift_step_idx, n):
-                s_label = loaded_trace.step_id_map.get(steps[k].step_id, str(steps[k].step_id))
+        flagged_step_ids: List[str] = []
+
+        for k, s in enumerate(steps):
+            is_scope_violation = s.step_id in violation_step_ids
+            is_drift_or_downstream = (
+                drift_step_idx is not None and k >= drift_step_idx
+            )
+            if is_scope_violation or is_drift_or_downstream:
+                s_label = loaded_trace.step_id_map.get(s.step_id, str(s.step_id))
                 if s_label not in flagged_step_ids:
                     flagged_step_ids.append(s_label)
 
         # 7. Generate natural language explanation
         is_deviated = deviation.step_id is not None and deviation.type != "none"
         dev_type = deviation.type if is_deviated else None
+
+        if is_deviated and deviation.step_id is not None:
+            primary_label = loaded_trace.step_id_map.get(deviation.step_id, str(deviation.step_id))
+            if primary_label in flagged_step_ids:
+                if flagged_step_ids[0] != primary_label:
+                    flagged_step_ids.remove(primary_label)
+                    flagged_step_ids.insert(0, primary_label)
+            else:
+                flagged_step_ids.insert(0, primary_label)
 
         if dev_type == "scope_creep":
             violating_step = loaded_trace.step_id_map.get(deviation.step_id, str(deviation.step_id))

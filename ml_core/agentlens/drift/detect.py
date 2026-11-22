@@ -122,11 +122,22 @@ def detect_from_curve(steps, curve, intent, drift_analysis=None):
     idx, drop = analysis.index, analysis.drop
     drift_step = steps[idx].step_id if idx is not None else None
 
-    candidates = [(s, t) for s, t in ((drift_step, "drift"),
-                  (flagged[0] if flagged else None, "scope_creep")) if s is not None]
+    # Earliest deviation step wins. When both drift and scope_creep occur at the
+    # exact same step, scope_creep takes precedence in tie-breaking.
+    candidates = [
+        (s, t)
+        for s, t in (
+            (flagged[0] if flagged else None, "scope_creep"),
+            (drift_step, "drift"),
+        )
+        if s is not None
+    ]
     if not candidates:
         return Deviation(None, "none", 0.0, list(curve), flagged)
-    step_id, typ = min(candidates, key=lambda c: c[0])
+
+    # Order candidates by their execution order in the trace
+    step_order = {s.step_id: i for i, s in enumerate(steps)}
+    step_id, typ = min(candidates, key=lambda c: step_order[c[0]])
     conf = 0.9 if (drift_step is not None and flagged) else min(0.95, 0.5 + drop) if typ == "drift" else 0.8
     return Deviation(step_id, typ, round(conf, 2), list(curve), flagged)
 

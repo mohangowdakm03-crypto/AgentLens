@@ -242,3 +242,128 @@ def test_evaluate_and_performance_endpoints_return_real_metrics():
         )
 
     assert exc_info.value.status_code == 400
+
+
+def test_regression_arbitration_drift_at_step_2_scope_at_step_3():
+    # 1. Drift at step 2, scope violation at step 3: primary is drift.
+    loaded = _normalize_trace_dict(
+        {
+            "trace_id": "test-arb-1",
+            "original_prompt": "Read the documents.",
+            "intent": {
+                "allowed_actions": ["read"],
+                "forbidden_actions": ["delete"],
+            },
+            "steps": [
+                {"step_id": "s1", "action_type": "read", "tool_input": "doc1"},
+                {"step_id": "s2", "action_type": "read", "tool_input": "unrelated"},
+                {"step_id": "s3", "action_type": "delete", "tool_input": "doc2"},
+                {"step_id": "s4", "action_type": "read", "tool_input": "doc3"},
+            ],
+        },
+        default_idx=901,
+    )
+    service = DetectorService()
+    with patch("api.service.embed", return_value=[[1.0, 0.0]]), patch(
+        "api.service.similarity_curve", return_value=[0.85, 0.40, 0.38, 0.37]
+    ):
+        result = service.run_detection(loaded)
+    assert result.audit.deviationType == "drift"
+    assert result.audit.flaggedStepIds[0] == "s2"
+    assert "s3" in result.audit.flaggedStepIds
+
+
+def test_regression_arbitration_scope_at_step_2_drift_at_step_3():
+    # 2. Scope violation at step 2, drift at step 3: primary is scope_creep.
+    loaded = _normalize_trace_dict(
+        {
+            "trace_id": "test-arb-2",
+            "original_prompt": "Read the documents.",
+            "intent": {
+                "allowed_actions": ["read"],
+                "forbidden_actions": ["delete"],
+            },
+            "steps": [
+                {"step_id": "s1", "action_type": "read", "tool_input": "doc1"},
+                {"step_id": "s2", "action_type": "delete", "tool_input": "doc2"},
+                {"step_id": "s3", "action_type": "read", "tool_input": "unrelated"},
+                {"step_id": "s4", "action_type": "read", "tool_input": "doc3"},
+            ],
+        },
+        default_idx=902,
+    )
+    service = DetectorService()
+    with patch("api.service.embed", return_value=[[1.0, 0.0]]), patch(
+        "api.service.similarity_curve", return_value=[0.86, 0.85, 0.40, 0.38]
+    ):
+        result = service.run_detection(loaded)
+    assert result.audit.deviationType == "scope_creep"
+    assert result.audit.flaggedStepIds[0] == "s2"
+    assert "s3" in result.audit.flaggedStepIds
+
+
+def test_regression_arbitration_both_at_step_3_scope_wins():
+    # 3. Both at step 3: primary is scope_creep.
+    loaded = _normalize_trace_dict(
+        {
+            "trace_id": "test-arb-3",
+            "original_prompt": "Read the documents.",
+            "intent": {
+                "allowed_actions": ["read"],
+                "forbidden_actions": ["delete"],
+            },
+            "steps": [
+                {"step_id": "s1", "action_type": "read", "tool_input": "doc1"},
+                {"step_id": "s2", "action_type": "read", "tool_input": "doc2"},
+                {"step_id": "s3", "action_type": "delete", "tool_input": "unrelated"},
+                {"step_id": "s4", "action_type": "read", "tool_input": "doc3"},
+            ],
+        },
+        default_idx=903,
+    )
+    service = DetectorService()
+    with patch("api.service.embed", return_value=[[1.0, 0.0]]), patch(
+        "api.service.similarity_curve", return_value=[0.86, 0.85, 0.40, 0.38]
+    ):
+        result = service.run_detection(loaded)
+    assert result.audit.deviationType == "scope_creep"
+    assert result.audit.flaggedStepIds[0] == "s3"
+
+
+def test_regression_flagged_step_ordering_and_multiple_scope_violations():
+    # 4. Multiple scope violations: all relevant flagged IDs are retained.
+    # 5. Non-consecutive or string step IDs: flagged IDs follow execution order.
+    # 6. The first flagged ID agrees with the primary deviation step ID.
+    loaded = _normalize_trace_dict(
+        {
+            "trace_id": "test-flagged-order",
+            "original_prompt": "Read the documents.",
+            "intent": {
+                "allowed_actions": ["read"],
+                "forbidden_actions": ["delete", "send"],
+            },
+            "steps": [
+                {"step_id": "step_99", "action_type": "read", "tool_input": "doc1"},
+                {"step_id": "step_02", "action_type": "delete", "tool_input": "doc2"},
+                {"step_id": "step_50", "action_type": "read", "tool_input": "doc3"},
+                {"step_id": "step_10", "action_type": "send", "tool_input": "email"},
+                {"step_id": "step_05", "action_type": "read", "tool_input": "doc4"},
+            ],
+        },
+        default_idx=904,
+    )
+    service = DetectorService()
+    with patch("api.service.embed", return_value=[[1.0, 0.0]]), patch(
+        "api.service.similarity_curve", return_value=[0.85, 0.84, 0.83, 0.82, 0.81]
+    ):
+        result = service.run_detection(loaded)
+
+    assert result.audit.isDeviated is True
+    assert result.audit.deviationType == "scope_creep"
+    # First flagged ID must agree with primary deviation
+    assert result.audit.flaggedStepIds[0] == "step_02"
+    # Both scope violations retained
+    assert "step_02" in result.audit.flaggedStepIds
+    assert "step_10" in result.audit.flaggedStepIds
+    # Must follow original execution order: step_02 before step_10 (NOT numeric or alphabetical order)
+    assert result.audit.flaggedStepIds == ["step_02", "step_10"]
