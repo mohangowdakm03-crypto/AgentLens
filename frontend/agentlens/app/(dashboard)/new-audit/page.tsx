@@ -20,8 +20,11 @@ import Topbar from '@/components/layout/Topbar';
 import Button from '@/components/common/Button';
 import { runAudit } from '@/services/api';
 import { BENCHMARK_TRACES } from '@/lib/benchmark-traces';
+import { parseTrace } from '@/lib/parser';
 
 type UploadStatus = 'idle' | 'validating' | 'valid' | 'error';
+const MAX_TRACE_FILE_SIZE = 10 * 1024 * 1024;
+const SUPPORTED_TRACE_EXTENSIONS = new Set(['.json', '.jsonl', '.txt', '.log', '.md']);
 
 interface ParsedTrace {
   traceId?: string;
@@ -40,6 +43,10 @@ interface ParsedTrace {
     deviationDetected: boolean;
     deviationType: string;
   };
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Unknown error';
 }
 
 const REAL_PRESETS = [
@@ -80,8 +87,10 @@ function NewAuditContent() {
 
   useEffect(() => {
     if (initialPrompt && !parsedTrace) {
-      setPrompt(initialPrompt);
+      const timeoutId = window.setTimeout(() => setPrompt(initialPrompt), 0);
+      return () => window.clearTimeout(timeoutId);
     }
+    return undefined;
   }, [initialPrompt, parsedTrace]);
 
   function loadPreset(preset: typeof REAL_PRESETS[0]) {
@@ -117,9 +126,15 @@ function NewAuditContent() {
   }
 
   function handleFile(file: File) {
-    if (!file.name.endsWith('.jsonl') && !file.name.endsWith('.json')) {
+    const extension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+    if (!SUPPORTED_TRACE_EXTENSIONS.has(extension)) {
       setUploadStatus('error');
-      setUploadError('Only .jsonl or .json files are supported.');
+      setUploadError('Only .json, .jsonl, .txt, .log, and .md files are supported.');
+      return;
+    }
+    if (file.size > MAX_TRACE_FILE_SIZE) {
+      setUploadStatus('error');
+      setUploadError('Trace file exceeds the 10 MB limit.');
       return;
     }
     setFileName(file.name);
@@ -132,41 +147,25 @@ function NewAuditContent() {
         const text = e.target?.result as string;
         const lines = text.trim().split('\n').filter(Boolean);
         if (!lines.length) throw new Error('File is empty');
-        const first = JSON.parse(lines[0]);
-
-        const rawAllowed =
-          first.intent?.allowed_actions ??
-          first.intent?.allowed_verbs ??
-          first.allowed_actions ??
-          first.allowedActions ??
-          first.traceInfo?.allowedActions;
-        const rawForbidden =
-          first.intent?.forbidden_actions ??
-          first.intent?.forbidden_verbs ??
-          first.forbidden_actions ??
-          first.forbiddenActions ??
-          first.traceInfo?.forbiddenActions;
-
-        const allowedActions = Array.isArray(rawAllowed) ? rawAllowed : undefined;
-        const forbiddenActions = Array.isArray(rawForbidden) ? rawForbidden : undefined;
+        const parsed = parseTrace(text, prompt || 'Uploaded trace');
 
         const trace: ParsedTrace = {
-          traceId: first.trace_id,
-          originalPrompt: first.original_prompt || first.user_instruction || prompt || 'Unknown',
-          allowedActions,
-          forbiddenActions,
-          steps: (first.steps || first.trace || []).map((s: any, idx: number) => ({
-            stepNumber: s.step_id ?? s.step_number ?? idx + 1,
-            actionType: s.action_type ?? 'tool_call',
-            toolCalled: s.tool_called,
-            toolInput: s.tool_input,
-            agentReasoning: s.agent_reasoning,
-            toolOutput: s.tool_output,
+          traceId: parsed.traceInfo?.traceId,
+          originalPrompt: parsed.userInstruction || prompt || 'Unknown',
+          allowedActions: parsed.traceInfo?.allowedActions,
+          forbiddenActions: parsed.traceInfo?.forbiddenActions,
+          steps: parsed.steps.map((step) => ({
+            stepNumber: step.stepNumber,
+            actionType: step.actionType,
+            toolCalled: step.toolName,
+            toolInput: step.toolInput,
+            agentReasoning: step.agentReasoning,
+            toolOutput: step.observation,
           })),
-          groundTruth: first.ground_truth
+          groundTruth: parsed.groundTruth
             ? {
-                deviationDetected: first.ground_truth.deviation_detected,
-                deviationType: first.ground_truth.deviation_type,
+                deviationDetected: parsed.groundTruth.deviationDetected === true,
+                deviationType: parsed.groundTruth.deviationType || 'none',
               }
             : undefined,
         };
@@ -175,9 +174,9 @@ function NewAuditContent() {
         if (!prompt && trace.originalPrompt) {
           setPrompt(trace.originalPrompt);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         setUploadStatus('error');
-        setUploadError(`Parse error: ${err.message}`);
+        setUploadError(`Parse error: ${errorMessage(err)}`);
       }
     };
     reader.readAsText(file);
@@ -213,7 +212,14 @@ function NewAuditContent() {
       const result = await runAudit({
         userInstruction: prompt || parsedTrace?.originalPrompt || 'Audit agent execution',
         traceSteps: stepsText,
-        steps: parsedTrace?.steps,
+        steps: parsedTrace?.steps.map((step) => ({
+          step_id: step.stepNumber,
+          action_type: step.actionType,
+          tool_called: step.toolCalled,
+          tool_input: step.toolInput,
+          tool_output: step.toolOutput,
+          agent_reasoning: step.agentReasoning,
+        })),
         allowedActions: parsedTrace?.allowedActions,
         forbiddenActions: parsedTrace?.forbiddenActions,
       });
@@ -237,12 +243,12 @@ function NewAuditContent() {
       setTimeout(() => {
         router.push(`/trace-analysis?id=${encodeURIComponent(targetTraceId)}&source=live`);
       }, 1200);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Audit execution failed:', e);
       setUploadStatus('error');
+      const message = errorMessage(e);
       setUploadError(
-        e?.response?.data?.message ||
-        e?.message ||
+        message ||
         'Audit execution failed. Ensure the ML backend is reachable.'
       );
     } finally {

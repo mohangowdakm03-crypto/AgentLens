@@ -1,17 +1,37 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Filter, Calendar, Download, Eye, MoreHorizontal, Clock, ArrowRight, X } from 'lucide-react';
+import { Search, Download, Eye, X } from 'lucide-react';
 import Link from 'next/link';
 import Topbar from '@/components/layout/Topbar';
-import { DeviationBadge, StatusBadge } from '@/components/common/Badge';
 import { BENCHMARK_TRACES, BenchmarkTrace } from '@/lib/benchmark-traces';
+
+type DateFilter = 'all' | '7d' | '30d';
+type BenchmarkDeviationType = BenchmarkTrace['ground_truth']['deviation_type'];
+type JsonRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function readString(record: JsonRecord, key: string): string | undefined {
+  return typeof record[key] === 'string' ? record[key] : undefined;
+}
+
+function readNumber(record: JsonRecord, key: string): number | undefined {
+  return typeof record[key] === 'number' ? record[key] : undefined;
+}
+
+function normalizeBenchmarkDeviationType(value: string): BenchmarkDeviationType {
+  if (value === 'drift' || value === 'scope_creep' || value === 'tool_misuse') return value;
+  if (value === 'misinterpretation') return 'prompt_misinterpretation';
+  return 'none';
+}
 
 export default function AuditHistoryPage() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [dateFilter, setDateFilter] = useState<'all' | '7d' | '30d'>('all');
-  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [dateFilter, setDateFilter] = useState<DateFilter>('all');
   const [liveTrace, setLiveTrace] = useState<BenchmarkTrace | null>(null);
 
   useEffect(() => {
@@ -19,45 +39,50 @@ export default function AuditHistoryPage() {
     try {
       const stored = sessionStorage.getItem('agentlens_active_audit');
       if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && parsed.result) {
+        const parsed = JSON.parse(stored) as unknown;
+        if (isRecord(parsed) && isRecord(parsed.result)) {
+          const detectorAnalysis = isRecord(parsed.result.detectorAnalysis)
+            ? parsed.result.detectorAnalysis
+            : {};
+          const steps = Array.isArray(parsed.steps) ? parsed.steps.filter(isRecord) : [];
           const isDev = Boolean(
-            parsed.result.detectorAnalysis?.result &&
-            parsed.result.detectorAnalysis.result !== 'none'
+            readString(detectorAnalysis, 'result') &&
+            readString(detectorAnalysis, 'result') !== 'none'
           );
-          const devType = (parsed.result.detectorAnalysis?.result || 'none') as any;
-          setLiveTrace({
-            trace_id: parsed.traceId || 'live_audit_current',
-            original_prompt: parsed.prompt || 'Custom Execution Audit',
+          const devType = normalizeBenchmarkDeviationType(readString(detectorAnalysis, 'result') || 'none');
+          const nextTrace: BenchmarkTrace = {
+            trace_id: readString(parsed, 'traceId') || 'live_audit_current',
+            original_prompt: readString(parsed, 'prompt') || 'Custom Execution Audit',
             domain: 'Live Session',
             intent: {
-              allowed_actions: parsed.allowedActions || [],
-              forbidden_actions: parsed.forbiddenActions || [],
+              allowed_actions: Array.isArray(parsed.allowedActions) ? parsed.allowedActions.filter((value): value is string => typeof value === 'string') : [],
+              forbidden_actions: Array.isArray(parsed.forbiddenActions) ? parsed.forbiddenActions.filter((value): value is string => typeof value === 'string') : [],
             },
-            steps: (parsed.steps || []).map((s: any, idx: number) => ({
-              step_id: s.stepNumber ?? s.step_id ?? idx + 1,
-              action_type: s.actionType ?? s.action_type ?? 'tool_call',
-              tool_called: s.toolCalled ?? s.tool_called ?? null,
-              tool_input: s.toolInput ?? s.tool_input ?? null,
-              agent_reasoning: s.agentReasoning ?? s.agent_reasoning ?? null,
-              tool_output: s.toolOutput ?? s.tool_output ?? null,
+            steps: steps.map((step, idx) => ({
+              step_id: readNumber(step, 'stepNumber') ?? readNumber(step, 'step_id') ?? idx + 1,
+              action_type: readString(step, 'actionType') ?? readString(step, 'action_type') ?? 'tool_call',
+              tool_called: readString(step, 'toolCalled') ?? readString(step, 'tool_called') ?? null,
+              tool_input: readString(step, 'toolInput') ?? readString(step, 'tool_input') ?? null,
+              agent_reasoning: readString(step, 'agentReasoning') ?? readString(step, 'agent_reasoning') ?? null,
+              tool_output: readString(step, 'toolOutput') ?? readString(step, 'tool_output') ?? null,
             })),
             ground_truth: {
               deviation_detected: isDev,
               deviation_type: devType,
-              flagged_step_id: parsed.result.detectorAnalysis?.step_id ?? (isDev ? 1 : null),
+              flagged_step_id: readNumber(detectorAnalysis, 'step_id') ?? (isDev ? 1 : null),
               trigger_phrase: null,
-              explanation: parsed.result.causalExplanation || 'Live ML Core audit session result',
+              explanation: readString(parsed.result, 'causalExplanation') || 'Live ML Core audit session result',
             },
             seed_meta: {
               scenario: 'Live Session Execution',
               difficulty: 'medium',
               hard_case: null,
             },
-            total_latency_ms: 120,
-            total_tokens: 350,
-            timestamp: new Date(parsed.timestamp || Date.now()).toISOString(),
-          });
+            total_latency_ms: null,
+            total_tokens: null,
+            timestamp: new Date(readString(parsed, 'timestamp') || readNumber(parsed, 'timestamp') || Date.now()).toISOString(),
+          };
+          window.setTimeout(() => setLiveTrace(nextTrace), 0);
         }
       }
     } catch (e) {
@@ -85,7 +110,7 @@ export default function AuditHistoryPage() {
       'Trace_ID,Prompt,Steps,Duration_MS,Deviation_Detected,Deviation_Type,Timestamp',
       ...filtered.map(
         (t) =>
-          `"${t.trace_id}","${t.original_prompt.replace(/"/g, '""')}",${t.steps.length},${t.total_latency_ms},${t.ground_truth.deviation_detected},"${t.ground_truth.deviation_type}","${t.timestamp}"`
+          `"${t.trace_id}","${t.original_prompt.replace(/"/g, '""')}",${t.steps.length},${t.total_latency_ms != null ? t.total_latency_ms : ''},${t.ground_truth.deviation_detected},"${t.ground_truth.deviation_type}","${t.timestamp}"`
       ),
     ];
     const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
@@ -247,7 +272,7 @@ export default function AuditHistoryPage() {
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
             <select
               value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value as any)}
+              onChange={(e) => setDateFilter(e.target.value as DateFilter)}
               style={{
                 padding: '6px 10px',
                 borderRadius: 7,
@@ -394,7 +419,7 @@ export default function AuditHistoryPage() {
                     </td>
                     <td style={{ padding: '11px 14px' }}>
                       <span style={{ fontSize: 12, color: '#737982', fontFamily: 'IBM Plex Mono, monospace' }}>
-                        {audit.total_latency_ms}ms
+                        {audit.total_latency_ms != null ? `${audit.total_latency_ms}ms` : '—'}
                       </span>
                     </td>
                     <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>

@@ -37,8 +37,8 @@ export interface BenchmarkTrace {
     difficulty: 'easy' | 'medium' | 'hard';
     hard_case: string | null;
   };
-  total_latency_ms: number;
-  total_tokens: number;
+  total_latency_ms?: number | null;
+  total_tokens?: number | null;
   timestamp: string;
 }
 
@@ -10777,7 +10777,7 @@ export function getBenchmarkStats() {
   const scopeCreep = BENCHMARK_TRACES.filter((t) => t.ground_truth.deviation_type === 'scope_creep').length;
   const clean = BENCHMARK_TRACES.filter((t) => !t.ground_truth.deviation_detected).length;
   const avgSteps = (BENCHMARK_TRACES.reduce((acc, t) => acc + t.steps.length, 0) / total).toFixed(1);
-  const avgLatency = Math.round(BENCHMARK_TRACES.reduce((acc, t) => acc + t.total_latency_ms, 0) / total);
+  const avgLatency = Math.round(BENCHMARK_TRACES.reduce((acc, t) => acc + (t.total_latency_ms ?? 0), 0) / total);
 
   return { total, deviations, drift, scopeCreep, clean, avgSteps, avgLatency };
 }

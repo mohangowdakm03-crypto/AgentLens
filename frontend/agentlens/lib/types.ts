@@ -38,6 +38,7 @@ export interface AgentTrace {
     forbiddenActions?: string[];
   };
   groundTruth?: GroundTruth;
+  multiTraces?: AgentTrace[];
 }
 
 /** Dataset/evaluation labels. Kept separate from model detector output. */

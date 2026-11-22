@@ -34,7 +34,62 @@ import Link from 'next/link';
 import Topbar from '@/components/layout/Topbar';
 import { BENCHMARK_TRACES, BenchmarkTrace, getTraceById } from '@/lib/benchmark-traces';
 import { runAudit, getTrace, listTraces, backendTraceToAuditResult } from '@/services/api';
-import type { AuditResult, BackendTraceListItem } from '@/lib/types';
+import type { AuditResult, BackendTraceListItem, DeviationClassification } from '@/lib/types';
+
+type JsonRecord = Record<string, unknown>;
+type ActiveTab = 'reasoning' | 'input' | 'output' | 'policy';
+
+interface ActiveLiveAuditStep extends JsonRecord {
+  stepNumber?: number;
+  step_id?: number;
+  actionType?: string;
+  action_type?: string;
+  toolCalled?: string | null;
+  tool_called?: string | null;
+  toolInput?: string | null;
+  tool_input?: string | null;
+  agentReasoning?: string | null;
+  agent_reasoning?: string | null;
+  toolOutput?: string | null;
+  tool_output?: string | null;
+}
+
+interface ActiveLiveAudit {
+  result: AuditResult;
+  traceId: string;
+  prompt?: string;
+  steps?: ActiveLiveAuditStep[];
+  allowedActions?: string[];
+  forbiddenActions?: string[];
+  timestamp: number;
+}
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isAuditResult(value: unknown): value is AuditResult {
+  return isRecord(value) && typeof value.causalExplanation === 'string' && Array.isArray(value.triggerTokens);
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+function asStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+}
+
+function normalizeDeviationType(value: string | null | undefined): DeviationClassification {
+  if (value === 'drift' || value === 'scope_creep' || value === 'misinterpretation') return value;
+  return 'none';
+}
+
+function normalizeBenchmarkDeviationType(value: string | null | undefined): BenchmarkTrace['ground_truth']['deviation_type'] {
+  if (value === 'drift' || value === 'scope_creep' || value === 'tool_misuse') return value;
+  if (value === 'misinterpretation') return 'prompt_misinterpretation';
+  return 'none';
+}
 
 function TraceAnalysisContent() {
   const searchParams = useSearchParams();
@@ -49,15 +104,7 @@ function TraceAnalysisContent() {
   const [auditSuccessNotice, setAuditSuccessNotice] = useState<string | null>(null);
   const [showContractPayload, setShowContractPayload] = useState(false);
   const [copiedContract, setCopiedContract] = useState(false);
-  const [activeLiveAudit, setActiveLiveAudit] = useState<{
-    result: AuditResult;
-    traceId: string;
-    prompt?: string;
-    steps?: any[];
-    allowedActions?: string[];
-    forbiddenActions?: string[];
-    timestamp: number;
-  } | null>(null);
+  const [activeLiveAudit, setActiveLiveAudit] = useState<ActiveLiveAudit | null>(null);
 
   // Restore live audit result if arriving from New Audit submission
   useEffect(() => {
@@ -65,18 +112,30 @@ function TraceAnalysisContent() {
     try {
       const stored = sessionStorage.getItem('agentlens_active_audit');
       if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && parsed.result) {
+        const parsed = JSON.parse(stored) as unknown;
+        if (isRecord(parsed) && isAuditResult(parsed.result)) {
           const isMatch =
             !queryId ||
-            queryId === parsed.traceId ||
+            queryId === asString(parsed.traceId) ||
             searchParams.get('source') === 'live';
           if (isMatch) {
-            setActiveLiveAudit(parsed);
-            setAuditResponse(parsed.result);
-            setAuditSuccessNotice(
-              `Live audit completed successfully for ${parsed.traceId}. Analysis synchronized with ML Core.`
-            );
+            const restoredAudit: ActiveLiveAudit = {
+              result: parsed.result,
+              traceId: asString(parsed.traceId) || queryId,
+              prompt: asString(parsed.prompt),
+              steps: Array.isArray(parsed.steps) ? parsed.steps.filter(isRecord) as ActiveLiveAuditStep[] : [],
+              allowedActions: asStringArray(parsed.allowedActions),
+              forbiddenActions: asStringArray(parsed.forbiddenActions),
+              timestamp: typeof parsed.timestamp === 'number' ? parsed.timestamp : Date.now(),
+            };
+            const restoreId = window.setTimeout(() => {
+              setActiveLiveAudit(restoredAudit);
+              setAuditResponse(restoredAudit.result);
+              setAuditSuccessNotice(
+                `Live audit completed successfully for ${restoredAudit.traceId}. Analysis synchronized with ML Core.`
+              );
+            }, 0);
+            return () => window.clearTimeout(restoreId);
           }
         }
       }
@@ -106,13 +165,14 @@ function TraceAnalysisContent() {
   useEffect(() => {
     if (!queryId) return;
     if (getTraceById(queryId)) {
-      setRepositoryTrace(null);
       return;
     }
     if (activeLiveAudit && activeLiveAudit.traceId === queryId) return;
 
     let isMounted = true;
-    setIsLoadingTrace(true);
+    const loadingId = window.setTimeout(() => {
+      if (isMounted) setIsLoadingTrace(true);
+    }, 0);
     getTrace(queryId)
       .then((backendModel) => {
         if (!isMounted) return;
@@ -127,14 +187,14 @@ function TraceAnalysisContent() {
           steps: backendModel.steps.map((s, idx) => ({
             step_id: parseInt(s.stepId, 10) || idx + 1,
             action_type: s.action || 'tool_call',
-            tool_called: (s as any).tool_called || s.action || null,
+            tool_called: s.action || null,
             tool_input: s.tool_input || null,
             agent_reasoning: s.reasoning || null,
             tool_output: s.tool_output || null,
           })),
           ground_truth: {
             deviation_detected: backendModel.groundTruth?.isDeviated ?? false,
-            deviation_type: (backendModel.groundTruth?.deviationType || 'none') as any,
+            deviation_type: normalizeBenchmarkDeviationType(backendModel.groundTruth?.deviationType),
             flagged_step_id: typeof backendModel.groundTruth?.flaggedStepId === 'number'
               ? backendModel.groundTruth.flaggedStepId
               : (backendModel.groundTruth?.flaggedSteps?.[0] ? Number(backendModel.groundTruth.flaggedSteps[0]) : null),
@@ -163,6 +223,7 @@ function TraceAnalysisContent() {
 
     return () => {
       isMounted = false;
+      window.clearTimeout(loadingId);
     };
   }, [queryId, activeLiveAudit]);
 
@@ -178,7 +239,7 @@ function TraceAnalysisContent() {
         activeLiveAudit.result.detectorAnalysis?.result &&
         activeLiveAudit.result.detectorAnalysis.result !== 'none'
       );
-      const devType = (activeLiveAudit.result.detectorAnalysis?.result || 'none') as any;
+      const devType = normalizeBenchmarkDeviationType(activeLiveAudit.result.detectorAnalysis?.result);
       const flaggedId = activeLiveAudit.result.detectorAnalysis?.step_id ?? (isDev ? 1 : null);
 
       return {
@@ -189,7 +250,7 @@ function TraceAnalysisContent() {
           allowed_actions: activeLiveAudit.allowedActions || [],
           forbidden_actions: activeLiveAudit.forbiddenActions || [],
         },
-        steps: activeLiveAudit.steps.map((s: any, idx: number) => ({
+        steps: activeLiveAudit.steps.map((s, idx) => ({
           step_id: s.stepNumber ?? s.step_id ?? idx + 1,
           action_type: s.actionType ?? s.action_type ?? 'tool_call',
           tool_called: s.toolCalled ?? s.tool_called ?? null,
@@ -211,7 +272,7 @@ function TraceAnalysisContent() {
         },
         total_latency_ms: 120,
         total_tokens: 350,
-        timestamp: new Date(activeLiveAudit.timestamp || Date.now()).toISOString(),
+        timestamp: new Date(activeLiveAudit.timestamp).toISOString(),
       };
     }
 
@@ -268,7 +329,7 @@ function TraceAnalysisContent() {
     ? auditResponse.detectorAnalysis.result !== 'none'
     : currentTrace.ground_truth.deviation_detected;
   const devType = auditResponse?.detectorAnalysis?.result !== undefined
-    ? (auditResponse.detectorAnalysis.result as any)
+    ? normalizeDeviationType(auditResponse.detectorAnalysis.result)
     : currentTrace.ground_truth.deviation_type;
   const flaggedStepId = auditResponse?.detectorAnalysis?.result !== undefined
     ? (auditResponse.detectorAnalysis.result !== 'none'
@@ -291,7 +352,14 @@ function TraceAnalysisContent() {
       const result = await runAudit({
         userInstruction: currentTrace.original_prompt,
         traceSteps: stepStrings,
-        steps: currentTrace.steps,
+        steps: currentTrace.steps.map((step) => ({
+          step_id: step.step_id,
+          action_type: step.action_type,
+          tool_called: step.tool_called,
+          tool_input: step.tool_input ?? undefined,
+          tool_output: step.tool_output ?? undefined,
+          agent_reasoning: step.agent_reasoning ?? undefined,
+        })),
         allowedActions: currentTrace.intent?.allowed_actions,
         forbiddenActions: currentTrace.intent?.forbidden_actions,
       });
@@ -1145,7 +1213,8 @@ function TraceAnalysisContent() {
             }}
           >
             {currentTrace.steps.map((step) => {
-              const widthPct = Math.max(8, (step.latency_ms || 300) / currentTrace.total_latency_ms * 100);
+              const totalLat = currentTrace.total_latency_ms || 1000;
+              const widthPct = Math.max(8, ((step.latency_ms || 300) / totalLat) * 100);
               const isFlagged = flaggedStepId === step.step_id;
               const barColor = isFlagged ? statusColor : '#829581';
 
@@ -1373,7 +1442,7 @@ function TraceAnalysisContent() {
                         return (
                           <button
                             key={tab.id}
-                            onClick={() => setActiveTabs({ ...activeTabs, [step.step_id]: tab.id as any })}
+                            onClick={() => setActiveTabs({ ...activeTabs, [step.step_id]: tab.id as ActiveTab })}
                             style={{
                               padding: '8px 12px',
                               background: 'transparent',

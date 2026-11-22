@@ -119,7 +119,13 @@ const EVAL_METRICS = [
   { label: 'F1-Score', value: '0.94', isSigma: true },
 ];
 
-function CustomTooltip({ active, payload, label }: any) {
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: Array<{ value?: number | string }>;
+  label?: string | number;
+}
+
+function CustomTooltip({ active, payload, label }: ChartTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div
@@ -133,7 +139,7 @@ function CustomTooltip({ active, payload, label }: any) {
       }}
     >
       <div style={{ color: '#737982', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontWeight: 600, color: '#292D32' }}>{payload[0].value} audits</div>
+      <div style={{ fontWeight: 600, color: '#292D32' }}>{String(payload[0].value ?? '')} audits</div>
     </div>
   );
 }
@@ -813,7 +819,7 @@ export default function OverviewPage() {
                       <span style={{ fontSize: 12, color: '#737982' }}>{trace.prompt}</span>
                     </td>
                     <td style={{ padding: '12px 14px' }}>
-                      <StatusBadge status={trace.result as any} size="sm" />
+                      <StatusBadge status={trace.result} size="sm" />
                     </td>
                     <td style={{ padding: '12px 14px' }}>
                       {trace.deviation ? (

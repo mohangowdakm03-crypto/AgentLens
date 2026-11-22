@@ -116,6 +116,7 @@ interface RawTraceStepJson {
   stepNumber?: number;
   action_type?: string;
   actionType?: string;
+  action?: string;
   tool_name?: string;
   toolName?: string;
   tool_called?: string;
@@ -124,6 +125,7 @@ interface RawTraceStepJson {
   observation?: string;
   tool_output?: string;
   agent_reasoning?: string;
+  reasoning?: string;
   raw_text?: string;
   rawText?: string;
   is_deviation?: boolean;
@@ -138,10 +140,10 @@ function normalizeStepObject(obj: RawTraceStepJson, index: number): TraceStep {
 
   return {
     stepNumber: obj.step_number ?? obj.stepNumber ?? obj.step_id ?? index + 1,
-    actionType: (obj.action_type ?? obj.actionType ?? inferActionType(rawText)) as ActionType,
-    toolName: obj.tool_name ?? obj.toolName ?? obj.tool_called,
+    actionType: (obj.action_type ?? obj.actionType ?? (obj.action ? "tool_call" : inferActionType(rawText))) as ActionType,
+    toolName: obj.tool_name ?? obj.toolName ?? obj.tool_called ?? obj.action,
     toolInput: obj.tool_input ?? obj.toolInput,
-    agentReasoning: obj.agent_reasoning,
+    agentReasoning: obj.agent_reasoning ?? obj.reasoning,
     observation: obj.observation ?? obj.tool_output,
     rawText,
     isDeviation: obj.is_deviation ?? obj.isDeviation ?? false,
@@ -268,6 +270,143 @@ export function parseReActLog(
   };
 }
 
+// ─── Format 4: Multi-Record and Step-Per-Line JSONL ──────────────────────────
+
+/**
+ * Ingests a JSONL string containing one or more records.
+ *
+ * Supported schemas:
+ * 1. Multi-record JSONL: Each line is a complete trace envelope (contains `steps` or `trace`,
+ *    `trace_id`, `original_prompt`/`prompt`).
+ *    Preserves record boundaries: Each line becomes an independent AgentTrace.
+ * 2. Step-per-line JSONL: Each line is an individual TraceStep object (contains `step_id`, `action`, etc.).
+ *    Combined into a single AgentTrace.
+ *
+ * Error handling:
+ * - Empty string or whitespace-only throws: "File is empty. Upload a non-empty trace file."
+ * - Invalid JSON on any non-empty line throws: "Invalid JSONL record at line {N}: {reason}"
+ */
+export function parseJsonlTraces(
+  text: string,
+  fallbackInstruction: string = "Execute agent task"
+): AgentTrace[] {
+  if (!text || !text.trim()) {
+    throw new Error("File is empty. Upload a non-empty trace file.");
+  }
+
+  const rawLines = text.split(/\r?\n/);
+  const parsedRecords: { lineNum: number; data: Record<string, unknown> }[] = [];
+
+  for (let idx = 0; idx < rawLines.length; idx++) {
+    const trimmedLine = rawLines[idx].trim();
+    if (!trimmedLine) continue;
+
+    try {
+      const parsed = JSON.parse(trimmedLine) as unknown;
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error("Record must be a JSON object");
+      }
+      parsedRecords.push({ lineNum: idx + 1, data: parsed as Record<string, unknown> });
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : "Malformed JSON";
+      throw new Error(`Invalid JSONL record at line ${idx + 1}: ${reason}`);
+    }
+  }
+
+  if (parsedRecords.length === 0) {
+    throw new Error("File is empty. Upload a non-empty trace file.");
+  }
+
+  // Schema check: Are lines individual steps of a single trace, or distinct trace envelopes?
+  const isAllStepObjects = parsedRecords.every(
+    ({ data }) =>
+      !("steps" in data || "trace" in data || "execution_steps" in data) &&
+      ("step_id" in data || "step_number" in data || "stepNumber" in data || "action" in data || "action_type" in data)
+  );
+
+  if (isAllStepObjects) {
+    const steps = parsedRecords.map(({ data }, index) =>
+      normalizeStepObject(data as RawTraceStepJson, index)
+    );
+    return [
+      {
+        sessionId: generateSessionId(),
+        userInstruction: fallbackInstruction,
+        steps,
+      },
+    ];
+  }
+
+  // Otherwise, treat each line as an independent trace record without merging
+  return parsedRecords.map(({ data }) => {
+    const rawSteps = (data.steps ?? data.trace ?? data.execution_steps ?? []) as unknown[];
+    const parsedSteps: TraceStep[] = Array.isArray(rawSteps)
+      ? rawSteps.map((s, idx) => {
+          if (typeof s === "string") {
+            return parseStringStep(s, idx);
+          }
+          if (s && typeof s === "object") {
+            return normalizeStepObject(s as RawTraceStepJson, idx);
+          }
+          return parseStringStep(String(s), idx);
+        })
+      : [];
+
+    const prompt =
+      (typeof data.user_instruction === "string" ? data.user_instruction : undefined) ||
+      (typeof data.original_prompt === "string" ? data.original_prompt : undefined) ||
+      (typeof data.prompt === "string" ? data.prompt : undefined) ||
+      (typeof data.userInstruction === "string" ? data.userInstruction : undefined) ||
+      fallbackInstruction;
+
+    const traceId =
+      (typeof data.trace_id === "string" ? data.trace_id : undefined) ||
+      (typeof data.traceId === "string" ? data.traceId : undefined) ||
+      (typeof data.session_id === "string" ? data.session_id : undefined);
+
+    const intent = (data.intent && typeof data.intent === "object" ? data.intent : {}) as Record<string, unknown>;
+
+    const trace: AgentTrace = {
+      sessionId: traceId || generateSessionId(),
+      userInstruction: prompt,
+      steps: parsedSteps,
+      traceInfo: {
+        traceId,
+        allowedActions: Array.isArray(intent.allowed_verbs)
+          ? (intent.allowed_verbs as string[])
+          : Array.isArray(intent.allowed_actions)
+            ? (intent.allowed_actions as string[])
+            : Array.isArray(data.allowed_actions)
+              ? (data.allowed_actions as string[])
+              : undefined,
+        forbiddenActions: Array.isArray(intent.forbidden_verbs)
+          ? (intent.forbidden_verbs as string[])
+          : Array.isArray(intent.forbidden_actions)
+            ? (intent.forbidden_actions as string[])
+            : Array.isArray(data.forbidden_actions)
+              ? (data.forbidden_actions as string[])
+              : undefined,
+      },
+    };
+
+    if (data.ground_truth && typeof data.ground_truth === "object") {
+      const truth = data.ground_truth as Record<string, unknown>;
+      trace.groundTruth = {
+        deviationDetected: typeof truth.deviation_detected === "boolean" ? truth.deviation_detected : undefined,
+        deviationType: typeof truth.deviation_type === "string" ? (truth.deviation_type as FailureType) : undefined,
+        flaggedStepId: typeof truth.flagged_step_id === "number" ? truth.flagged_step_id : null,
+        triggerPhrase: typeof truth.trigger_phrase === "string" ? truth.trigger_phrase : null,
+        explanation: typeof truth.explanation === "string" ? truth.explanation : null,
+        labelSource: typeof truth.label_source === "string" ? truth.label_source : undefined,
+      };
+    }
+
+    return trace;
+  });
+}
+
+export const parseJsonl = parseJsonlTraces;
+
 // ─── Unified Auto-Detect Parser ───────────────────────────────────────────────
 
 /**
@@ -316,24 +455,25 @@ export function parseTrace(
   // If it's a string, try to parse as JSON first
   if (typeof input === "string") {
     const trimmed = input.trim();
+    if (!trimmed) {
+      throw new Error("File is empty. Upload a non-empty trace file.");
+    }
 
-    // JSONL may contain either one trace per line or individual step objects.
+    // JSONL: multi-line JSON or step-per-line
     if (trimmed.includes("\n")) {
       const lines = trimmed.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
       if (lines.length && lines.every((line) => line.startsWith("{") || line.startsWith("["))) {
-        let records: unknown[];
         try {
-          records = lines.map((line) => JSON.parse(line));
-        } catch {
-          records = [];
-        }
-        if (records.length) {
-          if (records.length === 1) return parseTrace(JSON.stringify(records[0]), userInstruction, deviationStep, failureType);
-          if (records.every((record) => record && typeof record === "object" && !Array.isArray(record) && ("step_id" in record || "step_number" in record || "stepNumber" in record))) {
-            return parseTrace(records as Record<string, unknown>[], userInstruction, deviationStep, failureType);
+          const traces = parseJsonlTraces(trimmed, userInstruction);
+          if (traces.length > 0) {
+            const primaryTrace = traces[0];
+            primaryTrace.multiTraces = traces;
+            return primaryTrace;
           }
-          if (records.every((record) => record && typeof record === "object" && ("steps" in record || "trace" in record))) {
-            throw new Error("This JSONL contains multiple trace records. Upload one trace per file so no records are skipped.");
+        } catch (jsonlErr) {
+          // If JSONL parsing threw a syntax or validation error, re-throw so user gets the clear line-number message
+          if (jsonlErr instanceof Error && (jsonlErr.message.startsWith("Invalid JSONL record") || jsonlErr.message.startsWith("File is empty"))) {
+            throw jsonlErr;
           }
         }
       }

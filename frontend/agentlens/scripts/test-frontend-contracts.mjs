@@ -386,6 +386,139 @@ for (const u of unsupportedFields) {
 
 console.log('✓ Test 6 Passed: Supported vs unsupported evaluation metrics verified.');
 
+// ============================================================================
+// Test 7: Multi-Record and Single-Record JSONL Parser Verification
+// ============================================================================
+console.log('Test 7: Verifying JSONL parsing requirements...');
+
+const { parseJsonlTraces, parseTrace } = await import('../lib/parser.ts');
+
+// 7.1 Single-record JSONL
+const singleRecordJsonl = JSON.stringify({
+  trace_id: 'trace_single_01',
+  original_prompt: 'Search for documentation on React hooks',
+  steps: [
+    { step_id: 1, action: 'search', tool_input: 'React hooks', observation: 'Found docs' }
+  ],
+  intent: {
+    allowed_verbs: ['search', 'read'],
+    forbidden_verbs: ['write']
+  }
+});
+
+const singleResult = parseJsonlTraces(singleRecordJsonl);
+assert.equal(singleResult.length, 1, 'Single-record JSONL must parse exactly 1 trace');
+assert.equal(singleResult[0].traceInfo?.traceId, 'trace_single_01');
+assert.equal(singleResult[0].userInstruction, 'Search for documentation on React hooks');
+assert.equal(singleResult[0].steps.length, 1);
+assert.equal(singleResult[0].steps[0].actionType, 'tool_call');
+assert.equal(singleResult[0].steps[0].toolName, 'search');
+console.log('  ✓ 7.1 Single-record JSONL parsed successfully');
+
+// 7.2 Multiple-record JSONL (preserving boundaries, IDs, prompts, and steps without merging)
+const multiRecordJsonl = [
+  JSON.stringify({
+    trace_id: 'trace_rec_01',
+    original_prompt: 'Task A: Analyze repo structure',
+    steps: [
+      { step_id: 1, action: 'list_files', tool_input: '.', observation: 'package.json, src' }
+    ]
+  }),
+  JSON.stringify({
+    trace_id: 'trace_rec_02',
+    original_prompt: 'Task B: Run unit tests',
+    steps: [
+      { step_id: 1, action: 'run_tests', tool_input: 'npm test', observation: '10 passed' }
+    ]
+  }),
+  JSON.stringify({
+    trace_id: 'trace_rec_03',
+    original_prompt: 'Task C: Build application',
+    steps: [
+      { step_id: 1, action: 'build', tool_input: 'npm run build', observation: 'Build complete' }
+    ]
+  })
+].join('\n');
+
+const multiResult = parseJsonlTraces(multiRecordJsonl);
+assert.equal(multiResult.length, 3, 'Multi-record JSONL must parse exactly 3 distinct traces');
+assert.equal(multiResult[0].traceInfo?.traceId, 'trace_rec_01');
+assert.equal(multiResult[0].userInstruction, 'Task A: Analyze repo structure');
+assert.equal(multiResult[0].steps.length, 1);
+
+assert.equal(multiResult[1].traceInfo?.traceId, 'trace_rec_02');
+assert.equal(multiResult[1].userInstruction, 'Task B: Run unit tests');
+assert.equal(multiResult[1].steps.length, 1);
+
+assert.equal(multiResult[2].traceInfo?.traceId, 'trace_rec_03');
+assert.equal(multiResult[2].userInstruction, 'Task C: Build application');
+assert.equal(multiResult[2].steps.length, 1);
+
+// Confirm records are NOT merged
+assert.notEqual(multiResult[0].traceInfo?.traceId, multiResult[1].traceInfo?.traceId);
+console.log('  ✓ 7.2 Multi-record JSONL: Record boundaries, IDs, prompts, and steps strictly preserved');
+
+// 7.3 Multiple steps within a single record
+const multiStepRecordJsonl = JSON.stringify({
+  trace_id: 'trace_multistep_01',
+  prompt: 'Deploy service to cluster',
+  steps: [
+    { step_id: 1, action_type: 'search', tool_name: 'find_config', tool_input: 'k8s.yaml', reasoning: 'Locate deployment spec' },
+    { step_id: 2, action_type: 'read', tool_name: 'read_file', tool_input: 'k8s.yaml', observation: 'apiVersion: apps/v1' },
+    { step_id: 3, action_type: 'tool_call', tool_name: 'kubectl_apply', tool_input: '-f k8s.yaml', observation: 'deployment configured' }
+  ]
+});
+
+const multiStepResult = parseJsonlTraces(multiStepRecordJsonl);
+assert.equal(multiStepResult.length, 1);
+assert.equal(multiStepResult[0].steps.length, 3, 'Must preserve all 3 sequential steps within record');
+assert.equal(multiStepResult[0].steps[0].stepNumber, 1);
+assert.equal(multiStepResult[0].steps[0].toolName, 'find_config');
+assert.equal(multiStepResult[0].steps[1].stepNumber, 2);
+assert.equal(multiStepResult[0].steps[1].observation, 'apiVersion: apps/v1');
+assert.equal(multiStepResult[0].steps[2].stepNumber, 3);
+assert.equal(multiStepResult[0].steps[2].toolName, 'kubectl_apply');
+console.log('  ✓ 7.3 Multiple steps within a record preserved with structured metadata');
+
+// 7.4 Invalid JSONL records (line-specific syntax error reporting)
+const invalidJsonl = '{"trace_id": "valid_01", "steps": []}\n{malformed line here\n{"trace_id": "valid_03", "steps": []}';
+assert.throws(
+  () => parseJsonlTraces(invalidJsonl),
+  (err) => {
+    assert.ok(err instanceof Error);
+    assert.ok(err.message.includes('Invalid JSONL record at line 2'), `Expected error message to mention line 2, got: ${err.message}`);
+    return true;
+  }
+);
+console.log('  ✓ 7.4 Invalid JSONL records rejected with explicit line-number error message');
+
+// 7.5 Empty JSONL files
+assert.throws(
+  () => parseJsonlTraces(''),
+  (err) => {
+    assert.ok(err instanceof Error);
+    assert.ok(err.message.includes('File is empty'), `Expected empty file error, got: ${err.message}`);
+    return true;
+  }
+);
+assert.throws(
+  () => parseJsonlTraces('   \n  \n  '),
+  (err) => {
+    assert.ok(err instanceof Error);
+    assert.ok(err.message.includes('File is empty'), `Expected empty file error, got: ${err.message}`);
+    return true;
+  }
+);
+console.log('  ✓ 7.5 Empty JSONL files rejected with clear error');
+
+// 7.6 Verify parseTrace integration with multi-record JSONL
+const parsedTraceViaAutoDetect = parseTrace(multiRecordJsonl, 'Default instruction');
+assert.equal(parsedTraceViaAutoDetect.traceInfo?.traceId, 'trace_rec_01');
+assert.ok(Array.isArray(parsedTraceViaAutoDetect.multiTraces), 'multiTraces must be attached');
+assert.equal(parsedTraceViaAutoDetect.multiTraces.length, 3, 'multiTraces must contain all 3 distinct records');
+assert.equal(parsedTraceViaAutoDetect.multiTraces[1].traceInfo?.traceId, 'trace_rec_02');
+console.log('  ✓ 7.6 parseTrace integration verified: multiTraces preserved and accessible');
+
 console.log('\n======================================================');
-console.log('ALL FRONTEND CONTRACT & INTEGRATION TESTS PASSED (6/6)');
+console.log('ALL FRONTEND CONTRACT & INTEGRATION TESTS PASSED (7/7)');
 console.log('======================================================\n');

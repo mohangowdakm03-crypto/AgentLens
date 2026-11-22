@@ -33,12 +33,12 @@ const DATASET_INFO = {
   valid: 300,
   rejected: 0,
   classes: { none: 146, drift: 34, scope_creep: 115, misinterpretation: 5 },
-  splits: { train: 210, validation: 45, test: 45 },
+  splits: { train: 231, validation: 31, test: 28, review_only: 10 },
   domains: [
     { name: 'AI/ML Engineering', count: 150, color: '#829581' },
     { name: 'Software Development', count: 150, color: '#C49A5B' },
   ],
-  validationStatus: '13/13 Checks Passed',
+  validationStatus: '7-Stage Gateway Cleared',
   lastValidated: 'Nov 20, 2026 (Joyal Dataset Audit Clearance)',
 };
 
@@ -636,15 +636,16 @@ export default function DatasetManagerPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                 <Layers size={16} color="#829581" strokeWidth={1.8} />
                 <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>
-                  Dataset Splits (70% Train / 20% Val / 10% Test)
+                  Dataset Splits (Train / Val / Test / Review-Only)
                 </span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 18 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 18 }}>
                 {[
-                  { name: 'Train Set', count: 210, pct: '70%', color: '#829581' },
-                  { name: 'Validation Set', count: 60, pct: '20%', color: '#C49A5B' },
-                  { name: 'Test Holdout', count: 30, pct: '10%', color: '#B97878' },
+                  { name: 'Train Set', count: 231, pct: '77%', color: '#829581' },
+                  { name: 'Validation Set', count: 31, pct: '10.3%', color: '#C49A5B' },
+                  { name: 'Test Holdout', count: 28, pct: '9.3%', color: '#B97878' },
+                  { name: 'Review-Only', count: 10, pct: '3.3%', color: '#737982' },
                 ].map((s) => (
                   <div
                     key={s.name}
@@ -667,14 +668,17 @@ export default function DatasetManagerPage() {
 
               {/* Visual Split Segmented Bar */}
               <div style={{ display: 'flex', borderRadius: 6, overflow: 'hidden', height: 26 }}>
-                <div style={{ width: '70%', background: '#829581', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
-                  70% Train (210)
+                <div style={{ width: '77%', background: '#829581', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
+                  Train (231)
                 </div>
-                <div style={{ width: '20%', background: '#C49A5B', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
-                  20% Val (60)
+                <div style={{ width: '10.3%', background: '#C49A5B', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
+                  Val (31)
                 </div>
-                <div style={{ width: '10%', background: '#B97878', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
-                  10% Test (30)
+                <div style={{ width: '9.3%', background: '#B97878', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
+                  Test (28)
+                </div>
+                <div style={{ width: '3.3%', background: '#737982', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
+                  Rev (10)
                 </div>
               </div>
             </div>

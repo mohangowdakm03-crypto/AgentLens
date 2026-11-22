@@ -13,10 +13,10 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from detector.api.loader import repository, _normalize_trace_dict
-from detector.api.service import detector_service
-from detector.api.evaluate import evaluate_repository
-from detector.api.models import (
+from api.loader import repository, _normalize_trace_dict
+from api.service import detector_service
+from api.evaluate import evaluate_repository
+from api.models import (
     TraceModel,
     TraceListItem,
     HealthResponse,

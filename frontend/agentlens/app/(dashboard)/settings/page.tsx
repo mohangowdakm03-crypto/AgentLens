@@ -39,8 +39,8 @@ export default function SettingsPage() {
       } else {
         setPingStatus(`Endpoint returned HTTP ${res.status} (${latency}ms)`);
       }
-    } catch (e: any) {
-      setPingStatus(`Local route active: /api/audit (Mock contract ready)`);
+    } catch {
+      setPingStatus('Backend is unreachable. No successful audit result was produced.');
     } finally {
       setIsPinging(false);
     }

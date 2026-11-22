@@ -77,9 +77,12 @@ export function AuditDashboard() {
       setIsDemoResult(false);
       setTraceSearchQuery("");
       setSelectedStep(undefined);
+      const traceCountInfo = parsed.multiTraces && parsed.multiTraces.length > 1
+        ? `Loaded trace 1 of ${parsed.multiTraces.length} from multi-record JSONL (${parsed.traceInfo?.traceId ? `ID: ${parsed.traceInfo.traceId}, ` : ""}${parsed.steps.length} steps). All record boundaries preserved.`
+        : `Parsed ${parsed.steps.length} execution steps${sourceName ? ` from ${sourceName}` : ""}. Ground truth remains separate from detector output.`;
       setNotice({
         type: "success",
-        text: `Parsed ${parsed.steps.length} execution steps${sourceName ? ` from ${sourceName}` : ""}. Ground truth remains separate from detector output.`,
+        text: traceCountInfo,
       });
     } catch (error) {
       invalidateAudit();
@@ -101,7 +104,14 @@ export function AuditDashboard() {
     const extension = file.name.split(".").pop()?.toLowerCase();
     if (!extension || !["json", "jsonl", "txt", "log", "md"].includes(extension)) {
       setIsParsing(false);
+      setFileProgress(null);
       setNotice({ type: "error", text: "Unsupported file type. Choose a JSON, JSONL, TXT, LOG, or MD trace." });
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setIsParsing(false);
+      setFileProgress(null);
+      setNotice({ type: "error", text: `${file.name} exceeds the 10 MB file size limit. Please choose a smaller trace file.` });
       return;
     }
     setUploadedFile({ name: file.name, size: file.size });
@@ -758,11 +768,29 @@ function BackendTraceResponsePanel({
           {response.detection.scope.violations.length > 0 && (
             <div className="mt-3 space-y-2">
               <span className="block text-[11px] font-medium text-rose-700">Identified Scope Violations:</span>
-              {response.detection.scope.violations.map((v, i) => (
-                <div key={i} className="rounded border border-rose-200 bg-rose-50/70 p-2 text-xs text-rose-900">
-                  <span className="font-semibold">Step {v.stepId}</span> (action: <code className="font-mono font-bold">{v.action}</code>): {v.reason}
-                </div>
-              ))}
+              {response.detection.scope.violations.map((v, i) => {
+                const stepIdx = response.steps.findIndex((s) => String(s.stepId) === String(v.stepId));
+                const stepNumber = stepIdx !== -1 ? stepIdx + 1 : undefined;
+                return (
+                  <div
+                    key={i}
+                    role={stepNumber !== undefined ? "button" : undefined}
+                    tabIndex={stepNumber !== undefined ? 0 : undefined}
+                    onClick={stepNumber !== undefined ? () => onViewStep(stepNumber) : undefined}
+                    onKeyDown={stepNumber !== undefined ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onViewStep(stepNumber); } } : undefined}
+                    className={cn(
+                      "rounded border border-rose-200 bg-rose-50/70 p-2 text-xs text-rose-900",
+                      stepNumber !== undefined && "cursor-pointer hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+                    )}
+                    aria-label={stepNumber !== undefined ? `Jump to step ${v.stepId}` : undefined}
+                  >
+                    <span className="font-semibold">Step {v.stepId}</span> (action: <code className="font-mono font-bold">{v.action}</code>): {v.reason}
+                    {stepNumber !== undefined && (
+                      <span className="ml-2 text-[10px] font-semibold text-rose-600 underline underline-offset-2">↑ Jump to step</span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

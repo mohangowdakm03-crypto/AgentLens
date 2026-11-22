@@ -9,11 +9,20 @@ import type {
   BackendTraceListItem,
   BackendDetectRequest,
   BackendHealthResponse,
+  BackendPeltResultModel,
+  BackendFallbackResultModel,
+  BackendScopeResultModel,
+  BackendDetectionModel,
+  BackendAuditResultModel,
   EvaluationReport,
   AgentTrace,
   AuditResult,
   FailureType,
 } from '@/lib/types';
+
+function isPeltResult(value: BackendPeltResultModel | BackendFallbackResultModel | null | undefined): value is BackendPeltResultModel {
+  return Boolean(value && 'difference' in value);
+}
 
 // Client for Next.js internal API routes (such as /api/audit, /api/health)
 const NEXTJS_BASE_URL =
@@ -46,11 +55,36 @@ export const backendClient = axios.create({
 export interface RunAuditParams {
   userInstruction: string;
   traceSteps?: string[];
-  steps?: any[];
+  steps?: BackendDetectRequest['steps'];
   allowedActions?: string[];
   forbiddenActions?: string[];
   deviationStep?: number;
   failureType?: FailureType;
+}
+
+interface AuditGatewayResponse {
+  status?: 'success' | 'error';
+  message?: string;
+  causal_attribution?: {
+    explanation?: string;
+    trigger_tokens?: string[];
+  };
+  prompt_repair?: {
+    corrected_prompt?: string;
+    diff?: { old: string; new: string; reason: string }[];
+    justification?: string;
+  };
+  result?: {
+    confidence?: number | null;
+    type?: string | null;
+    step_id?: number | null;
+    flagged_steps?: number[] | null;
+    similarity_curve?: number[] | null;
+  };
+  drift_analysis?: BackendPeltResultModel | BackendFallbackResultModel | null;
+  scope_analysis?: BackendScopeResultModel | null;
+  detection?: BackendDetectionModel | null;
+  audit?: BackendAuditResultModel | null;
 }
 
 // ============================================================================
@@ -243,7 +277,7 @@ export function backendTraceToAuditResult(trace: BackendTraceModel): AuditResult
  * Execute an audit against the POST /api/audit endpoint (or fallback to /api/detect).
  */
 export async function runAudit(params: RunAuditParams): Promise<AuditResult> {
-  const payload: any = {
+  const payload = {
     user_instruction: params.userInstruction,
     trace: params.traceSteps,
     steps: params.steps,
@@ -251,7 +285,7 @@ export async function runAudit(params: RunAuditParams): Promise<AuditResult> {
     forbidden_actions: params.forbiddenActions,
   };
 
-  const response = await apiClient.post<any>('/api/audit', payload);
+  const response = await apiClient.post<AuditGatewayResponse>('/api/audit', payload);
   if (response.data && response.data.status === 'success') {
     const res = response.data;
     const auditResult: AuditResult = {
@@ -275,11 +309,11 @@ export async function runAudit(params: RunAuditParams): Promise<AuditResult> {
         result: res.result.type,
         step_id: res.result.step_id,
         flagged_steps: res.result.flagged_steps,
-        drift: res.drift_analysis?.difference ?? null,
+        drift: isPeltResult(res.drift_analysis) ? res.drift_analysis.difference : null,
         similarityCurve: (res.result.similarity_curve || []).map(
           (score: number, idx: number) => ({ stepNumber: idx + 1, score })
         ),
-        pelt: res.detection?.pelt || res.drift_analysis || null,
+        pelt: res.detection?.pelt || (isPeltResult(res.drift_analysis) ? res.drift_analysis : null),
         fallback: res.detection?.fallback || null,
         scopeDetails: res.detection?.scope || res.scope_analysis || null,
       };

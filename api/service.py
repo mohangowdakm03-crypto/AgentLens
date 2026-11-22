@@ -28,8 +28,8 @@ from agentlens.drift.detect import (
     MIN_DROP,
     FALLBACK_DROP,
 )
-from detector.api.loader import LoadedTrace
-from detector.api.models import (
+from api.loader import LoadedTrace
+from api.models import (
     TraceModel,
     StepModel,
     DetectionModel,

@@ -6,6 +6,30 @@ import type {
   DetectorV1Response,
 } from "@/lib/types";
 
+type JsonRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function asStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function stringifyValue(value: unknown): string | undefined {
+  if (typeof value === "string") return value;
+  if (value === undefined || value === null) return undefined;
+  return JSON.stringify(value);
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Unknown error";
+}
+
 const BACKEND_URL =
   process.env.BACKEND_API_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
@@ -41,9 +65,16 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  let body: any;
+  let body: JsonRecord;
   try {
-    body = await request.json();
+    const parsed = await request.json() as unknown;
+    if (!isRecord(parsed)) {
+      return NextResponse.json(
+        { status: "error", message: "Request body must be a JSON object" },
+        { status: 400 }
+      );
+    }
+    body = parsed;
   } catch {
     return NextResponse.json(
       { status: "error", message: "Invalid JSON in request body" },
@@ -53,9 +84,9 @@ export async function POST(request: NextRequest) {
 
   // 1. Validate required prompt / instruction
   const prompt = (
-    body.user_instruction ||
-    body.prompt ||
-    body.original_prompt ||
+    asString(body.user_instruction) ||
+    asString(body.prompt) ||
+    asString(body.original_prompt) ||
     ""
   ).trim();
 
@@ -72,7 +103,7 @@ export async function POST(request: NextRequest) {
 
   // 2. Validate trace / execution steps
   // Prefer structured steps when available and non-empty; fallback to string trace
-  let rawTrace: any;
+  let rawTrace: unknown;
   if (Array.isArray(body.steps) && body.steps.length > 0) {
     rawTrace = body.steps;
   } else if (
@@ -108,27 +139,21 @@ export async function POST(request: NextRequest) {
   }> = [];
 
   if (Array.isArray(rawTrace) && rawTrace.length > 0) {
-    if (typeof rawTrace[0] === "object" && rawTrace[0] !== null) {
-      backendSteps = rawTrace.map((s: any, idx: number) => {
+    if (rawTrace.every(isRecord)) {
+      backendSteps = rawTrace.map((s, idx) => {
         const rawId = s.step_id ?? s.stepNumber ?? s.stepId ?? idx + 1;
         const stepIdNum =
           typeof rawId === "number" ? rawId : parseInt(String(rawId), 10);
-        const action = s.action_type || s.actionType || s.action;
-        const tool = s.tool_called || s.toolName || s.tool_name;
+        const action = asString(s.action_type) || asString(s.actionType) || asString(s.action);
+        const tool = asString(s.tool_called) || asString(s.toolName) || asString(s.tool_name);
         return {
           step_id: Number.isFinite(stepIdNum) ? stepIdNum : idx + 1,
           action_type: normalizeActionType(action, tool),
           tool_called: tool || undefined,
-          tool_input:
-            typeof s.tool_input === "object"
-              ? JSON.stringify(s.tool_input)
-              : s.tool_input ?? s.toolInput ?? undefined,
-          tool_output:
-            typeof s.tool_output === "object"
-              ? JSON.stringify(s.tool_output)
-              : s.tool_output ?? s.toolOutput ?? s.observation ?? undefined,
+          tool_input: stringifyValue(s.tool_input ?? s.toolInput),
+          tool_output: stringifyValue(s.tool_output ?? s.toolOutput ?? s.observation),
           agent_reasoning:
-            s.agent_reasoning ?? s.agentReasoning ?? s.reasoning ?? undefined,
+            asString(s.agent_reasoning) || asString(s.agentReasoning) || asString(s.reasoning),
         };
       });
     } else {
@@ -142,11 +167,11 @@ export async function POST(request: NextRequest) {
           tool_output: s.observation || undefined,
           agent_reasoning: s.agentReasoning || undefined,
         }));
-      } catch (parseErr: any) {
+      } catch (parseErr: unknown) {
         return NextResponse.json(
           {
             status: "error",
-            message: `Failed to parse execution trace: ${parseErr.message}`,
+            message: `Failed to parse execution trace: ${errorMessage(parseErr)}`,
           },
           { status: 400 }
         );
@@ -163,11 +188,11 @@ export async function POST(request: NextRequest) {
         tool_output: s.observation || undefined,
         agent_reasoning: s.agentReasoning || undefined,
       }));
-    } catch (parseErr: any) {
+    } catch (parseErr: unknown) {
       return NextResponse.json(
         {
           status: "error",
-          message: `Failed to parse execution trace: ${parseErr.message}`,
+          message: `Failed to parse execution trace: ${errorMessage(parseErr)}`,
         },
         { status: 400 }
       );
@@ -185,24 +210,25 @@ export async function POST(request: NextRequest) {
   }
 
   // 4. Extract permissions / intent constraints (ground truth strictly excluded)
+  const intent = isRecord(body.intent) ? body.intent : {};
   const allowedActions: string[] = Array.isArray(body.allowed_actions)
-    ? body.allowed_actions
+    ? asStringArray(body.allowed_actions)
     : Array.isArray(body.allowedActions)
-    ? body.allowedActions
-    : Array.isArray(body.intent?.allowed_actions)
-    ? body.intent.allowed_actions
-    : Array.isArray(body.intent?.allowed_verbs)
-    ? body.intent.allowed_verbs
+    ? asStringArray(body.allowedActions)
+    : Array.isArray(intent.allowed_actions)
+    ? asStringArray(intent.allowed_actions)
+    : Array.isArray(intent.allowed_verbs)
+    ? asStringArray(intent.allowed_verbs)
     : [];
 
   const forbiddenActions: string[] = Array.isArray(body.forbidden_actions)
-    ? body.forbidden_actions
+    ? asStringArray(body.forbidden_actions)
     : Array.isArray(body.forbiddenActions)
-    ? body.forbiddenActions
-    : Array.isArray(body.intent?.forbidden_actions)
-    ? body.intent.forbidden_actions
-    : Array.isArray(body.intent?.forbidden_verbs)
-    ? body.intent.forbidden_verbs
+    ? asStringArray(body.forbiddenActions)
+    : Array.isArray(intent.forbidden_actions)
+    ? asStringArray(intent.forbidden_actions)
+    : Array.isArray(intent.forbidden_verbs)
+    ? asStringArray(intent.forbidden_verbs)
     : [];
 
   // Ground-truth labels (deviation_step, failure_type, etc.) are strictly excluded
@@ -226,8 +252,8 @@ export async function POST(request: NextRequest) {
       cache: "no-store",
     });
     clearTimeout(timeoutId);
-  } catch (fetchErr: any) {
-    if (fetchErr.name === "AbortError") {
+  } catch (fetchErr: unknown) {
+    if (fetchErr instanceof DOMException && fetchErr.name === "AbortError") {
       return NextResponse.json(
         {
           status: "error",
@@ -265,9 +291,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let detectorOutput: any;
+  let detectorOutput: JsonRecord;
   try {
-    detectorOutput = await backendRes.json();
+    const parsed = await backendRes.json() as unknown;
+    if (!isRecord(parsed)) throw new Error("Response is not a JSON object");
+    detectorOutput = parsed;
   } catch {
     return NextResponse.json(
       {
@@ -282,7 +310,8 @@ export async function POST(request: NextRequest) {
     !detectorOutput ||
     typeof detectorOutput !== "object" ||
     !Array.isArray(detectorOutput.steps) ||
-    !detectorOutput.audit
+    !isRecord(detectorOutput.audit) ||
+    detectorOutput.steps.some((step) => !isRecord(step))
   ) {
     return NextResponse.json(
       {
@@ -293,44 +322,47 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const detectorSteps = detectorOutput.steps.filter(isRecord);
+  const detectorAudit = detectorOutput.audit as JsonRecord;
+  const detectorDetection = isRecord(detectorOutput.detection) ? detectorOutput.detection : {};
+
   // 6. Map FastAPI TraceModel into frontend's expected structure
-  const isDeviated = Boolean(detectorOutput.audit?.isDeviated);
+  const isDeviated = detectorAudit.isDeviated === true;
   const deviationType = isDeviated
-    ? detectorOutput.audit?.deviationType || "none"
+    ? asString(detectorAudit.deviationType) || "none"
     : "none";
   const confidence =
-    typeof detectorOutput.audit?.confidence === "number"
-      ? detectorOutput.audit.confidence
+    typeof detectorAudit.confidence === "number"
+      ? detectorAudit.confidence
       : 0;
 
-  const similarityCurve: number[] = detectorOutput.steps.map((s: any) =>
+  const similarityCurve: number[] = detectorSteps.map((s) =>
     typeof s.similarityScore === "number" && Number.isFinite(s.similarityScore)
       ? s.similarityScore
       : 0
   );
 
-  const flaggedStepIds: number[] = Array.isArray(
-    detectorOutput.audit?.flaggedStepIds
-  )
-    ? detectorOutput.audit.flaggedStepIds
-        .map((id: any) => parseInt(id, 10))
+  const flaggedStepIds: number[] = Array.isArray(detectorAudit.flaggedStepIds)
+    ? detectorAudit.flaggedStepIds
+        .map((id) => parseInt(String(id), 10))
         .filter((n: number) => Number.isFinite(n))
     : [];
 
   let primaryStepId: number | null = null;
   if (isDeviated) {
-    if (detectorOutput.detection?.pelt?.breakpointStepId) {
-      const parsed = parseInt(detectorOutput.detection.pelt.breakpointStepId, 10);
+    const pelt = isRecord(detectorDetection.pelt) ? detectorDetection.pelt : {};
+    const scope = isRecord(detectorDetection.scope) ? detectorDetection.scope : {};
+    if (asString(pelt.breakpointStepId)) {
+      const parsed = parseInt(asString(pelt.breakpointStepId) || "", 10);
       if (Number.isFinite(parsed)) primaryStepId = parsed;
     }
     if (
       primaryStepId === null &&
-      detectorOutput.detection?.scope?.violations?.length > 0
+      Array.isArray(scope.violations) &&
+      scope.violations.length > 0
     ) {
-      const parsed = parseInt(
-        detectorOutput.detection.scope.violations[0].stepId,
-        10
-      );
+      const firstViolation = isRecord(scope.violations[0]) ? scope.violations[0] : {};
+      const parsed = parseInt(asString(firstViolation.stepId) || "", 10);
       if (Number.isFinite(parsed)) primaryStepId = parsed;
     }
     if (primaryStepId === null && flaggedStepIds.length > 0) {
@@ -338,21 +370,19 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const mappedSteps: DetectorV1Step[] = detectorOutput.steps.map(
-    (s: any, idx: number) => {
-      const parsedId = parseInt(s.stepId, 10);
+  const mappedSteps: DetectorV1Step[] = detectorSteps.map((s, idx) => {
+      const parsedId = parseInt(asString(s.stepId) || "", 10);
       const originalStep = backendSteps[idx];
       return {
         step_id: Number.isFinite(parsedId) ? parsedId : idx + 1,
-        action_type: s.action || originalStep?.action_type || "unknown",
+        action_type: asString(s.action) || originalStep?.action_type || "unknown",
         tool_called:
-          originalStep?.tool_called || s.tool_called || s.action || null,
-        tool_input: s.tool_input || originalStep?.tool_input || null,
-        tool_output: s.tool_output || originalStep?.tool_output || null,
-        agent_reasoning: s.reasoning || originalStep?.agent_reasoning || null,
+          originalStep?.tool_called || asString(s.tool_called) || asString(s.action) || null,
+        tool_input: asString(s.tool_input) || originalStep?.tool_input || null,
+        tool_output: asString(s.tool_output) || originalStep?.tool_output || null,
+        agent_reasoning: asString(s.reasoning) || originalStep?.agent_reasoning || null,
       };
-    }
-  );
+    });
 
   const v1Result: DetectorV1Result = {
     step_id: primaryStepId,
@@ -363,7 +393,7 @@ export async function POST(request: NextRequest) {
   };
 
   const explanation =
-    detectorOutput.audit?.explanation ||
+    asString(detectorAudit.explanation) ||
     (isDeviated
       ? `Deviation (${deviationType}) detected by ML core.`
       : "No deviation detected by ML core.");
@@ -373,31 +403,32 @@ export async function POST(request: NextRequest) {
     causal_attribution: { explanation: string; trigger_tokens: string[] };
     prompt_repair: {
       corrected_prompt: string;
-      diff: any[];
+      diff: Array<{ old: string; new: string; reason: string }>;
       justification: string;
     };
-    detection?: any;
-    audit?: any;
+    detection?: unknown;
+    audit?: unknown;
   } = {
     status: "success",
-    trace_id: detectorOutput.traceId || `trace_${Date.now()}`,
-    original_prompt: detectorOutput.prompt || prompt,
+    trace_id: asString(detectorOutput.traceId) || `trace_${Date.now()}`,
+    original_prompt: asString(detectorOutput.prompt) || prompt,
     steps: mappedSteps,
     intent: {
       allowed_actions:
-        detectorOutput.detection?.scope?.allowedActions || allowedActions,
+      isRecord(detectorDetection.scope) && Array.isArray(detectorDetection.scope.allowedActions)
+        ? asStringArray(detectorDetection.scope.allowedActions)
+        : allowedActions,
       forbidden_actions:
-        detectorOutput.detection?.scope?.forbiddenActions || forbiddenActions,
+        isRecord(detectorDetection.scope) && Array.isArray(detectorDetection.scope.forbiddenActions)
+          ? asStringArray(detectorDetection.scope.forbiddenActions)
+          : forbiddenActions,
     },
     similarity_analysis: {
       curve: similarityCurve,
-      config: detectorOutput.detection?.detectorConfig || null,
+      config: detectorDetection.detectorConfig || null,
     },
-    drift_analysis:
-      detectorOutput.detection?.pelt ||
-      detectorOutput.detection?.fallback ||
-      null,
-    scope_analysis: detectorOutput.detection?.scope || null,
+    drift_analysis: detectorDetection.pelt || detectorDetection.fallback || null,
+    scope_analysis: detectorDetection.scope || null,
     detection: detectorOutput.detection || null,
     audit: detectorOutput.audit || null,
     result: v1Result,

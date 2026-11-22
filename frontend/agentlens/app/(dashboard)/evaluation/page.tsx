@@ -57,7 +57,10 @@ export default function EvaluationPage() {
   }, []);
 
   useEffect(() => {
-    fetchMetrics(split, false);
+    const requestId = window.setTimeout(() => {
+      void fetchMetrics(split, false);
+    }, 0);
+    return () => window.clearTimeout(requestId);
   }, [split, fetchMetrics]);
 
   const handleRunEvaluation = () => {
@@ -212,8 +215,8 @@ export default function EvaluationPage() {
                   }}
                 >
                   <option value="test">test (28 traces)</option>
-                  <option value="train">train</option>
-                  <option value="validation">validation</option>
+                  <option value="train">train (231 traces)</option>
+                  <option value="validation">validation (31 traces)</option>
                 </select>
               </div>
 

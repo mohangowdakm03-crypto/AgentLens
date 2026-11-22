@@ -29,6 +29,11 @@ import { DeviationBadge, StatusBadge } from '@/components/common/Badge';
 import Button from '@/components/common/Button';
 import { BENCHMARK_TRACES, BenchmarkTrace } from '@/lib/benchmark-traces';
 import { listTraces, getTrace } from '@/services/api';
+function normalizeDeviationType(value: string | null | undefined): BenchmarkTrace['ground_truth']['deviation_type'] {
+  if (value === 'drift' || value === 'scope_creep' || value === 'tool_misuse') return value;
+  if (value === 'misinterpretation') return 'prompt_misinterpretation';
+  return 'none';
+}
 
 export default function TraceExplorerPage() {
   const [search, setSearch] = useState('');
@@ -42,18 +47,17 @@ export default function TraceExplorerPage() {
   const [drawerTab, setDrawerTab] = useState<'timeline' | 'json' | 'policy'>('timeline');
   const [currentPage, setCurrentPage] = useState(1);
   const [backendTraces, setBackendTraces] = useState<BenchmarkTrace[]>([]);
-  const [isLoadingBackend, setIsLoadingBackend] = useState(false);
+  const [isLoadingBackend, setIsLoadingBackend] = useState(true);
   const pageSize = 15;
 
   // Fetch traces from backend repository (300 records)
   useEffect(() => {
-    setIsLoadingBackend(true);
     listTraces()
       .then((items) => {
         if (Array.isArray(items) && items.length > 0) {
           const mapped: BenchmarkTrace[] = items.map((item) => {
             const isDev = item.groundTruth?.isDeviated ?? false;
-            const devType = (item.groundTruth?.deviationType || 'none') as any;
+            const devType = normalizeDeviationType(item.groundTruth?.deviationType);
             const domain = item.traceId.includes('00') ? 'Software Development' : 'AI/ML';
             return {
               trace_id: item.traceId,
@@ -160,7 +164,9 @@ export default function TraceExplorerPage() {
         return sortOrder === 'asc' ? a.steps.length - b.steps.length : b.steps.length - a.steps.length;
       }
       if (sortField === 'latency') {
-        return sortOrder === 'asc' ? a.total_latency_ms - b.total_latency_ms : b.total_latency_ms - a.total_latency_ms;
+        const aLat = a.total_latency_ms ?? 0;
+        const bLat = b.total_latency_ms ?? 0;
+        return sortOrder === 'asc' ? aLat - bLat : bLat - aLat;
       }
       if (sortField === 'status') {
         const aStatus = a.ground_truth.deviation_type;
@@ -1069,7 +1075,7 @@ export default function TraceExplorerPage() {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setDrawerTab(tab.id as any)}
+                    onClick={() => setDrawerTab(tab.id as 'timeline' | 'json' | 'policy')}
                     style={{
                       padding: '11px 16px',
                       background: 'transparent',

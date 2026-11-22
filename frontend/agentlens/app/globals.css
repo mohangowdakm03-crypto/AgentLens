@@ -88,3 +88,27 @@ input, textarea, select {
   font-family: inherit;
   font-size: inherit;
 }
+
+/* Mobile Drawer & Sidebar Responsiveness */
+@media (max-width: 1023px) {
+  .sidebar-desktop-container {
+    display: none !important;
+  }
+}
+@media (min-width: 1024px) {
+  .sidebar-mobile-trigger,
+  .sidebar-mobile-overlay,
+  .sidebar-mobile-drawer {
+    display: none !important;
+  }
+}
+
+/* Reduced-motion: disable transitions and animations for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

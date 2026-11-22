@@ -3,22 +3,21 @@ import os
 import sys
 import pytest
 
-# Ensure project root, detector, and ml_core are in sys.path
+# Ensure project root and ml_core are in sys.path
 test_dir = os.path.dirname(os.path.abspath(__file__))
-detector_dir = os.path.dirname(test_dir)
-project_root = os.path.dirname(detector_dir)
-ml_core_dir = os.path.join(detector_dir, "ml_core")
+project_root = os.path.dirname(test_dir)
+ml_core_dir = os.path.join(project_root, "ml_core")
 
-for p in [project_root, detector_dir, ml_core_dir]:
+for p in [project_root, ml_core_dir]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
-from detector.api.loader import repository
-from detector.api.service import detector_service
-from detector.api.main import (
+from api.loader import repository
+from api.service import detector_service
+from api.main import (
     health_check,
     list_traces,
     get_trace_endpoint,
@@ -26,7 +25,7 @@ from detector.api.main import (
     evaluate_dataset,
     get_performance_report,
 )
-from detector.api.models import DetectRequest
+from api.models import DetectRequest
 from fastapi import HTTPException
 
 

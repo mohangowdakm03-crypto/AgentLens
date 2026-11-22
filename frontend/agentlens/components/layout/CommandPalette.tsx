@@ -46,9 +46,13 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
-      setQuery('');
-      setSelectedIndex(0);
+      const resetId = window.setTimeout(() => {
+        setQuery('');
+        setSelectedIndex(0);
+      }, 0);
+      return () => window.clearTimeout(resetId);
     }
+    return undefined;
   }, [isOpen]);
 
   useEffect(() => {
@@ -312,7 +316,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                             {trace.original_prompt}
                           </div>
                           <div style={{ fontSize: 11, color: '#737982' }}>
-                            {trace.domain} • {trace.steps.length} steps • {trace.total_latency_ms}ms
+                            {trace.domain} • {trace.steps.length} steps{trace.total_latency_ms != null ? ` • ${trace.total_latency_ms}ms` : ''}
                           </div>
                         </div>
                         <span
