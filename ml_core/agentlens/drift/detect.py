@@ -1,4 +1,7 @@
 """Drift (PELT) + scope verifier -> Deviation."""
+from dataclasses import dataclass
+from typing import Optional
+
 import numpy as np
 from agentlens.schema import Deviation
 
@@ -7,39 +10,72 @@ MIN_DROP = 0.15    # min mean drop to count as drift
 FALLBACK_DROP = 0.20  # min single-step drop for the fallback
 
 
-def find_drift_step(curve, pen=PEN, min_drop=MIN_DROP, fallback_drop=FALLBACK_DROP):
-    """Return (index, drop) of first sustained drop, or (None, 0). Index is 0-based.
+@dataclass(frozen=True)
+class DriftAnalysis:
+    """Canonical drift decision and diagnostics for a similarity curve.
+
+    ``index`` is zero-based.  ``method`` is one of ``pelt``, ``fallback``, or
+    ``none``; the optional similarity values are the segment means for PELT
+    and the adjacent values for the fallback.
+    """
+
+    index: Optional[int]
+    drop: float
+    method: str
+    similarity_before: Optional[float] = None
+    similarity_after: Optional[float] = None
+
+
+def analyze_drift_curve(curve, pen=PEN, min_drop=MIN_DROP, fallback_drop=FALLBACK_DROP):
+    """Return the canonical drift decision plus the diagnostics behind it.
 
     Edge cases:
-    - Curves shorter than 3 points: returns (None, 0.0) — insufficient data for PELT
-      or reliable fallback.
+    - Curves with fewer than 2 points: returns (None, 0.0) — insufficient data
+      for detection or single-step fallback.
+    - Curves with at least 3 points: evaluated with PELT change-point detection first.
+    - Curves with at least 2 points: eligible for the single-step fallback.
     - All-zero or flat curves: no drop detected; returns (None, 0.0).
-    - Single-element diff (2-point curve): handled by n < 3 guard above.
     """
-    import ruptures as rpt
     n = len(curve)
-    if n < 3:
-        return None, 0.0
-    sig = np.asarray(curve, float).reshape(-1, 1)
-    try:
-        bkps = rpt.Pelt(model="l2", min_size=1, jump=1).fit(sig).predict(pen=pen)
-    except (ValueError, rpt.exceptions.BadSegmentationParameters) as exc:
-        # PELT cannot operate on this input (e.g. all-identical values, bad pen).
-        # Fall through to the single-step fallback below.
-        bkps = [n]
-    for b in bkps:
-        if b >= n:
-            continue
-        before, after = np.mean(curve[:b]), np.mean(curve[b:])
-        if before - after >= min_drop:       # dropped and did not recover
-            return b, float(before - after)
-    # Fallback: biggest single-step drop (short traces often defeat PELT).
-    # np.diff always produces at least 2 elements here (n >= 3 → n-1 >= 2).
+    if n < 2:
+        return DriftAnalysis(None, 0.0, "none")
+
+    if n >= 3:
+        import ruptures as rpt
+        sig = np.asarray(curve, float).reshape(-1, 1)
+        try:
+            bkps = rpt.Pelt(model="l2", min_size=1, jump=1).fit(sig).predict(pen=pen)
+        except (ValueError, rpt.exceptions.BadSegmentationParameters) as exc:
+            # PELT cannot operate on this input (e.g. all-identical values, bad pen).
+            # Fall through to the single-step fallback below.
+            bkps = [n]
+        for b in bkps:
+            if b >= n:
+                continue
+            before, after = np.mean(curve[:b]), np.mean(curve[b:])
+            if before - after >= min_drop:       # dropped and did not recover
+                return DriftAnalysis(
+                    b, float(before - after), "pelt", float(before), float(after)
+                )
+
+    # Fallback: biggest single-step drop (operates on curves with n >= 2).
     drops = np.diff(curve)
     i = int(np.argmin(drops))
     if -drops[i] >= fallback_drop and np.mean(curve[i + 1:]) < curve[i]:
-        return i + 1, float(-drops[i])
-    return None, 0.0
+        return DriftAnalysis(
+            i + 1, float(-drops[i]), "fallback", float(curve[i]), float(curve[i + 1])
+        )
+    return DriftAnalysis(None, 0.0, "none")
+
+
+def find_drift_step(curve, pen=PEN, min_drop=MIN_DROP, fallback_drop=FALLBACK_DROP):
+    """Return ``(index, drop)`` from :func:`analyze_drift_curve`.
+
+    This compatibility wrapper retains the original ML-core contract for
+    callers that only require the detected step and magnitude.
+    """
+    result = analyze_drift_curve(curve, pen, min_drop, fallback_drop)
+    return result.index, result.drop
 
 
 def scope_violations(steps, intent):
@@ -62,8 +98,12 @@ def scope_violations(steps, intent):
     return out
 
 
-def detect_from_curve(steps, curve, intent):
+def detect_from_curve(steps, curve, intent, drift_analysis=None):
     """Classify deviation given a pre-computed similarity curve.
+
+    ``drift_analysis`` may be supplied by a caller that also needs diagnostics;
+    this guarantees its reported breakpoint is the same decision used for
+    classification.
 
     Raises:
         ValueError: if len(curve) != len(steps), making the curve uninterpretable.
@@ -78,7 +118,8 @@ def detect_from_curve(steps, curve, intent):
         )
 
     flagged = scope_violations(steps, intent)
-    idx, drop = find_drift_step(curve)
+    analysis = drift_analysis if drift_analysis is not None else analyze_drift_curve(curve)
+    idx, drop = analysis.index, analysis.drop
     drift_step = steps[idx].step_id if idx is not None else None
 
     candidates = [(s, t) for s, t in ((drift_step, "drift"),

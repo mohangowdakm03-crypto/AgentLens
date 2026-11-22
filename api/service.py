@@ -13,7 +13,6 @@ os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
 import numpy as np
-import ruptures as rpt
 from typing import Dict, Any, List, Optional
 
 from agentlens.schema import Step, Intent, Deviation
@@ -22,7 +21,7 @@ from agentlens.drift.curve import similarity_curve
 from agentlens.drift.detect import (
     detect_deviation,
     scope_violations,
-    find_drift_step,
+    analyze_drift_curve,
     detect_from_curve,
     PEN,
     MIN_DROP,
@@ -73,47 +72,27 @@ class DetectorService:
         else:
             curve = []
 
-        # 3. Analyze PELT change-point detection
-        pelt_idx: Optional[int] = None
-        pelt_drop: Optional[float] = None
-        sim_before: Optional[float] = None
-        sim_after: Optional[float] = None
-
-        if n >= 3:
-            sig = np.asarray(curve, float).reshape(-1, 1)
-            try:
-                bkps = rpt.Pelt(model="l2", min_size=1, jump=1).fit(sig).predict(pen=PEN)
-            except Exception:
-                bkps = [n]
-            for b in bkps:
-                if b < n:
-                    before, after = float(np.mean(curve[:b])), float(np.mean(curve[b:]))
-                    if before - after >= MIN_DROP:
-                        pelt_idx = b
-                        pelt_drop = float(before - after)
-                        sim_before = before
-                        sim_after = after
-                        break
-
-        # 4. Analyze Fallback single-step drop
-        fallback_triggered = False
+        # 3. Use the ML core's canonical analysis for API diagnostics.  Do not
+        # duplicate PELT/fallback logic here: that previously made two-step
+        # fallback detections disagree with the API response.
+        drift_analysis = analyze_drift_curve(curve)
+        pelt_idx = drift_analysis.index if drift_analysis.method == "pelt" else None
+        pelt_drop = drift_analysis.drop if pelt_idx is not None else None
+        sim_before = drift_analysis.similarity_before if pelt_idx is not None else None
+        sim_after = drift_analysis.similarity_after if pelt_idx is not None else None
+        fallback_triggered = drift_analysis.method == "fallback"
+        fallback_idx = drift_analysis.index if fallback_triggered else None
+        fallback_drop_val = drift_analysis.drop if fallback_triggered else 0.0
         fallback_reason: Optional[str] = None
-        fallback_idx: Optional[int] = None
-        fallback_drop_val: float = 0.0
-
-        if pelt_idx is None and n >= 3:
-            drops = np.diff(curve)
-            i = int(np.argmin(drops))
-            if -drops[i] >= FALLBACK_DROP and np.mean(curve[i + 1:]) < curve[i]:
-                fallback_triggered = True
-                fallback_idx = i + 1
-                fallback_drop_val = float(-drops[i])
-                step_name = loaded_trace.step_id_map.get(steps[i + 1].step_id, str(steps[i + 1].step_id))
-                fallback_reason = (
-                    f"No PELT changepoint met threshold {MIN_DROP}. Fallback triggered: "
-                    f"single-step similarity drop of {fallback_drop_val:.3f} at step {step_name} "
-                    f"exceeds FALLBACK_DROP ({FALLBACK_DROP})."
-                )
+        if fallback_triggered and fallback_idx is not None:
+            step_name = loaded_trace.step_id_map.get(
+                steps[fallback_idx].step_id, str(steps[fallback_idx].step_id)
+            )
+            fallback_reason = (
+                f"No PELT changepoint met threshold {MIN_DROP}. Fallback triggered: "
+                f"single-step similarity drop of {fallback_drop_val:.3f} at step {step_name} "
+                f"exceeds FALLBACK_DROP ({FALLBACK_DROP})."
+            )
 
         # 5. Scope violations (Action Types only)
         raw_violation_ids = scope_violations(steps, intent) if steps else []
@@ -134,10 +113,13 @@ class DetectorService:
                     )
                 )
 
-        # 6. Contract function: detect_deviation / detect_from_curve
-        deviation = detect_from_curve(steps, curve, intent) if steps else Deviation(None, "none", 0.0, [], [])
+        # 5. Contract function: detect_deviation / detect_from_curve
+        deviation = (
+            detect_from_curve(steps, curve, intent, drift_analysis=drift_analysis)
+            if steps else Deviation(None, "none", 0.0, [], [])
+        )
 
-        # 7. Build flagged step IDs
+        # 6. Build flagged step IDs
         flagged_step_ids: List[str] = []
         # Add scope violations
         for v in raw_violation_ids:
@@ -146,14 +128,14 @@ class DetectorService:
                 flagged_step_ids.append(s_label)
 
         # If drift detected, flag drift step and downstream steps
-        drift_step_idx = pelt_idx if pelt_idx is not None else fallback_idx
+        drift_step_idx = drift_analysis.index
         if drift_step_idx is not None and drift_step_idx < n:
             for k in range(drift_step_idx, n):
                 s_label = loaded_trace.step_id_map.get(steps[k].step_id, str(steps[k].step_id))
                 if s_label not in flagged_step_ids:
                     flagged_step_ids.append(s_label)
 
-        # 8. Generate natural language explanation
+        # 7. Generate natural language explanation
         is_deviated = deviation.step_id is not None and deviation.type != "none"
         dev_type = deviation.type if is_deviated else None
 
@@ -188,7 +170,7 @@ class DetectorService:
                     f"No forbidden action types used. Trace classified as on-task."
                 )
 
-        # 9. Build StepModel list
+        # 8. Build StepModel list
         step_models: List[StepModel] = []
         for idx, s in enumerate(steps):
             score = float(curve[idx]) if idx < len(curve) else 0.0
@@ -203,7 +185,7 @@ class DetectorService:
                 )
             )
 
-        # 10. Assemble full DetectionModel
+        # 9. Assemble full DetectionModel
         breakpoint_step_label = (
             loaded_trace.step_id_map.get(steps[pelt_idx].step_id, str(steps[pelt_idx].step_id))
             if pelt_idx is not None and pelt_idx < n

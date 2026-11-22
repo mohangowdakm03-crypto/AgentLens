@@ -2,7 +2,17 @@ from agentlens.drift.embed import embed, cosine
 
 
 def step_text(step):
-    return f"{step.agent_reasoning} {step.tool_output}".strip() or step.tool_input
+    parts = []
+    for val in (
+        getattr(step, "agent_reasoning", None),
+        getattr(step, "tool_input", None),
+        getattr(step, "tool_output", None),
+    ):
+        if val:
+            s = str(val).strip()
+            if s:
+                parts.append(s)
+    return " ".join(parts)
 
 
 def similarity_curve(steps, intent_vec, embed_fn=embed):

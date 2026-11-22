@@ -1,6 +1,7 @@
 """Step 1 of your work: embeddings + cosine similarity."""
 import numpy as np
 
+MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 _MODEL = None
 
 
@@ -8,7 +9,7 @@ def _device():
     return "cpu"
 
 
-def get_model(name="sentence-transformers/all-MiniLM-L6-v2"):
+def get_model(name=MODEL_NAME):
     global _MODEL
     if _MODEL is None:
         from sentence_transformers import SentenceTransformer

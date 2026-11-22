@@ -25,6 +25,8 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
 
 from .loader import LoadedTrace, TraceRepository, _DATA_DIR, _GT_RAW_KEYS, normalize_bool
 from .models import TraceModel
+from agentlens.drift.curve import step_text
+from agentlens.drift.embed import MODEL_NAME
 
 # Canonical 4-class AgentLens taxonomy order
 EVALUATION_CLASSES: Tuple[str, ...] = (
@@ -418,8 +420,12 @@ def compute_known_limitations(
     return {
         "short_drift_traces_lt_3_steps": {
             "description": (
-                "Drift-labelled traces with fewer than 3 steps cannot trigger PELT or "
-                "fallback drift detection because find_drift_step() requires len(curve) >= 3."
+                "PELT requires at least 3 similarity values, so it is unavailable for these "
+                "drift-labelled traces. The fallback detector still supports 2-step traces "
+                "when the adjacent similarity drop meets FALLBACK_DROP (0.20): al_trace_170 "
+                "is a successful example. This subset is therefore PELT-ineligible, not "
+                "universally undetectable; al_trace_192 remains a false negative because its "
+                "0.1237 drop is below the 0.20 fallback threshold."
             ),
             **_summarize_subset(short_drift_rows),
         },
@@ -620,6 +626,14 @@ def evaluate_repository(
             "pelt_breakpoint_step_id": model_out.detection.pelt.breakpointStepId,
             "fallback_triggered": bool(model_out.detection.fallback.triggered),
             "scope_violation_count": len(model_out.detection.scope.violations),
+            # Reproducibility metadata is derived from detector inputs only;
+            # it is captured before ground truth is joined in stage 2.
+            "detector_diagnostics": {
+                "embedding_model": MODEL_NAME,
+                "detector_config": model_out.detection.detectorConfig.model_dump(),
+                "similarity_curve": [round(float(s.similarityScore), 4) for s in model_out.steps],
+                "step_embedding_texts": [step_text(s) for s in trace.steps],
+            },
         }
         ordered_evaluated_ids.append(trace.trace_id)
 
@@ -704,6 +718,7 @@ def evaluate_repository(
             "pelt_breakpoint_step_id": pred["pelt_breakpoint_step_id"],
             "fallback_triggered": pred["fallback_triggered"],
             "scope_violation_count": pred["scope_violation_count"],
+            "detector_diagnostics": pred["detector_diagnostics"],
         }
         per_trace_results.append(row)
 
