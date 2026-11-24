@@ -75,9 +75,9 @@ const ACTIVITY_BY_RANGE: Record<string, { date: string; audits: number }[]> = {
 };
 
 const OUTCOME_DATA = [
-  { name: 'None (Nominal)', value: 146, color: '#72947A', pct: '48.7%' },
-  { name: 'Scope Creep', value: 115, color: '#B97878', pct: '38.3%' },
-  { name: 'Semantic Drift', value: 34, color: '#C49A5B', pct: '11.3%' },
+  { name: 'None (Nominal)', value: 146, color: '#059669', pct: '48.7%' },
+  { name: 'Scope Creep', value: 115, color: '#DC2626', pct: '38.3%' },
+  { name: 'Semantic Drift', value: 34, color: '#D97706', pct: '11.3%' },
   { name: 'Misinterpretation', value: 5, color: '#9B8FC0', pct: '1.7%' },
 ];
 
@@ -106,10 +106,10 @@ const RECENT_TRACES = [
 ];
 
 const RECENT_ACTIVITY = [
-  { label: 'Dataset audited (300 traces)', time: '3 mins ago', color: '#72947A', filled: true },
-  { label: 'Deviation analysis completed', time: '5 mins ago', color: '#72947A', filled: true },
-  { label: 'Evaluation metrics updated', time: '8 mins ago', color: '#829581', filled: false },
-  { label: 'New audit: AL-0300', time: '10 mins ago', color: '#737982', filled: false },
+  { label: 'Dataset audited (300 traces)', time: '3 mins ago', color: '#059669', filled: true },
+  { label: 'Deviation analysis completed', time: '5 mins ago', color: '#059669', filled: true },
+  { label: 'Evaluation metrics updated', time: '8 mins ago', color: '#4F46E5', filled: false },
+  { label: 'New audit: AL-0300', time: '10 mins ago', color: '#475569', filled: false },
 ];
 
 const EVAL_METRICS = [
@@ -131,15 +131,15 @@ function CustomTooltip({ active, payload, label }: ChartTooltipProps) {
     <div
       style={{
         background: '#FFFFFF',
-        border: '1px solid #E6E5DF',
+        border: '1px solid #E2E8F0',
         borderRadius: 8,
         padding: '8px 12px',
         boxShadow: '0 4px 12px rgba(41,45,50,0.08)',
         fontSize: 12,
       }}
     >
-      <div style={{ color: '#737982', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontWeight: 600, color: '#292D32' }}>{String(payload[0].value ?? '')} audits</div>
+      <div style={{ color: '#475569', marginBottom: 4 }}>{label}</div>
+      <div style={{ fontWeight: 600, color: '#0F172A' }}>{String(payload[0].value ?? '')} audits</div>
     </div>
   );
 }
@@ -158,7 +158,7 @@ export default function OverviewPage() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        background: '#F8F7F3',
+        background: '#F8FAFC',
         position: 'relative',
         overflowX: 'hidden',
       }}
@@ -189,12 +189,12 @@ export default function OverviewPage() {
         />
         <defs>
           <linearGradient id="waveGrad1" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#829581" stopOpacity="0.08" />
-            <stop offset="100%" stopColor="#829581" stopOpacity="0.02" />
+            <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.08" />
+            <stop offset="100%" stopColor="#4F46E5" stopOpacity="0.02" />
           </linearGradient>
           <linearGradient id="waveGrad2" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#829581" stopOpacity="0.06" />
-            <stop offset="100%" stopColor="#829581" stopOpacity="0.01" />
+            <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.06" />
+            <stop offset="100%" stopColor="#4F46E5" stopOpacity="0.01" />
           </linearGradient>
         </defs>
       </svg>
@@ -232,9 +232,9 @@ export default function OverviewPage() {
             changePositive
             subtitle="150 AI/ML, 150 Software Dev"
             icon={<Layers size={22} strokeWidth={1.8} />}
-            accentColor="#829581"
-            accentBg="rgba(130, 149, 129, 0.12)"
-            bottomBarColor="#829581"
+            accentColor="#4F46E5"
+            accentBg="rgba(79, 70, 229, 0.1)"
+            bottomBarColor="#4F46E5"
           />
           <StatCard
             title="Deviations Detected"
@@ -243,9 +243,9 @@ export default function OverviewPage() {
             changePositive={false}
             subtitle="Total ground truth anomalies"
             icon={<AlertTriangle size={22} strokeWidth={1.8} />}
-            accentColor="#B97878"
-            accentBg="rgba(185, 120, 120, 0.12)"
-            bottomBarColor="#B97878"
+            accentColor="#DC2626"
+            accentBg="rgba(220, 38, 38, 0.1)"
+            bottomBarColor="#DC2626"
           />
           <StatCard
             title="Scope Creep Cases"
@@ -254,9 +254,9 @@ export default function OverviewPage() {
             changePositive={false}
             subtitle="Action whitelist breaches"
             icon={<Layers size={22} strokeWidth={1.8} />}
-            accentColor="#B97878"
-            accentBg="rgba(185, 120, 120, 0.12)"
-            bottomBarColor="#B97878"
+            accentColor="#DC2626"
+            accentBg="rgba(220, 38, 38, 0.1)"
+            bottomBarColor="#DC2626"
           />
           <StatCard
             title="Semantic Drift Cases"
@@ -265,9 +265,9 @@ export default function OverviewPage() {
             changePositive
             subtitle="PELT change-point drops"
             icon={<GitBranch size={22} strokeWidth={1.8} />}
-            accentColor="#C49A5B"
-            accentBg="rgba(196, 154, 91, 0.12)"
-            bottomBarColor="#C49A5B"
+            accentColor="#D97706"
+            accentBg="rgba(217, 119, 6, 0.1)"
+            bottomBarColor="#D97706"
           />
         </div>
 
@@ -279,16 +279,16 @@ export default function OverviewPage() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '22px 24px',
               boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>
                 Audit Outcome Distribution
               </span>
-              <Info size={14} color="#737982" strokeWidth={1.6} />
+              <Info size={14} color="#475569" strokeWidth={1.6} />
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
@@ -329,14 +329,14 @@ export default function OverviewPage() {
                     style={{
                       fontSize: 22,
                       fontWeight: 700,
-                      color: '#292D32',
+                      color: '#0F172A',
                       letterSpacing: '-0.02em',
                       lineHeight: 1.1,
                     }}
                   >
                     300
                   </div>
-                  <div style={{ fontSize: 11, color: '#737982' }}>Traces</div>
+                  <div style={{ fontSize: 11, color: '#475569' }}>Traces</div>
                 </div>
               </div>
 
@@ -363,16 +363,16 @@ export default function OverviewPage() {
                           flexShrink: 0,
                         }}
                       />
-                      <span style={{ fontSize: 13, color: '#292D32' }}>{item.name}</span>
+                      <span style={{ fontSize: 13, color: '#0F172A' }}>{item.name}</span>
                     </div>
                     <span
                       style={{
                         fontSize: 13,
-                        color: '#737982',
+                        color: '#475569',
                         fontFamily: 'IBM Plex Mono, monospace',
                       }}
                     >
-                      {item.value} <span style={{ color: '#737982' }}>({item.pct})</span>
+                      {item.value} <span style={{ color: '#475569' }}>({item.pct})</span>
                     </span>
                   </div>
                 ))}
@@ -385,7 +385,7 @@ export default function OverviewPage() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '22px 24px',
               boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
               display: 'flex',
@@ -394,10 +394,10 @@ export default function OverviewPage() {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>
                 Evaluation Performance
               </span>
-              <Info size={14} color="#737982" strokeWidth={1.6} />
+              <Info size={14} color="#475569" strokeWidth={1.6} />
             </div>
 
             <div
@@ -416,14 +416,14 @@ export default function OverviewPage() {
                     style={{
                       textAlign: 'center',
                       padding: '18px 10px',
-                      background: '#F8F7F3',
+                      background: '#F8FAFC',
                       borderRadius: 10,
-                      border: '1px solid #E6E5DF',
+                      border: '1px solid #E2E8F0',
                     }}
                   >
                     <div
                       style={{
-                        color: '#829581',
+                        color: '#4F46E5',
                         marginBottom: 10,
                         display: 'flex',
                         justifyContent: 'center',
@@ -435,14 +435,14 @@ export default function OverviewPage() {
                         IconComponent && <IconComponent size={20} strokeWidth={1.8} />
                       )}
                     </div>
-                    <div style={{ fontSize: 11, color: '#737982', marginBottom: 6 }}>
+                    <div style={{ fontSize: 11, color: '#475569', marginBottom: 6 }}>
                       {m.label}
                     </div>
                     <div
                       style={{
                         fontSize: 26,
                         fontWeight: 700,
-                        color: '#292D32',
+                        color: '#0F172A',
                         letterSpacing: '-0.02em',
                         fontFamily: 'IBM Plex Mono, monospace',
                       }}
@@ -464,7 +464,7 @@ export default function OverviewPage() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '20px 24px',
               boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
             }}
@@ -477,7 +477,7 @@ export default function OverviewPage() {
                 marginBottom: 16,
               }}
             >
-              <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>
                 Audit Activity Trend
               </span>
               <div style={{ position: 'relative' }}>
@@ -488,9 +488,9 @@ export default function OverviewPage() {
                     alignItems: 'center',
                     gap: 6,
                     fontSize: 12,
-                    color: '#292D32',
-                    background: '#F8F7F3',
-                    border: '1px solid #E6E5DF',
+                    color: '#0F172A',
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
                     borderRadius: 6,
                     padding: '4px 10px',
                     cursor: 'pointer',
@@ -515,7 +515,7 @@ export default function OverviewPage() {
                       right: 0,
                       marginTop: 4,
                       background: '#FFFFFF',
-                      border: '1px solid #E6E5DF',
+                      border: '1px solid #E2E8F0',
                       borderRadius: 8,
                       boxShadow: '0 4px 14px rgba(41,45,50,0.1)',
                       zIndex: 50,
@@ -536,8 +536,8 @@ export default function OverviewPage() {
                           textAlign: 'left',
                           padding: '8px 12px',
                           fontSize: 12,
-                          background: timeRange === opt ? '#F8F7F3' : 'transparent',
-                          color: timeRange === opt ? '#829581' : '#292D32',
+                          background: timeRange === opt ? '#F8FAFC' : 'transparent',
+                          color: timeRange === opt ? '#4F46E5' : '#0F172A',
                           fontWeight: timeRange === opt ? 600 : 400,
                           border: 'none',
                           cursor: 'pointer',
@@ -558,21 +558,21 @@ export default function OverviewPage() {
               >
                 <defs>
                   <linearGradient id="auditGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#829581" stopOpacity="0.25" />
-                    <stop offset="95%" stopColor="#829581" stopOpacity="0.02" />
+                    <stop offset="5%" stopColor="#4F46E5" stopOpacity="0.25" />
+                    <stop offset="95%" stopColor="#4F46E5" stopOpacity="0.02" />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F0E9" vertical={false} />
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 10, fill: '#737982' }}
+                  tick={{ fontSize: 10, fill: '#475569' }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
                   ticks={[0, 10, 20, 30, 40]}
                   domain={[0, 40]}
-                  tick={{ fontSize: 10, fill: '#737982' }}
+                  tick={{ fontSize: 10, fill: '#475569' }}
                   axisLine={false}
                   tickLine={false}
                 />
@@ -580,11 +580,11 @@ export default function OverviewPage() {
                 <Area
                   type="monotone"
                   dataKey="audits"
-                  stroke="#829581"
+                  stroke="#4F46E5"
                   strokeWidth={2}
                   fill="url(#auditGrad)"
-                  dot={{ fill: '#829581', r: 3, strokeWidth: 0 }}
-                  activeDot={{ r: 5, fill: '#829581', strokeWidth: 0 }}
+                  dot={{ fill: '#4F46E5', r: 3, strokeWidth: 0 }}
+                  activeDot={{ r: 5, fill: '#4F46E5', strokeWidth: 0 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -595,7 +595,7 @@ export default function OverviewPage() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '20px 24px',
               boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
               display: 'flex',
@@ -604,10 +604,10 @@ export default function OverviewPage() {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>
                 Deviation Types (200)
               </span>
-              <Info size={14} color="#737982" strokeWidth={1.6} />
+              <Info size={14} color="#475569" strokeWidth={1.6} />
             </div>
 
             <div style={{ margin: 'auto 0' }}>
@@ -624,7 +624,7 @@ export default function OverviewPage() {
                 <div
                   style={{
                     flex: 1,
-                    background: '#72947A',
+                    background: '#059669',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -638,7 +638,7 @@ export default function OverviewPage() {
                 <div
                   style={{
                     flex: 1,
-                    background: '#C49A5B',
+                    background: '#D97706',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -652,7 +652,7 @@ export default function OverviewPage() {
                 <div
                   style={{
                     flex: 1,
-                    background: '#B97878',
+                    background: '#DC2626',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -680,10 +680,10 @@ export default function OverviewPage() {
                       width: 10,
                       height: 10,
                       borderRadius: 3,
-                      background: '#72947A',
+                      background: '#059669',
                     }}
                   />
-                  <span style={{ fontSize: 12, color: '#737982' }}>None (100)</span>
+                  <span style={{ fontSize: 12, color: '#475569' }}>None (100)</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div
@@ -691,10 +691,10 @@ export default function OverviewPage() {
                       width: 10,
                       height: 10,
                       borderRadius: 3,
-                      background: '#C49A5B',
+                      background: '#D97706',
                     }}
                   />
-                  <span style={{ fontSize: 12, color: '#737982' }}>Drift (100)</span>
+                  <span style={{ fontSize: 12, color: '#475569' }}>Drift (100)</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div
@@ -702,10 +702,10 @@ export default function OverviewPage() {
                       width: 10,
                       height: 10,
                       borderRadius: 3,
-                      background: '#B97878',
+                      background: '#DC2626',
                     }}
                   />
-                  <span style={{ fontSize: 12, color: '#737982' }}>Scope Creep (100)</span>
+                  <span style={{ fontSize: 12, color: '#475569' }}>Scope Creep (100)</span>
                 </div>
               </div>
             </div>
@@ -720,7 +720,7 @@ export default function OverviewPage() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
               overflow: 'hidden',
             }}
@@ -728,15 +728,15 @@ export default function OverviewPage() {
             <div
               style={{
                 padding: '16px 20px',
-                borderBottom: '1px solid #E6E5DF',
+                borderBottom: '1px solid #E2E8F0',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Layers size={16} color="#829581" strokeWidth={1.8} />
-                <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>
+                <Layers size={16} color="#4F46E5" strokeWidth={1.8} />
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>
                   Recent Audit Traces
                 </span>
               </div>
@@ -747,7 +747,7 @@ export default function OverviewPage() {
                   alignItems: 'center',
                   gap: 5,
                   fontSize: 12,
-                  color: '#829581',
+                  color: '#4F46E5',
                   fontWeight: 600,
                   textDecoration: 'none',
                 }}
@@ -758,9 +758,9 @@ export default function OverviewPage() {
 
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: '#F8F7F3' }}>
+                <tr style={{ background: '#F8FAFC' }}>
                   <th style={{ width: 36, padding: '10px 14px' }}>
-                    <input type="checkbox" style={{ accentColor: '#829581' }} />
+                    <input type="checkbox" style={{ accentColor: '#4F46E5' }} />
                   </th>
                   {['Trace ID', 'Original Prompt', 'Result', 'Deviation Type', 'Time', ''].map(
                     (h, i) => (
@@ -771,8 +771,8 @@ export default function OverviewPage() {
                           textAlign: 'left',
                           fontSize: 11,
                           fontWeight: 600,
-                          color: '#737982',
-                          borderBottom: '1px solid #E6E5DF',
+                          color: '#475569',
+                          borderBottom: '1px solid #E2E8F0',
                           whiteSpace: 'nowrap',
                         }}
                       >
@@ -792,14 +792,14 @@ export default function OverviewPage() {
                       transition: 'background 0.1s',
                     }}
                     onMouseEnter={(e) =>
-                      ((e.currentTarget as HTMLTableRowElement).style.background = '#F8F7F3')
+                      ((e.currentTarget as HTMLTableRowElement).style.background = '#F8FAFC')
                     }
                     onMouseLeave={(e) =>
                       ((e.currentTarget as HTMLTableRowElement).style.background = '')
                     }
                   >
                     <td style={{ padding: '12px 14px' }}>
-                      <input type="checkbox" style={{ accentColor: '#829581' }} />
+                      <input type="checkbox" style={{ accentColor: '#4F46E5' }} />
                     </td>
                     <td style={{ padding: '12px 14px' }}>
                       <Link
@@ -807,7 +807,7 @@ export default function OverviewPage() {
                         style={{
                           fontSize: 12,
                           fontWeight: 600,
-                          color: '#292D32',
+                          color: '#0F172A',
                           textDecoration: 'none',
                           fontFamily: 'IBM Plex Mono, monospace',
                         }}
@@ -816,7 +816,7 @@ export default function OverviewPage() {
                       </Link>
                     </td>
                     <td style={{ padding: '12px 14px', maxWidth: 280 }}>
-                      <span style={{ fontSize: 12, color: '#737982' }}>{trace.prompt}</span>
+                      <span style={{ fontSize: 12, color: '#475569' }}>{trace.prompt}</span>
                     </td>
                     <td style={{ padding: '12px 14px' }}>
                       <StatusBadge status={trace.result} size="sm" />
@@ -825,21 +825,21 @@ export default function OverviewPage() {
                       {trace.deviation ? (
                         <DeviationBadge type={trace.deviation} size="sm" />
                       ) : (
-                        <span style={{ fontSize: 12, color: '#737982' }}>—</span>
+                        <span style={{ fontSize: 12, color: '#475569' }}>—</span>
                       )}
                     </td>
                     <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
-                      <span style={{ fontSize: 11, color: '#737982' }}>{trace.time}</span>
+                      <span style={{ fontSize: 11, color: '#475569' }}>{trace.time}</span>
                     </td>
                     <td style={{ padding: '12px 14px', position: 'relative' }}>
                       <button
                         onClick={() => setActiveMenuId(activeMenuId === trace.id ? null : trace.id)}
                         title="Trace actions"
                         style={{
-                          background: activeMenuId === trace.id ? '#F0EFE9' : 'none',
+                          background: activeMenuId === trace.id ? '#F1F5F9' : 'none',
                           border: 'none',
                           cursor: 'pointer',
-                          color: '#737982',
+                          color: '#475569',
                           padding: 4,
                           borderRadius: 4,
                           display: 'flex',
@@ -855,7 +855,7 @@ export default function OverviewPage() {
                             right: 14,
                             top: 40,
                             background: '#FFFFFF',
-                            border: '1px solid #E6E5DF',
+                            border: '1px solid #E2E8F0',
                             borderRadius: 8,
                             boxShadow: '0 4px 16px rgba(41,45,50,0.12)',
                             zIndex: 40,
@@ -872,11 +872,11 @@ export default function OverviewPage() {
                               gap: 8,
                               padding: '8px 12px',
                               fontSize: 12,
-                              color: '#292D32',
+                              color: '#0F172A',
                               textDecoration: 'none',
                             }}
                           >
-                            <FileText size={13} color="#829581" />
+                            <FileText size={13} color="#4F46E5" />
                             Inspect in Review
                           </Link>
                           <Link
@@ -888,11 +888,11 @@ export default function OverviewPage() {
                               gap: 8,
                               padding: '8px 12px',
                               fontSize: 12,
-                              color: '#292D32',
+                              color: '#0F172A',
                               textDecoration: 'none',
                             }}
                           >
-                            <AlertTriangle size={13} color="#C49A5B" />
+                            <AlertTriangle size={13} color="#D97706" />
                             Deviation Details
                           </Link>
                           <Link
@@ -904,11 +904,11 @@ export default function OverviewPage() {
                               gap: 8,
                               padding: '8px 12px',
                               fontSize: 12,
-                              color: '#292D32',
+                              color: '#0F172A',
                               textDecoration: 'none',
                             }}
                           >
-                            <GitBranch size={13} color="#829581" />
+                            <GitBranch size={13} color="#4F46E5" />
                             View Causal DAG
                           </Link>
                           <Link
@@ -920,11 +920,11 @@ export default function OverviewPage() {
                               gap: 8,
                               padding: '8px 12px',
                               fontSize: 12,
-                              color: '#292D32',
+                              color: '#0F172A',
                               textDecoration: 'none',
                             }}
                           >
-                            <Sparkles size={13} color="#829581" />
+                            <Sparkles size={13} color="#4F46E5" />
                             Prompt Repair
                           </Link>
                         </div>
@@ -941,7 +941,7 @@ export default function OverviewPage() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '20px 24px',
               boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
             }}
@@ -954,8 +954,8 @@ export default function OverviewPage() {
                 marginBottom: 20,
               }}
             >
-              <Clock size={16} color="#829581" strokeWidth={1.8} />
-              <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>
+              <Clock size={16} color="#4F46E5" strokeWidth={1.8} />
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>
                 Recent Activity
               </span>
             </div>
@@ -972,7 +972,7 @@ export default function OverviewPage() {
                         top: 14,
                         bottom: 0,
                         width: 1,
-                        background: '#E6E5DF',
+                        background: '#E2E8F0',
                       }}
                     />
                   )}
@@ -991,10 +991,10 @@ export default function OverviewPage() {
                     }}
                   />
                   <div style={{ flex: 1, paddingBottom: 16 }}>
-                    <div style={{ fontSize: 12, color: '#292D32', lineHeight: 1.4 }}>
+                    <div style={{ fontSize: 12, color: '#0F172A', lineHeight: 1.4 }}>
                       {item.label}
                     </div>
-                    <div style={{ fontSize: 11, color: '#737982', marginTop: 2 }}>
+                    <div style={{ fontSize: 11, color: '#475569', marginTop: 2 }}>
                       {item.time}
                     </div>
                   </div>

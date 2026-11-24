@@ -17,7 +17,7 @@ const NOTIFICATIONS = [
     time: '2 mins ago',
     href: '/trace-analysis?id=seed_003',
     badge: 'Scope Creep',
-    color: '#B97878',
+    color: '#DC2626',
   },
   {
     id: 2,
@@ -27,7 +27,7 @@ const NOTIFICATIONS = [
     time: '8 mins ago',
     href: '/trace-analysis?id=seed_002',
     badge: 'Semantic Drift',
-    color: '#C49A5B',
+    color: '#D97706',
   },
   {
     id: 3,
@@ -37,7 +37,7 @@ const NOTIFICATIONS = [
     time: '25 mins ago',
     href: '/dataset-manager',
     badge: 'Validated',
-    color: '#72947A',
+    color: '#059669',
   },
   {
     id: 4,
@@ -47,7 +47,7 @@ const NOTIFICATIONS = [
     time: '1 hr ago',
     href: '/prompt-correction?id=seed_003',
     badge: 'Repair Ready',
-    color: '#829581',
+    color: '#4F46E5',
   },
 ];
 
@@ -59,7 +59,7 @@ export default function NotificationsDrawer({ isOpen, onClose }: NotificationsDr
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(41, 45, 50, 0.3)',
+        backgroundColor: 'rgba(15, 23, 42, 0.4)',
         zIndex: 9998,
         display: 'flex',
         justifyContent: 'flex-end',
@@ -72,8 +72,8 @@ export default function NotificationsDrawer({ isOpen, onClose }: NotificationsDr
           maxWidth: 400,
           height: '100vh',
           background: '#FFFFFF',
-          borderLeft: '1px solid #E6E5DF',
-          boxShadow: '-8px 0 24px rgba(41, 45, 50, 0.1)',
+          borderLeft: '1px solid #E2E8F0',
+          boxShadow: '-8px 0 24px rgba(15, 23, 42, 0.12)',
           display: 'flex',
           flexDirection: 'column',
           animation: 'slideIn 0.2s ease-out',
@@ -84,18 +84,18 @@ export default function NotificationsDrawer({ isOpen, onClose }: NotificationsDr
         <div
           style={{
             padding: '18px 20px',
-            borderBottom: '1px solid #E6E5DF',
-            background: '#F8F7F3',
+            borderBottom: '1px solid #E2E8F0',
+            background: '#F8FAFC',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
         >
           <div>
-            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#292D32' }}>
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#0F172A' }}>
               Audit Notifications
             </h3>
-            <p style={{ margin: '2px 0 0', fontSize: 11.5, color: '#737982' }}>
+            <p style={{ margin: '2px 0 0', fontSize: 11.5, color: '#64748B' }}>
               Real-time failure detections and model alerts
             </p>
           </div>
@@ -106,7 +106,7 @@ export default function NotificationsDrawer({ isOpen, onClose }: NotificationsDr
               border: 'none',
               padding: 4,
               cursor: 'pointer',
-              color: '#737982',
+              color: '#64748B',
               borderRadius: 6,
             }}
           >
@@ -125,18 +125,18 @@ export default function NotificationsDrawer({ isOpen, onClose }: NotificationsDr
                 display: 'block',
                 textDecoration: 'none',
                 background: '#FFFFFF',
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 borderRadius: 10,
                 padding: '12px 14px',
                 marginBottom: 10,
                 transition: 'all 0.15s ease',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#829581';
+                e.currentTarget.style.borderColor = '#4F46E5';
                 e.currentTarget.style.boxShadow = '0 2px 8px rgba(41, 45, 50, 0.05)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#E6E5DF';
+                e.currentTarget.style.borderColor = '#E2E8F0';
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
@@ -163,7 +163,7 @@ export default function NotificationsDrawer({ isOpen, onClose }: NotificationsDr
               <div style={{ fontSize: 11.5, color: '#737982', lineHeight: 1.4 }}>
                 {n.desc}
               </div>
-              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: '#829581' }}>
+              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: '#4F46E5' }}>
                 Inspect Trace <ArrowRight size={12} />
               </div>
             </Link>
@@ -174,8 +174,8 @@ export default function NotificationsDrawer({ isOpen, onClose }: NotificationsDr
         <div
           style={{
             padding: '12px 20px',
-            borderTop: '1px solid #E6E5DF',
-            background: '#F8F7F3',
+            borderTop: '1px solid #E2E8F0',
+            background: '#F8FAFC',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -189,7 +189,7 @@ export default function NotificationsDrawer({ isOpen, onClose }: NotificationsDr
               border: 'none',
               fontSize: 11.5,
               fontWeight: 600,
-              color: '#829581',
+              color: '#4F46E5',
               cursor: 'pointer',
             }}
           >

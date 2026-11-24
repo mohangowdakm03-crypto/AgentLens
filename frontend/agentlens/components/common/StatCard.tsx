@@ -19,21 +19,21 @@ export default function StatCard({
   changePositive = true,
   subtitle,
   icon,
-  accentColor = '#829581',
-  accentBg = 'rgba(130, 149, 129, 0.1)',
-  bottomBarColor = '#829581',
+  accentColor = '#4F46E5',
+  accentBg = 'rgba(79, 70, 229, 0.1)',
+  bottomBarColor = '#4F46E5',
 }: StatCardProps) {
   return (
     <div
       style={{
         background: '#FFFFFF',
         borderRadius: 12,
-        border: '1px solid #E6E5DF',
+        border: '1px solid #E2E8F0',
         padding: '16px 18px',
         display: 'flex',
         alignItems: 'center',
         gap: 16,
-        boxShadow: '0 1px 3px rgba(41, 45, 50, 0.04)',
+        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -69,11 +69,11 @@ export default function StatCard({
 
       {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, color: '#737982', fontWeight: 500, marginBottom: 2 }}>
+        <div style={{ fontSize: 12, color: '#64748B', fontWeight: 500, marginBottom: 2 }}>
           {title}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 26, fontWeight: 700, color: '#292D32', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+          <span style={{ fontSize: 26, fontWeight: 700, color: '#0F172A', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
             {value}
           </span>
           {change && (
@@ -81,8 +81,8 @@ export default function StatCard({
               style={{
                 fontSize: 11,
                 fontWeight: 600,
-                color: changePositive ? '#72947A' : '#B97878',
-                background: changePositive ? 'rgba(114, 148, 122, 0.12)' : 'rgba(185, 120, 120, 0.12)',
+                color: changePositive ? '#059669' : '#DC2626',
+                background: changePositive ? 'rgba(5, 150, 105, 0.1)' : 'rgba(220, 38, 38, 0.1)',
                 padding: '2px 7px',
                 borderRadius: 5,
                 display: 'inline-flex',
@@ -95,7 +95,7 @@ export default function StatCard({
           )}
         </div>
         {subtitle && (
-          <div style={{ fontSize: 11, color: '#737982', marginTop: 4 }}>
+          <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>
             {subtitle}
           </div>
         )}

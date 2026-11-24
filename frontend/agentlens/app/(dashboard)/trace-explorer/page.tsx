@@ -228,7 +228,7 @@ export default function TraceExplorerPage() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        background: '#F8F7F3',
+        background: '#F8FAFC',
         position: 'relative',
         overflowX: 'hidden',
       }}
@@ -249,8 +249,8 @@ export default function TraceExplorerPage() {
         fill="none"
         preserveAspectRatio="none"
       >
-        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#829581" fillOpacity="0.08" />
-        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#829581" fillOpacity="0.05" />
+        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#4F46E5" fillOpacity="0.08" />
+        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#4F46E5" fillOpacity="0.05" />
       </svg>
 
       <Topbar
@@ -282,19 +282,19 @@ export default function TraceExplorerPage() {
             style={{
               background: '#FFFFFF',
               borderRadius: 10,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '12px 16px',
               display: 'flex',
               alignItems: 'center',
               gap: 12,
             }}
           >
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: '#F0EFE9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Layers size={16} color="#829581" />
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Layers size={16} color="#4F46E5" />
             </div>
             <div>
-              <div style={{ fontSize: 11, color: '#737982', fontWeight: 600 }}>Total Traces</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#292D32', lineHeight: 1.1 }}>{stats.total}</div>
+              <div style={{ fontSize: 11, color: '#475569', fontWeight: 600 }}>Total Traces</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#0F172A', lineHeight: 1.1 }}>{stats.total}</div>
             </div>
           </div>
 
@@ -302,20 +302,20 @@ export default function TraceExplorerPage() {
             style={{
               background: '#FFFFFF',
               borderRadius: 10,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '12px 16px',
               display: 'flex',
               alignItems: 'center',
               gap: 12,
             }}
           >
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(114, 148, 122, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CheckCircle2 size={16} color="#72947A" />
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(5, 150, 105, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CheckCircle2 size={16} color="#059669" />
             </div>
             <div>
-              <div style={{ fontSize: 11, color: '#737982', fontWeight: 600 }}>Nominal Traces</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#72947A', lineHeight: 1.1 }}>
-                {stats.nominal} <span style={{ fontSize: 11, fontWeight: 500, color: '#737982' }}>({stats.nominalPct}%)</span>
+              <div style={{ fontSize: 11, color: '#475569', fontWeight: 600 }}>Nominal Traces</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#059669', lineHeight: 1.1 }}>
+                {stats.nominal} <span style={{ fontSize: 11, fontWeight: 500, color: '#475569' }}>({stats.nominalPct}%)</span>
               </div>
             </div>
           </div>
@@ -324,20 +324,20 @@ export default function TraceExplorerPage() {
             style={{
               background: '#FFFFFF',
               borderRadius: 10,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '12px 16px',
               display: 'flex',
               alignItems: 'center',
               gap: 12,
             }}
           >
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(196, 154, 91, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <AlertTriangle size={16} color="#C49A5B" />
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(217, 119, 6, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <AlertTriangle size={16} color="#D97706" />
             </div>
             <div>
-              <div style={{ fontSize: 11, color: '#737982', fontWeight: 600 }}>Semantic Drift</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#C49A5B', lineHeight: 1.1 }}>
-                {stats.drift} <span style={{ fontSize: 11, fontWeight: 500, color: '#737982' }}>({stats.driftPct}%)</span>
+              <div style={{ fontSize: 11, color: '#475569', fontWeight: 600 }}>Semantic Drift</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#D97706', lineHeight: 1.1 }}>
+                {stats.drift} <span style={{ fontSize: 11, fontWeight: 500, color: '#475569' }}>({stats.driftPct}%)</span>
               </div>
             </div>
           </div>
@@ -346,20 +346,20 @@ export default function TraceExplorerPage() {
             style={{
               background: '#FFFFFF',
               borderRadius: 10,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '12px 16px',
               display: 'flex',
               alignItems: 'center',
               gap: 12,
             }}
           >
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(185, 120, 120, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ShieldAlert size={16} color="#B97878" />
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(220, 38, 38, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ShieldAlert size={16} color="#DC2626" />
             </div>
             <div>
-              <div style={{ fontSize: 11, color: '#737982', fontWeight: 600 }}>Scope Creep</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#B97878', lineHeight: 1.1 }}>
-                {stats.scope} <span style={{ fontSize: 11, fontWeight: 500, color: '#737982' }}>({stats.scopePct}%)</span>
+              <div style={{ fontSize: 11, color: '#475569', fontWeight: 600 }}>Scope Creep</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#DC2626', lineHeight: 1.1 }}>
+                {stats.scope} <span style={{ fontSize: 11, fontWeight: 500, color: '#475569' }}>({stats.scopePct}%)</span>
               </div>
             </div>
           </div>
@@ -368,19 +368,19 @@ export default function TraceExplorerPage() {
             style={{
               background: '#FFFFFF',
               borderRadius: 10,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '12px 16px',
               display: 'flex',
               alignItems: 'center',
               gap: 12,
             }}
           >
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: '#F0EFE9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Zap size={16} color="#829581" />
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Zap size={16} color="#4F46E5" />
             </div>
             <div>
-              <div style={{ fontSize: 11, color: '#737982', fontWeight: 600 }}>Dataset Source</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#292D32', lineHeight: 1.1 }}>
+              <div style={{ fontSize: 11, color: '#475569', fontWeight: 600 }}>Dataset Source</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#0F172A', lineHeight: 1.1 }}>
                 {backendTraces.length > 0 ? 'FastAPI Repository' : 'Core Benchmark'}
               </div>
             </div>
@@ -392,7 +392,7 @@ export default function TraceExplorerPage() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '14px 18px',
             display: 'flex',
             alignItems: 'center',
@@ -407,15 +407,15 @@ export default function TraceExplorerPage() {
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              background: '#F8F7F3',
-              border: '1px solid #E6E5DF',
+              background: '#F8FAFC',
+              border: '1px solid #E2E8F0',
               borderRadius: 8,
               padding: '7px 12px',
               flex: 1,
               minWidth: 260,
             }}
           >
-            <Search size={14} color="#737982" strokeWidth={1.8} />
+            <Search size={14} color="#475569" strokeWidth={1.8} />
             <input
               value={search}
               onChange={(e) => {
@@ -428,14 +428,14 @@ export default function TraceExplorerPage() {
                 background: 'transparent',
                 outline: 'none',
                 fontSize: 13,
-                color: '#292D32',
+                color: '#0F172A',
                 width: '100%',
               }}
             />
             {search && (
               <button
                 onClick={() => setSearch('')}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 2, color: '#737982' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 2, color: '#475569' }}
               >
                 <X size={13} />
               </button>
@@ -462,9 +462,9 @@ export default function TraceExplorerPage() {
                   style={{
                     padding: '6px 12px',
                     borderRadius: 7,
-                    border: `1px solid ${active ? '#829581' : '#E6E5DF'}`,
-                    background: active ? '#829581' : '#FFFFFF',
-                    color: active ? '#FFFFFF' : '#737982',
+                    border: `1px solid ${active ? '#4F46E5' : '#E2E8F0'}`,
+                    background: active ? '#4F46E5' : '#FFFFFF',
+                    color: active ? '#FFFFFF' : '#475569',
                     fontSize: 12,
                     fontWeight: active ? 600 : 500,
                     cursor: 'pointer',
@@ -487,9 +487,9 @@ export default function TraceExplorerPage() {
             style={{
               padding: '6px 10px',
               borderRadius: 7,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               background: '#FFFFFF',
-              color: '#292D32',
+              color: '#0F172A',
               fontSize: 12,
               fontWeight: 500,
               cursor: 'pointer',
@@ -512,9 +512,9 @@ export default function TraceExplorerPage() {
             style={{
               padding: '6px 10px',
               borderRadius: 7,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               background: '#FFFFFF',
-              color: '#292D32',
+              color: '#0F172A',
               fontSize: 12,
               fontWeight: 500,
               cursor: 'pointer',
@@ -537,16 +537,16 @@ export default function TraceExplorerPage() {
                 gap: 6,
                 padding: '6px 12px',
                 borderRadius: 7,
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 background: '#FFFFFF',
-                color: '#292D32',
+                color: '#0F172A',
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: 'pointer',
                 transition: 'background 0.15s ease',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#F8F7F3';
+                e.currentTarget.style.background = '#F8FAFC';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = '#FFFFFF';
@@ -560,10 +560,10 @@ export default function TraceExplorerPage() {
 
         {/* Selected Items & Result Info */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
-          <span style={{ fontSize: 13, color: '#737982' }}>
+          <span style={{ fontSize: 13, color: '#475569' }}>
             Showing <strong>{filtered.length}</strong> matching traces
             {selectedTraces.size > 0 && (
-              <span style={{ color: '#829581', fontWeight: 600, marginLeft: 8 }}>
+              <span style={{ color: '#4F46E5', fontWeight: 600, marginLeft: 8 }}>
                 • {selectedTraces.size} selected for batch action
               </span>
             )}
@@ -579,7 +579,7 @@ export default function TraceExplorerPage() {
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: '#829581',
+                color: '#4F46E5',
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -598,20 +598,20 @@ export default function TraceExplorerPage() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
             overflow: 'hidden',
           }}
         >
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: '#F8F7F3', borderBottom: '1px solid #E6E5DF' }}>
+              <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
                 <th style={{ width: 44, padding: '11px 16px' }}>
                   <input
                     type="checkbox"
                     checked={selectedTraces.size === filtered.length && filtered.length > 0}
                     onChange={toggleSelectAll}
-                    style={{ accentColor: '#829581', cursor: 'pointer' }}
+                    style={{ accentColor: '#4F46E5', cursor: 'pointer' }}
                   />
                 </th>
                 <th
@@ -621,20 +621,20 @@ export default function TraceExplorerPage() {
                     textAlign: 'left',
                     fontSize: 11,
                     fontWeight: 700,
-                    color: '#737982',
+                    color: '#475569',
                     cursor: 'pointer',
                     userSelect: 'none',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     TRACE ID
-                    <ArrowUpDown size={11} color={sortField === 'id' ? '#829581' : '#A3A8B0'} />
+                    <ArrowUpDown size={11} color={sortField === 'id' ? '#4F46E5' : '#A3A8B0'} />
                   </div>
                 </th>
-                <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#737982' }}>
+                <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#475569' }}>
                   ORIGINAL INSTRUCTION
                 </th>
-                <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#737982' }}>
+                <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#475569' }}>
                   DOMAIN
                 </th>
                 <th
@@ -644,14 +644,14 @@ export default function TraceExplorerPage() {
                     textAlign: 'left',
                     fontSize: 11,
                     fontWeight: 700,
-                    color: '#737982',
+                    color: '#475569',
                     cursor: 'pointer',
                     userSelect: 'none',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     STEPS &amp; SPAN
-                    <ArrowUpDown size={11} color={sortField === 'steps' ? '#829581' : '#A3A8B0'} />
+                    <ArrowUpDown size={11} color={sortField === 'steps' ? '#4F46E5' : '#A3A8B0'} />
                   </div>
                 </th>
                 <th
@@ -661,14 +661,14 @@ export default function TraceExplorerPage() {
                     textAlign: 'left',
                     fontSize: 11,
                     fontWeight: 700,
-                    color: '#737982',
+                    color: '#475569',
                     cursor: 'pointer',
                     userSelect: 'none',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     LATENCY
-                    <ArrowUpDown size={11} color={sortField === 'latency' ? '#829581' : '#A3A8B0'} />
+                    <ArrowUpDown size={11} color={sortField === 'latency' ? '#4F46E5' : '#A3A8B0'} />
                   </div>
                 </th>
                 <th
@@ -678,20 +678,20 @@ export default function TraceExplorerPage() {
                     textAlign: 'left',
                     fontSize: 11,
                     fontWeight: 700,
-                    color: '#737982',
+                    color: '#475569',
                     cursor: 'pointer',
                     userSelect: 'none',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     CLASSIFICATION
-                    <ArrowUpDown size={11} color={sortField === 'status' ? '#829581' : '#A3A8B0'} />
+                    <ArrowUpDown size={11} color={sortField === 'status' ? '#4F46E5' : '#A3A8B0'} />
                   </div>
                 </th>
-                <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#737982' }}>
+                <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#475569' }}>
                   DIFFICULTY
                 </th>
-                <th style={{ padding: '11px 16px', textAlign: 'right', fontSize: 11, fontWeight: 700, color: '#737982' }}>
+                <th style={{ padding: '11px 16px', textAlign: 'right', fontSize: 11, fontWeight: 700, color: '#475569' }}>
                   ACTIONS
                 </th>
               </tr>
@@ -699,10 +699,10 @@ export default function TraceExplorerPage() {
             <tbody>
               {paginatedTraces.length === 0 ? (
                 <tr>
-                  <td colSpan={9} style={{ padding: '48px 16px', textAlign: 'center', color: '#737982' }}>
+                  <td colSpan={9} style={{ padding: '48px 16px', textAlign: 'center', color: '#475569' }}>
                     <Layers size={36} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>No traces match your filter criteria</div>
-                    <div style={{ fontSize: 12, marginTop: 4, color: '#737982' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>No traces match your filter criteria</div>
+                    <div style={{ fontSize: 12, marginTop: 4, color: '#475569' }}>
                       Try adjusting the search query or clearing the active filters.
                     </div>
                   </td>
@@ -715,8 +715,8 @@ export default function TraceExplorerPage() {
                   const isSelected = selectedTraces.has(trace.trace_id);
                   const isDrawerActive = activeDrawerTrace?.trace_id === trace.trace_id;
 
-                  const badgeColor = !isDev ? '#72947A' : devType === 'drift' ? '#C49A5B' : '#B97878';
-                  const badgeBg = !isDev ? 'rgba(114, 148, 122, 0.12)' : devType === 'drift' ? 'rgba(196, 154, 91, 0.12)' : 'rgba(185, 120, 120, 0.12)';
+                  const badgeColor = !isDev ? '#059669' : devType === 'drift' ? '#D97706' : '#DC2626';
+                  const badgeBg = !isDev ? 'rgba(5, 150, 105, 0.1)' : devType === 'drift' ? 'rgba(217, 119, 6, 0.1)' : 'rgba(220, 38, 38, 0.1)';
 
                   return (
                     <tr
@@ -725,7 +725,7 @@ export default function TraceExplorerPage() {
                       style={{
                         borderBottom: idx < paginatedTraces.length - 1 ? '1px solid #F1F0E9' : 'none',
                         background: isDrawerActive
-                          ? 'rgba(130, 149, 129, 0.12)'
+                          ? 'rgba(79, 70, 229, 0.1)'
                           : isSelected
                           ? 'rgba(130, 149, 129, 0.05)'
                           : '#FFFFFF',
@@ -734,7 +734,7 @@ export default function TraceExplorerPage() {
                       }}
                       onMouseEnter={(e) => {
                         if (!isDrawerActive && !isSelected) {
-                          e.currentTarget.style.background = '#F8F7F3';
+                          e.currentTarget.style.background = '#F8FAFC';
                         }
                       }}
                       onMouseLeave={(e) => {
@@ -755,7 +755,7 @@ export default function TraceExplorerPage() {
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => {}}
-                          style={{ accentColor: '#829581', cursor: 'pointer' }}
+                          style={{ accentColor: '#4F46E5', cursor: 'pointer' }}
                         />
                       </td>
 
@@ -766,8 +766,8 @@ export default function TraceExplorerPage() {
                             fontFamily: 'IBM Plex Mono, monospace',
                             fontSize: 12,
                             fontWeight: 700,
-                            color: '#292D32',
-                            background: '#F0EFE9',
+                            color: '#0F172A',
+                            background: '#F1F5F9',
                             padding: '3px 7px',
                             borderRadius: 4,
                             whiteSpace: 'nowrap',
@@ -782,7 +782,7 @@ export default function TraceExplorerPage() {
                         <div
                           style={{
                             fontSize: 12.5,
-                            color: '#292D32',
+                            color: '#0F172A',
                             fontWeight: 500,
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
@@ -799,9 +799,9 @@ export default function TraceExplorerPage() {
                         <span
                           style={{
                             fontSize: 11,
-                            color: '#737982',
-                            background: '#F8F7F3',
-                            border: '1px solid #E6E5DF',
+                            color: '#475569',
+                            background: '#F8FAFC',
+                            border: '1px solid #E2E8F0',
                             padding: '2px 8px',
                             borderRadius: 6,
                             whiteSpace: 'nowrap',
@@ -814,7 +814,7 @@ export default function TraceExplorerPage() {
                       {/* Steps & Mini Timeline Dots */}
                       <td style={{ padding: '12px 16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ fontSize: 12, fontWeight: 600, color: '#292D32' }}>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: '#0F172A' }}>
                             {trace.steps.length}
                           </span>
                           <div style={{ display: 'flex', gap: 3 }}>
@@ -828,7 +828,7 @@ export default function TraceExplorerPage() {
                                     width: 6,
                                     height: 6,
                                     borderRadius: '50%',
-                                    background: isStepDeviation ? badgeColor : '#829581',
+                                    background: isStepDeviation ? badgeColor : '#4F46E5',
                                     boxShadow: isStepDeviation ? `0 0 0 2px ${badgeColor}40` : undefined,
                                   }}
                                 />
@@ -844,7 +844,7 @@ export default function TraceExplorerPage() {
                           style={{
                             fontFamily: 'IBM Plex Mono, monospace',
                             fontSize: 11.5,
-                            color: '#737982',
+                            color: '#475569',
                           }}
                         >
                           {trace.total_latency_ms}ms
@@ -880,7 +880,7 @@ export default function TraceExplorerPage() {
                             fontWeight: 600,
                             textTransform: 'uppercase',
                             letterSpacing: '0.04em',
-                            color: trace.seed_meta.difficulty === 'hard' ? '#B97878' : trace.seed_meta.difficulty === 'medium' ? '#C49A5B' : '#72947A',
+                            color: trace.seed_meta.difficulty === 'hard' ? '#DC2626' : trace.seed_meta.difficulty === 'medium' ? '#D97706' : '#059669',
                           }}
                         >
                           {trace.seed_meta.difficulty}
@@ -897,14 +897,14 @@ export default function TraceExplorerPage() {
                           style={{
                             fontSize: 11.5,
                             fontWeight: 600,
-                            color: '#829581',
+                            color: '#4F46E5',
                             textDecoration: 'none',
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: 4,
                             padding: '4px 8px',
                             borderRadius: 6,
-                            background: '#F0EFE9',
+                            background: '#F1F5F9',
                           }}
                         >
                           Inspect <ArrowRight size={12} />
@@ -921,13 +921,13 @@ export default function TraceExplorerPage() {
           <div
             style={{
               padding: '12px 18px',
-              borderTop: '1px solid #E6E5DF',
-              background: '#F8F7F3',
+              borderTop: '1px solid #E2E8F0',
+              background: '#F8FAFC',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               fontSize: 12,
-              color: '#737982',
+              color: '#475569',
             }}
           >
             <div>
@@ -940,7 +940,7 @@ export default function TraceExplorerPage() {
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 style={{
                   background: '#FFFFFF',
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                   borderRadius: 6,
                   padding: '4px 8px',
                   cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
@@ -959,7 +959,7 @@ export default function TraceExplorerPage() {
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 style={{
                   background: '#FFFFFF',
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                   borderRadius: 6,
                   padding: '4px 8px',
                   cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
@@ -994,7 +994,7 @@ export default function TraceExplorerPage() {
               maxWidth: 580,
               height: '100vh',
               background: '#FFFFFF',
-              borderLeft: '1px solid #E6E5DF',
+              borderLeft: '1px solid #E2E8F0',
               boxShadow: '-10px 0 35px rgba(41, 45, 50, 0.12)',
               display: 'flex',
               flexDirection: 'column',
@@ -1006,8 +1006,8 @@ export default function TraceExplorerPage() {
             <div
               style={{
                 padding: '18px 24px',
-                borderBottom: '1px solid #E6E5DF',
-                background: '#F8F7F3',
+                borderBottom: '1px solid #E2E8F0',
+                background: '#F8FAFC',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -1019,8 +1019,8 @@ export default function TraceExplorerPage() {
                     fontFamily: 'IBM Plex Mono, monospace',
                     fontSize: 14,
                     fontWeight: 700,
-                    color: '#292D32',
-                    background: '#F0EFE9',
+                    color: '#0F172A',
+                    background: '#F1F5F9',
                     padding: '3px 8px',
                     borderRadius: 6,
                   }}
@@ -1033,8 +1033,8 @@ export default function TraceExplorerPage() {
                     fontWeight: 600,
                     padding: '3px 9px',
                     borderRadius: 12,
-                    color: !activeDrawerTrace.ground_truth.deviation_detected ? '#72947A' : '#C49A5B',
-                    background: !activeDrawerTrace.ground_truth.deviation_detected ? 'rgba(114, 148, 122, 0.12)' : 'rgba(196, 154, 91, 0.12)',
+                    color: !activeDrawerTrace.ground_truth.deviation_detected ? '#059669' : '#D97706',
+                    background: !activeDrawerTrace.ground_truth.deviation_detected ? 'rgba(5, 150, 105, 0.1)' : 'rgba(217, 119, 6, 0.1)',
                     textTransform: 'capitalize',
                   }}
                 >
@@ -1050,7 +1050,7 @@ export default function TraceExplorerPage() {
                   border: 'none',
                   padding: 4,
                   cursor: 'pointer',
-                  color: '#737982',
+                  color: '#475569',
                 }}
               >
                 <X size={18} />
@@ -1061,7 +1061,7 @@ export default function TraceExplorerPage() {
             <div
               style={{
                 display: 'flex',
-                borderBottom: '1px solid #E6E5DF',
+                borderBottom: '1px solid #E2E8F0',
                 background: '#FFFFFF',
                 padding: '0 24px',
               }}
@@ -1080,8 +1080,8 @@ export default function TraceExplorerPage() {
                       padding: '11px 16px',
                       background: 'transparent',
                       border: 'none',
-                      borderBottom: `2px solid ${active ? '#829581' : 'transparent'}`,
-                      color: active ? '#829581' : '#737982',
+                      borderBottom: `2px solid ${active ? '#4F46E5' : 'transparent'}`,
+                      color: active ? '#4F46E5' : '#475569',
                       fontSize: 12.5,
                       fontWeight: active ? 600 : 500,
                       cursor: 'pointer',
@@ -1098,17 +1098,17 @@ export default function TraceExplorerPage() {
               {/* User Prompt Card */}
               <div
                 style={{
-                  background: '#F8F7F3',
+                  background: '#F8FAFC',
                   borderRadius: 8,
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                   padding: '12px 16px',
                   marginBottom: 16,
                 }}
               >
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
                   Audited Instruction
                 </div>
-                <div style={{ fontSize: 13, color: '#292D32', fontWeight: 500 }}>
+                <div style={{ fontSize: 13, color: '#0F172A', fontWeight: 500 }}>
                   {activeDrawerTrace.original_prompt}
                 </div>
               </div>
@@ -1121,26 +1121,26 @@ export default function TraceExplorerPage() {
                     <div
                       style={{
                         background: 'rgba(196, 154, 91, 0.1)',
-                        border: '1px solid #C49A5B',
+                        border: '1px solid #D97706',
                         borderRadius: 8,
                         padding: '12px 16px',
                         marginBottom: 16,
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <AlertTriangle size={15} color="#C49A5B" />
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#C49A5B' }}>
+                        <AlertTriangle size={15} color="#D97706" />
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#D97706' }}>
                           Failure Localized at Step {activeDrawerTrace.ground_truth.flagged_step_id}
                         </span>
                       </div>
-                      <div style={{ fontSize: 11.5, color: '#292D32', lineHeight: 1.4 }}>
+                      <div style={{ fontSize: 11.5, color: '#0F172A', lineHeight: 1.4 }}>
                         {activeDrawerTrace.ground_truth.explanation}
                       </div>
                     </div>
                   )}
 
                   {/* Step Waterfall */}
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
                     Execution Sequence ({activeDrawerTrace.steps.length} steps • {activeDrawerTrace.total_latency_ms}ms)
                   </div>
 
@@ -1152,10 +1152,10 @@ export default function TraceExplorerPage() {
                           key={step.step_id}
                           style={{
                             background: '#FFFFFF',
-                            border: `1px solid ${isFlagged ? '#C49A5B' : '#E6E5DF'}`,
+                            border: `1px solid ${isFlagged ? '#D97706' : '#E2E8F0'}`,
                             borderRadius: 8,
                             padding: '12px 14px',
-                            boxShadow: isFlagged ? '0 0 0 1px #C49A5B' : undefined,
+                            boxShadow: isFlagged ? '0 0 0 1px #D97706' : undefined,
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -1165,7 +1165,7 @@ export default function TraceExplorerPage() {
                                   width: 20,
                                   height: 20,
                                   borderRadius: '50%',
-                                  background: isFlagged ? '#C49A5B' : '#829581',
+                                  background: isFlagged ? '#D97706' : '#4F46E5',
                                   color: '#FFFFFF',
                                   fontSize: 10,
                                   fontWeight: 700,
@@ -1176,7 +1176,7 @@ export default function TraceExplorerPage() {
                               >
                                 {step.step_id}
                               </span>
-                              <span style={{ fontSize: 12, fontWeight: 600, color: '#292D32' }}>
+                              <span style={{ fontSize: 12, fontWeight: 600, color: '#0F172A' }}>
                                 {step.tool_called || step.action_type}
                               </span>
                             </div>
@@ -1184,8 +1184,8 @@ export default function TraceExplorerPage() {
                               style={{
                                 fontFamily: 'IBM Plex Mono, monospace',
                                 fontSize: 10.5,
-                                color: '#737982',
-                                background: '#F8F7F3',
+                                color: '#475569',
+                                background: '#F8FAFC',
                                 padding: '2px 6px',
                                 borderRadius: 4,
                               }}
@@ -1195,7 +1195,7 @@ export default function TraceExplorerPage() {
                           </div>
 
                           {step.agent_reasoning && (
-                            <div style={{ fontSize: 11.5, color: '#737982', marginBottom: 6, fontStyle: 'italic' }}>
+                            <div style={{ fontSize: 11.5, color: '#475569', marginBottom: 6, fontStyle: 'italic' }}>
                               &quot;{step.agent_reasoning}&quot;
                             </div>
                           )}
@@ -1205,10 +1205,10 @@ export default function TraceExplorerPage() {
                               style={{
                                 fontFamily: 'IBM Plex Mono, monospace',
                                 fontSize: 11,
-                                background: '#F8F7F3',
+                                background: '#F8FAFC',
                                 padding: '6px 10px',
                                 borderRadius: 6,
-                                color: '#292D32',
+                                color: '#0F172A',
                                 overflowX: 'auto',
                                 whiteSpace: 'pre-wrap',
                               }}
@@ -1227,7 +1227,7 @@ export default function TraceExplorerPage() {
               {drawerTab === 'policy' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#72947A', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
                       Allowed Actions
                     </div>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -1238,8 +1238,8 @@ export default function TraceExplorerPage() {
                             fontSize: 11.5,
                             fontWeight: 600,
                             padding: '3px 9px',
-                            background: 'rgba(114, 148, 122, 0.12)',
-                            color: '#72947A',
+                            background: 'rgba(5, 150, 105, 0.1)',
+                            color: '#059669',
                             borderRadius: 6,
                           }}
                         >
@@ -1250,7 +1250,7 @@ export default function TraceExplorerPage() {
                   </div>
 
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#B97878', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
                       Forbidden Actions
                     </div>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -1261,8 +1261,8 @@ export default function TraceExplorerPage() {
                             fontSize: 11.5,
                             fontWeight: 600,
                             padding: '3px 9px',
-                            background: 'rgba(185, 120, 120, 0.12)',
-                            color: '#B97878',
+                            background: 'rgba(220, 38, 38, 0.1)',
+                            color: '#DC2626',
                             borderRadius: 6,
                           }}
                         >
@@ -1272,12 +1272,12 @@ export default function TraceExplorerPage() {
                     </div>
                   </div>
 
-                  <div style={{ background: '#F8F7F3', borderRadius: 8, padding: '12px 14px', border: '1px solid #E6E5DF' }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#737982', marginBottom: 4 }}>
+                  <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '12px 14px', border: '1px solid #E2E8F0' }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 4 }}>
                       Difficulty Level: {activeDrawerTrace.seed_meta.difficulty.toUpperCase()}
                     </div>
                     {activeDrawerTrace.seed_meta.hard_case && (
-                      <div style={{ fontSize: 11.5, color: '#292D32' }}>
+                      <div style={{ fontSize: 11.5, color: '#0F172A' }}>
                         Edge Condition: {activeDrawerTrace.seed_meta.hard_case}
                       </div>
                     )}
@@ -1291,8 +1291,8 @@ export default function TraceExplorerPage() {
                   style={{
                     fontFamily: 'IBM Plex Mono, monospace',
                     fontSize: 11,
-                    background: '#292D32',
-                    color: '#F8F7F3',
+                    background: '#0F172A',
+                    color: '#F8FAFC',
                     padding: 16,
                     borderRadius: 8,
                     overflowX: 'auto',
@@ -1308,8 +1308,8 @@ export default function TraceExplorerPage() {
             <div
               style={{
                 padding: '14px 24px',
-                borderTop: '1px solid #E6E5DF',
-                background: '#F8F7F3',
+                borderTop: '1px solid #E2E8F0',
+                background: '#F8FAFC',
                 display: 'flex',
                 gap: 10,
               }}
@@ -1324,7 +1324,7 @@ export default function TraceExplorerPage() {
                   gap: 8,
                   padding: '9px 16px',
                   borderRadius: 8,
-                  background: '#829581',
+                  background: '#4F46E5',
                   color: '#FFFFFF',
                   textDecoration: 'none',
                   fontSize: 13,
@@ -1344,8 +1344,8 @@ export default function TraceExplorerPage() {
                     padding: '9px 14px',
                     borderRadius: 8,
                     background: '#FFFFFF',
-                    border: '1px solid #E6E5DF',
-                    color: '#292D32',
+                    border: '1px solid #E2E8F0',
+                    color: '#0F172A',
                     textDecoration: 'none',
                     fontSize: 13,
                     fontWeight: 600,

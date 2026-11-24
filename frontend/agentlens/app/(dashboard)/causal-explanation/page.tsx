@@ -102,8 +102,8 @@ function CausalExplanationContent() {
     });
   }, [originalPrompt, triggerList]);
 
-  const devColor = !isDeviation ? '#72947A' : devType === 'drift' ? '#C49A5B' : '#B97878';
-  const devBg = !isDeviation ? 'rgba(114, 148, 122, 0.12)' : devType === 'drift' ? 'rgba(196, 154, 91, 0.12)' : 'rgba(185, 120, 120, 0.12)';
+  const devColor = !isDeviation ? '#059669' : devType === 'drift' ? '#D97706' : '#DC2626';
+  const devBg = !isDeviation ? 'rgba(5, 150, 105, 0.1)' : devType === 'drift' ? 'rgba(217, 119, 6, 0.1)' : 'rgba(220, 38, 38, 0.1)';
 
   const stepsList = liveTrace
     ? liveTrace.steps.map((s, idx) => ({
@@ -120,7 +120,7 @@ function CausalExplanationContent() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        background: '#F8F7F3',
+        background: '#F8FAFC',
         position: 'relative',
         overflowX: 'hidden',
       }}
@@ -141,8 +141,8 @@ function CausalExplanationContent() {
         fill="none"
         preserveAspectRatio="none"
       >
-        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#829581" fillOpacity="0.08" />
-        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#829581" fillOpacity="0.05" />
+        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#4F46E5" fillOpacity="0.08" />
+        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#4F46E5" fillOpacity="0.05" />
       </svg>
 
       <Topbar
@@ -175,11 +175,11 @@ function CausalExplanationContent() {
           }}
         >
           {isLoading ? (
-            <Loader2 size={18} color="#829581" className="animate-spin" style={{ flexShrink: 0 }} />
+            <Loader2 size={18} color="#4F46E5" className="animate-spin" style={{ flexShrink: 0 }} />
           ) : (
-            <Sparkles size={18} color="#829581" style={{ flexShrink: 0 }} />
+            <Sparkles size={18} color="#4F46E5" style={{ flexShrink: 0 }} />
           )}
-          <div style={{ fontSize: 12, color: '#292D32', lineHeight: 1.5 }}>
+          <div style={{ fontSize: 12, color: '#0F172A', lineHeight: 1.5 }}>
             <strong>Live Generative Causal Engine (Active):</strong> Word-level causal trigger token attribution is powered by the locally fine-tuned Mistral-7B QLoRA model (<code>agentlens:latest</code> via Ollama). {isLoading ? 'Analyzing root causes...' : 'Highlights ambiguous instruction tokens and traces divergent state transitions.'}
           </div>
         </div>
@@ -188,7 +188,7 @@ function CausalExplanationContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '18px 24px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
             display: 'flex',
@@ -200,16 +200,16 @@ function CausalExplanationContent() {
         >
           <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap' }}>
             <div>
-              <div style={{ fontSize: 10, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>
+              <div style={{ fontSize: 10, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>
                 Investigated Trace
               </div>
-              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'IBM Plex Mono, monospace', color: '#292D32' }}>
+              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'IBM Plex Mono, monospace', color: '#0F172A' }}>
                 {trace.trace_id}
               </div>
             </div>
 
             <div>
-              <div style={{ fontSize: 10, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>
+              <div style={{ fontSize: 10, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>
                 Classification
               </div>
               <span
@@ -228,7 +228,7 @@ function CausalExplanationContent() {
             </div>
 
             <div>
-              <div style={{ fontSize: 10, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>
+              <div style={{ fontSize: 10, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>
                 Divergence Node
               </div>
               <div style={{ fontSize: 14, fontWeight: 700, color: devColor }}>
@@ -245,7 +245,7 @@ function CausalExplanationContent() {
               gap: 8,
               padding: '9px 16px',
               borderRadius: 8,
-              background: '#829581',
+              background: '#4F46E5',
               color: '#FFFFFF',
               textDecoration: 'none',
               fontSize: 13,
@@ -261,7 +261,7 @@ function CausalExplanationContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '22px 24px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
             display: 'flex',
@@ -271,21 +271,21 @@ function CausalExplanationContent() {
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Zap size={16} color="#829581" />
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+              <Zap size={16} color="#4F46E5" />
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
                 Token Attribution Heatmap (Shapley Gradient Sensitivity)
               </span>
             </div>
-            <span style={{ fontSize: 11, color: '#737982' }}>
+            <span style={{ fontSize: 11, color: '#475569' }}>
               Hover over tokens to inspect causal contribution to failure
             </span>
           </div>
 
           <div
             style={{
-              background: '#F8F7F3',
+              background: '#F8FAFC',
               borderRadius: 8,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '18px 20px',
               display: 'flex',
               flexWrap: 'wrap',
@@ -312,9 +312,9 @@ function CausalExplanationContent() {
                     background: isHigh
                       ? `${devColor}25`
                       : isHovered
-                      ? 'rgba(130, 149, 129, 0.15)'
+                      ? 'rgba(79, 70, 229, 0.12)'
                       : 'transparent',
-                    color: isHigh ? devColor : '#292D32',
+                    color: isHigh ? devColor : '#0F172A',
                     border: isHigh ? `1px solid ${devColor}` : '1px solid transparent',
                     boxShadow: isHovered ? '0 2px 6px rgba(0,0,0,0.06)' : undefined,
                   }}
@@ -341,9 +341,9 @@ function CausalExplanationContent() {
           <div
             style={{
               fontSize: 12,
-              color: '#737982',
+              color: '#475569',
               background: '#FAFAF8',
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               borderRadius: 6,
               padding: '10px 14px',
               display: 'flex',
@@ -351,7 +351,7 @@ function CausalExplanationContent() {
               gap: 8,
             }}
           >
-            <HelpCircle size={14} color="#829581" />
+            <HelpCircle size={14} color="#4F46E5" />
             <span>
               Highlighted tokens denote semantic triggers that inflated agent action permissions beyond user intent.
               {trace.ground_truth.trigger_phrase && (
@@ -366,7 +366,7 @@ function CausalExplanationContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '22px 24px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
             display: 'flex',
@@ -375,8 +375,8 @@ function CausalExplanationContent() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <GitBranch size={16} color="#829581" />
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+            <GitBranch size={16} color="#4F46E5" />
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
               Sequential State Machine &amp; Counterfactual Branching Graph
             </span>
           </div>
@@ -412,7 +412,7 @@ function CausalExplanationContent() {
                         width: 40,
                         height: 40,
                         borderRadius: '50%',
-                        background: isFlagged ? devColor : '#829581',
+                        background: isFlagged ? devColor : '#4F46E5',
                         color: '#FFFFFF',
                         fontWeight: 700,
                         fontSize: 13,
@@ -425,10 +425,10 @@ function CausalExplanationContent() {
                     >
                       S{step.step_id}
                     </div>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: '#292D32', marginTop: 8, textAlign: 'center' }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: '#0F172A', marginTop: 8, textAlign: 'center' }}>
                       {step.tool_called || step.action_type}
                     </div>
-                    <div style={{ fontSize: 10, color: '#737982' }}>
+                    <div style={{ fontSize: 10, color: '#475569' }}>
                       {isFlagged ? (
                         <span style={{ color: devColor, fontWeight: 700 }}>DIVERGENCE</span>
                       ) : (
@@ -443,7 +443,7 @@ function CausalExplanationContent() {
                       style={{
                         flex: 1,
                         height: 2,
-                        background: isFlagged ? devColor : '#E6E5DF',
+                        background: isFlagged ? devColor : '#E2E8F0',
                         position: 'relative',
                         margin: '0 8px',
                       }}
@@ -473,27 +473,27 @@ function CausalExplanationContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '20px 24px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#829581', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Sparkles size={14} color="#829581" />
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#4F46E5', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Sparkles size={14} color="#4F46E5" />
               Fine-Tuned Mistral-7B Causal Attribution (Live Model Output)
             </div>
             {isLoading && (
-              <span style={{ fontSize: 11, color: '#737982', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 11, color: '#475569', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Loader2 size={12} className="animate-spin" /> Inferring causal explanation...
               </span>
             )}
           </div>
-          <p style={{ margin: 0, fontSize: 14, color: '#292D32', lineHeight: 1.6, fontWeight: 500 }}>
+          <p style={{ margin: 0, fontSize: 14, color: '#0F172A', lineHeight: 1.6, fontWeight: 500 }}>
             {causalExplanation}
           </p>
           {fallbackTrace.ground_truth.explanation && fallbackTrace.ground_truth.explanation !== causalExplanation && (
-            <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #F0EFE9', fontSize: 11.5, color: '#737982' }}>
+            <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #F1F5F9', fontSize: 11.5, color: '#475569' }}>
               <strong>Benchmark Ground Truth Reference:</strong> {fallbackTrace.ground_truth.explanation}
             </div>
           )}
@@ -505,7 +505,7 @@ function CausalExplanationContent() {
 
 export default function CausalExplanationPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 40, color: '#737982' }}>Loading Causal Studio...</div>}>
+    <Suspense fallback={<div style={{ padding: 40, color: '#475569' }}>Loading Causal Studio...</div>}>
       <CausalExplanationContent />
     </Suspense>
   );

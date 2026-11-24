@@ -42,22 +42,25 @@ export default function Button({
 
   const variants: Record<string, React.CSSProperties> = {
     primary: {
-      background: '#829581',
-      color: 'white',
+      background: 'linear-gradient(135deg, #4F46E5 0%, #6366F1 100%)',
+      color: '#FFFFFF',
+      boxShadow: '0 2px 8px rgba(79, 70, 229, 0.25)',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
     },
     secondary: {
       background: '#FFFFFF',
-      color: '#292D32',
-      border: '1px solid #E8E6DF',
+      color: '#0F172A',
+      border: '1px solid #E2E8F0',
+      boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)',
     },
     ghost: {
       background: 'transparent',
-      color: '#737982',
+      color: '#475569',
     },
     danger: {
-      background: 'rgba(185, 120, 120, 0.1)',
-      color: '#B97878',
-      border: '1px solid rgba(185, 120, 120, 0.2)',
+      background: 'rgba(220, 38, 38, 0.08)',
+      color: '#DC2626',
+      border: '1px solid rgba(220, 38, 38, 0.2)',
     },
   };
 

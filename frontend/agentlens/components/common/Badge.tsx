@@ -61,11 +61,11 @@ export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
           borderRadius: 6,
           fontSize: size === 'sm' ? 12 : 13,
           fontWeight: 600,
-          color: '#292D32',
+          color: '#0F172A',
           whiteSpace: 'nowrap',
         }}
       >
-        <CheckCircle2 size={14} color="#72947A" strokeWidth={2.2} />
+        <CheckCircle2 size={14} color="#059669" strokeWidth={2.2} />
         <span>Correct</span>
       </span>
     );
@@ -82,11 +82,11 @@ export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
           borderRadius: 6,
           fontSize: size === 'sm' ? 12 : 13,
           fontWeight: 600,
-          color: '#292D32',
+          color: '#0F172A',
           whiteSpace: 'nowrap',
         }}
       >
-        <AlertTriangle size={14} color="#C49A5B" strokeWidth={2} />
+        <AlertTriangle size={14} color="#D97706" strokeWidth={2} />
         <span>Deviation</span>
       </span>
     );

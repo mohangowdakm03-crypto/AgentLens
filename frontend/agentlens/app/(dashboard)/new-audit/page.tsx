@@ -263,7 +263,7 @@ function NewAuditContent() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        background: '#F8F7F3',
+        background: '#F8FAFC',
         position: 'relative',
         overflowX: 'hidden',
       }}
@@ -284,8 +284,8 @@ function NewAuditContent() {
         fill="none"
         preserveAspectRatio="none"
       >
-        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#829581" fillOpacity="0.08" />
-        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#829581" fillOpacity="0.05" />
+        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#4F46E5" fillOpacity="0.08" />
+        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#4F46E5" fillOpacity="0.05" />
       </svg>
 
       <Topbar
@@ -312,7 +312,7 @@ function NewAuditContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '16px 20px',
             boxShadow: '0 1px 3px rgba(41, 45, 50, 0.03)',
             display: 'flex',
@@ -323,8 +323,8 @@ function NewAuditContent() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Sparkles size={16} color="#829581" strokeWidth={2} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#292D32' }}>
+            <Sparkles size={16} color="#4F46E5" strokeWidth={2} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
               Load Real Benchmark Traces:
             </span>
           </div>
@@ -336,21 +336,21 @@ function NewAuditContent() {
                 style={{
                   padding: '6px 12px',
                   borderRadius: 6,
-                  border: '1px solid #E6E5DF',
-                  background: '#F8F7F3',
+                  border: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
                   fontSize: 12,
-                  color: '#292D32',
+                  color: '#0F172A',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                   fontWeight: 500,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#829581';
-                  e.currentTarget.style.background = 'rgba(130, 149, 129, 0.08)';
+                  e.currentTarget.style.borderColor = '#4F46E5';
+                  e.currentTarget.style.background = 'rgba(79, 70, 229, 0.06)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#E6E5DF';
-                  e.currentTarget.style.background = '#F8F7F3';
+                  e.currentTarget.style.borderColor = '#E2E8F0';
+                  e.currentTarget.style.background = '#F8FAFC';
                 }}
               >
                 {preset.name}
@@ -364,7 +364,7 @@ function NewAuditContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '24px',
             boxShadow: '0 1px 3px rgba(41, 45, 50, 0.03)',
             display: 'flex',
@@ -374,10 +374,10 @@ function NewAuditContent() {
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#292D32' }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
                 1. Original Prompt / Instruction
               </div>
-              <div style={{ fontSize: 12, color: '#737982', marginTop: 2 }}>
+              <div style={{ fontSize: 12, color: '#475569', marginTop: 2 }}>
                 The user prompt dispatched to the autonomous LLM agent.
               </div>
             </div>
@@ -388,7 +388,7 @@ function NewAuditContent() {
                   background: 'transparent',
                   border: 'none',
                   fontSize: 11.5,
-                  color: '#737982',
+                  color: '#475569',
                   cursor: 'pointer',
                 }}
               >
@@ -406,11 +406,11 @@ function NewAuditContent() {
               width: '100%',
               padding: '12px 14px',
               borderRadius: 8,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               fontSize: 13,
               fontFamily: 'inherit',
-              color: '#292D32',
-              background: '#F8F7F3',
+              color: '#0F172A',
+              background: '#F8FAFC',
               outline: 'none',
               resize: 'vertical',
             }}
@@ -422,7 +422,7 @@ function NewAuditContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '24px',
             boxShadow: '0 1px 3px rgba(41, 45, 50, 0.03)',
             display: 'flex',
@@ -431,10 +431,10 @@ function NewAuditContent() {
           }}
         >
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#292D32' }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
               2. Execution Trace Payload (JSONL)
             </div>
-            <div style={{ fontSize: 12, color: '#737982', marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: '#475569', marginTop: 2 }}>
               Upload the sequential tool-calling logs or raw agent trace JSONL.
             </div>
           </div>
@@ -448,14 +448,14 @@ function NewAuditContent() {
             onDrop={handleDrop}
             onClick={() => fileRef.current?.click()}
             style={{
-              border: `2px dashed ${isDragging ? '#829581' : uploadStatus === 'valid' ? '#72947A' : '#E6E5DF'}`,
+              border: `2px dashed ${isDragging ? '#4F46E5' : uploadStatus === 'valid' ? '#059669' : '#E2E8F0'}`,
               borderRadius: 10,
               padding: '32px 24px',
               background: isDragging
                 ? 'rgba(130, 149, 129, 0.06)'
                 : uploadStatus === 'valid'
                 ? 'rgba(114, 148, 122, 0.04)'
-                : '#F8F7F3',
+                : '#F8FAFC',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -478,23 +478,23 @@ function NewAuditContent() {
 
             {uploadStatus === 'valid' && fileName ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <CheckCircle2 size={24} color="#72947A" />
+                <CheckCircle2 size={24} color="#059669" />
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#292D32' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
                     {fileName}
                   </div>
-                  <div style={{ fontSize: 11, color: '#72947A' }}>
+                  <div style={{ fontSize: 11, color: '#059669' }}>
                     Validated: {parsedTrace?.steps.length} sequential execution steps loaded
                   </div>
                 </div>
               </div>
             ) : (
               <>
-                <Upload size={24} color="#829581" strokeWidth={1.8} />
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#292D32' }}>
+                <Upload size={24} color="#4F46E5" strokeWidth={1.8} />
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
                   Drop your .jsonl trace file here or click to browse
                 </div>
-                <div style={{ fontSize: 11, color: '#737982' }}>
+                <div style={{ fontSize: 11, color: '#475569' }}>
                   Supports AgentLens schema (tool_called, tool_input, tool_output, agent_reasoning)
                 </div>
               </>
@@ -507,7 +507,7 @@ function NewAuditContent() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
-                color: '#B97878',
+                color: '#DC2626',
                 fontSize: 12,
                 background: 'rgba(185, 120, 120, 0.1)',
                 padding: '8px 12px',
@@ -526,7 +526,7 @@ function NewAuditContent() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '24px',
               boxShadow: '0 1px 3px rgba(41, 45, 50, 0.03)',
               display: 'flex',
@@ -535,11 +535,11 @@ function NewAuditContent() {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
                 Parsed Trace Steps Preview ({parsedTrace.steps.length} Steps)
               </div>
               {parsedTrace.traceId && (
-                <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontSize: 11, color: '#737982' }}>
+                <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontSize: 11, color: '#475569' }}>
                   ID: {parsedTrace.traceId}
                 </span>
               )}
@@ -555,7 +555,7 @@ function NewAuditContent() {
                     gap: 10,
                     padding: '8px 12px',
                     borderRadius: 6,
-                    background: '#F8F7F3',
+                    background: '#F8FAFC',
                     fontSize: 12,
                   }}
                 >
@@ -564,7 +564,7 @@ function NewAuditContent() {
                       width: 20,
                       height: 20,
                       borderRadius: '50%',
-                      background: '#829581',
+                      background: '#4F46E5',
                       color: '#FFFFFF',
                       fontSize: 10,
                       fontWeight: 700,
@@ -575,11 +575,11 @@ function NewAuditContent() {
                   >
                     {step.stepNumber}
                   </span>
-                  <span style={{ fontWeight: 600, color: '#292D32' }}>
+                  <span style={{ fontWeight: 600, color: '#0F172A' }}>
                     {step.toolCalled || step.actionType}
                   </span>
                   {step.agentReasoning && (
-                    <span style={{ color: '#737982', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span style={{ color: '#475569', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {step.agentReasoning}
                     </span>
                   )}
@@ -595,15 +595,15 @@ function NewAuditContent() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #829581',
+              border: '1px solid #4F46E5',
               padding: '20px',
-              boxShadow: '0 4px 16px rgba(130, 149, 129, 0.15)',
+              boxShadow: '0 4px 16px rgba(79, 70, 229, 0.12)',
               display: 'flex',
               flexDirection: 'column',
               gap: 12,
             }}
           >
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
               Executing Audit Pipeline...
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
@@ -620,8 +620,8 @@ function NewAuditContent() {
                     style={{
                       padding: '8px 10px',
                       borderRadius: 6,
-                      background: isPassed ? 'rgba(114, 148, 122, 0.15)' : '#F0EFE9',
-                      color: isPassed ? '#72947A' : '#737982',
+                      background: isPassed ? 'rgba(5, 150, 105, 0.12)' : '#F1F5F9',
+                      color: isPassed ? '#059669' : '#475569',
                       fontSize: 11,
                       fontWeight: 600,
                       display: 'flex',
@@ -657,7 +657,7 @@ function NewAuditContent() {
 
 export default function NewAuditPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 40, color: '#737982' }}>Loading New Audit Engine...</div>}>
+    <Suspense fallback={<div style={{ padding: 40, color: '#475569' }}>Loading New Audit Engine...</div>}>
       <NewAuditContent />
     </Suspense>
   );

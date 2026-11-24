@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body style={{ margin: 0, fontFamily: 'Inter, sans-serif', background: '#F8F7F3' }}>
+      <body style={{ margin: 0, fontFamily: 'Inter, sans-serif', background: 'var(--bg-main, #F8FAFC)' }}>
         {children}
       </body>
     </html>

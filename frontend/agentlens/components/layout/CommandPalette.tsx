@@ -120,8 +120,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
           maxWidth: 640,
           background: '#FFFFFF',
           borderRadius: 12,
-          border: '1px solid #E6E5DF',
-          boxShadow: '0 20px 45px rgba(41, 45, 50, 0.16)',
+          border: '1px solid #E2E8F0',
+          boxShadow: '0 20px 45px rgba(15, 23, 42, 0.16)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -135,12 +135,12 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             display: 'flex',
             alignItems: 'center',
             padding: '14px 18px',
-            borderBottom: '1px solid #E6E5DF',
-            background: '#F8F7F3',
+            borderBottom: '1px solid #E2E8F0',
+            background: '#F8FAFC',
             gap: 12,
           }}
         >
-          <Search size={18} color="#829581" strokeWidth={2.2} />
+          <Search size={18} color="#4F46E5" strokeWidth={2.2} />
           <input
             ref={inputRef}
             value={query}
@@ -207,10 +207,10 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                           borderRadius: 8,
                           cursor: 'pointer',
                           transition: 'background 0.12s ease',
-                          background: idx === selectedIndex && matchingTraces.length === 0 ? 'rgba(130, 149, 129, 0.12)' : 'transparent',
+                          background: idx === selectedIndex && matchingTraces.length === 0 ? 'rgba(79, 70, 229, 0.08)' : 'transparent',
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'rgba(130, 149, 129, 0.12)';
+                          e.currentTarget.style.background = 'rgba(79, 70, 229, 0.08)';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = 'transparent';
@@ -221,18 +221,18 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                             width: 28,
                             height: 28,
                             borderRadius: 6,
-                            background: '#F0EFE9',
+                            background: '#F1F5F9',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             flexShrink: 0,
                           }}
                         >
-                          <Icon size={14} color="#829581" strokeWidth={2} />
+                          <Icon size={14} color="#4F46E5" strokeWidth={2} />
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: '#292D32' }}>{page.title}</div>
-                          <div style={{ fontSize: 11, color: '#737982', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>{page.title}</div>
+                          <div style={{ fontSize: 11, color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {page.desc}
                           </div>
                         </div>
@@ -240,8 +240,8 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                           style={{
                             fontSize: 10,
                             padding: '2px 7px',
-                            background: '#F0EFE9',
-                            color: '#737982',
+                            background: '#F1F5F9',
+                            color: '#64748B',
                             borderRadius: 4,
                             fontWeight: 600,
                             letterSpacing: '0.04em',
@@ -250,7 +250,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                         >
                           {page.category}
                         </span>
-                        <ArrowRight size={14} color="#829581" />
+                        <ArrowRight size={14} color="#4F46E5" />
                       </div>
                     );
                   })}
@@ -260,14 +260,14 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
               {/* Traces Section */}
               {matchingTraces.length > 0 && (
                 <div>
-                  <div style={{ fontSize: 10.5, fontWeight: 700, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '6px 10px' }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '6px 10px' }}>
                     Matching Benchmark Traces ({matchingTraces.length})
                   </div>
                   {matchingTraces.map((trace) => {
                     const isDev = trace.ground_truth.deviation_detected;
                     const devType = trace.ground_truth.deviation_type;
-                    const badgeColor = !isDev ? '#72947A' : devType === 'drift' ? '#C49A5B' : '#B97878';
-                    const badgeBg = !isDev ? 'rgba(114, 148, 122, 0.12)' : devType === 'drift' ? 'rgba(196, 154, 91, 0.12)' : 'rgba(185, 120, 120, 0.12)';
+                    const badgeColor = !isDev ? '#059669' : devType === 'drift' ? '#D97706' : '#DC2626';
+                    const badgeBg = !isDev ? 'rgba(5, 150, 105, 0.12)' : devType === 'drift' ? 'rgba(217, 119, 6, 0.12)' : 'rgba(220, 38, 38, 0.12)';
 
                     return (
                       <div
@@ -296,7 +296,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                             fontSize: 12,
                             fontWeight: 700,
                             color: '#292D32',
-                            background: '#F0EFE9',
+                            background: '#F1F5F9',
                             padding: '2px 7px',
                             borderRadius: 4,
                           }}
@@ -348,15 +348,15 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '8px 18px',
-            borderTop: '1px solid #E6E5DF',
-            background: '#F8F7F3',
+            borderTop: '1px solid #E2E8F0',
+            background: '#F8FAFC',
             fontSize: 11,
             color: '#737982',
           }}
         >
           <div style={{ display: 'flex', gap: 14 }}>
-            <span><kbd style={{ background: '#FFFFFF', border: '1px solid #E6E5DF', padding: '1px 5px', borderRadius: 3 }}>↵</kbd> Select</span>
-            <span><kbd style={{ background: '#FFFFFF', border: '1px solid #E6E5DF', padding: '1px 5px', borderRadius: 3 }}>esc</kbd> Dismiss</span>
+            <span><kbd style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', padding: '1px 5px', borderRadius: 3 }}>↵</kbd> Select</span>
+            <span><kbd style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', padding: '1px 5px', borderRadius: 3 }}>esc</kbd> Dismiss</span>
           </div>
           <span>AgentLens Auditor Command Palette</span>
         </div>

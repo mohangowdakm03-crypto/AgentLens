@@ -15,8 +15,8 @@ export default function Card({ title, titleExtra, children, style, bodyStyle, in
       style={{
         background: '#FFFFFF',
         borderRadius: 12,
-        border: '1px solid #E8E6DF',
-        boxShadow: '0 1px 3px rgba(41, 45, 50, 0.05)',
+        border: '1px solid #E2E8F0',
+        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)',
         overflow: 'hidden',
         ...style,
       }}
@@ -25,14 +25,14 @@ export default function Card({ title, titleExtra, children, style, bodyStyle, in
         <div
           style={{
             padding: '16px 20px',
-            borderBottom: '1px solid #E8E6DF',
+            borderBottom: '1px solid #E2E8F0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>{title}</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>{title}</span>
             {info && (
               <div
                 title={info}
@@ -40,12 +40,12 @@ export default function Card({ title, titleExtra, children, style, bodyStyle, in
                   width: 16,
                   height: 16,
                   borderRadius: '50%',
-                  border: '1px solid #E8E6DF',
+                  border: '1px solid #E2E8F0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: 10,
-                  color: '#737982',
+                  color: '#64748B',
                   cursor: 'help',
                   fontStyle: 'italic',
                   fontWeight: 600,

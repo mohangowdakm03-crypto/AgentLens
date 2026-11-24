@@ -35,8 +35,8 @@ const DATASET_INFO = {
   classes: { none: 146, drift: 34, scope_creep: 115, misinterpretation: 5 },
   splits: { train: 231, validation: 31, test: 28, review_only: 10 },
   domains: [
-    { name: 'AI/ML Engineering', count: 150, color: '#829581' },
-    { name: 'Software Development', count: 150, color: '#C49A5B' },
+    { name: 'AI/ML Engineering', count: 150, color: '#4F46E5' },
+    { name: 'Software Development', count: 150, color: '#D97706' },
   ],
   validationStatus: '7-Stage Gateway Cleared',
   lastValidated: 'Nov 20, 2026 (Joyal Dataset Audit Clearance)',
@@ -105,7 +105,7 @@ export default function DatasetManagerPage() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        background: '#F8F7F3',
+        background: '#F8FAFC',
         position: 'relative',
         overflowX: 'hidden',
       }}
@@ -126,8 +126,8 @@ export default function DatasetManagerPage() {
         fill="none"
         preserveAspectRatio="none"
       >
-        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#829581" fillOpacity="0.08" />
-        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#829581" fillOpacity="0.05" />
+        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#4F46E5" fillOpacity="0.08" />
+        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#4F46E5" fillOpacity="0.05" />
       </svg>
 
       <Topbar
@@ -153,7 +153,7 @@ export default function DatasetManagerPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: '1px solid #E6E5DF',
+            borderBottom: '1px solid #E2E8F0',
             paddingBottom: 4,
           }}
         >
@@ -164,8 +164,8 @@ export default function DatasetManagerPage() {
                 padding: '8px 16px',
                 borderRadius: 8,
                 border: 'none',
-                background: activeTab === 'annotations' ? '#829581' : 'transparent',
-                color: activeTab === 'annotations' ? '#FFFFFF' : '#737982',
+                background: activeTab === 'annotations' ? '#4F46E5' : 'transparent',
+                color: activeTab === 'annotations' ? '#FFFFFF' : '#475569',
                 fontSize: 13,
                 fontWeight: activeTab === 'annotations' ? 700 : 500,
                 cursor: 'pointer',
@@ -183,8 +183,8 @@ export default function DatasetManagerPage() {
                 padding: '8px 16px',
                 borderRadius: 8,
                 border: 'none',
-                background: activeTab === 'gateway' ? '#829581' : 'transparent',
-                color: activeTab === 'gateway' ? '#FFFFFF' : '#737982',
+                background: activeTab === 'gateway' ? '#4F46E5' : 'transparent',
+                color: activeTab === 'gateway' ? '#FFFFFF' : '#475569',
                 fontSize: 13,
                 fontWeight: activeTab === 'gateway' ? 700 : 500,
                 cursor: 'pointer',
@@ -206,15 +206,15 @@ export default function DatasetManagerPage() {
               gap: 6,
               padding: '6px 14px',
               borderRadius: 7,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               background: '#FFFFFF',
-              color: '#292D32',
+              color: '#0F172A',
               fontSize: 12,
               fontWeight: 600,
               cursor: 'pointer',
             }}
           >
-            <Download size={13} color="#829581" /> Export Dataset (JSONL)
+            <Download size={13} color="#4F46E5" /> Export Dataset (JSONL)
           </button>
         </div>
 
@@ -226,7 +226,7 @@ export default function DatasetManagerPage() {
               style={{
                 background: '#FFFFFF',
                 borderRadius: 12,
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 padding: '14px 18px',
                 display: 'flex',
                 alignItems: 'center',
@@ -240,15 +240,15 @@ export default function DatasetManagerPage() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  background: '#F8F7F3',
-                  border: '1px solid #E6E5DF',
+                  background: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
                   borderRadius: 8,
                   padding: '7px 12px',
                   flex: 1,
                   minWidth: 260,
                 }}
               >
-                <Search size={14} color="#737982" />
+                <Search size={14} color="#475569" />
                 <input
                   value={search}
                   onChange={(e) => {
@@ -261,14 +261,14 @@ export default function DatasetManagerPage() {
                     background: 'transparent',
                     outline: 'none',
                     fontSize: 12.5,
-                    color: '#292D32',
+                    color: '#0F172A',
                     width: '100%',
                   }}
                 />
                 {search && (
                   <button
                     onClick={() => setSearch('')}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#737982' }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569' }}
                   >
                     <X size={13} />
                   </button>
@@ -285,9 +285,9 @@ export default function DatasetManagerPage() {
                 style={{
                   padding: '6px 12px',
                   borderRadius: 7,
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                   background: '#FFFFFF',
-                  color: '#292D32',
+                  color: '#0F172A',
                   fontSize: 12,
                   fontWeight: 500,
                   outline: 'none',
@@ -312,9 +312,9 @@ export default function DatasetManagerPage() {
                 style={{
                   padding: '6px 12px',
                   borderRadius: 7,
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                   background: '#FFFFFF',
-                  color: '#292D32',
+                  color: '#0F172A',
                   fontSize: 12,
                   fontWeight: 500,
                   outline: 'none',
@@ -338,7 +338,7 @@ export default function DatasetManagerPage() {
                   style={{
                     background: 'transparent',
                     border: 'none',
-                    color: '#829581',
+                    color: '#4F46E5',
                     fontSize: 12,
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -357,29 +357,29 @@ export default function DatasetManagerPage() {
               style={{
                 background: '#FFFFFF',
                 borderRadius: 12,
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
                 overflow: 'hidden',
               }}
             >
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ background: '#F8F7F3', borderBottom: '1px solid #E6E5DF' }}>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#737982' }}>TRACE ID</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#737982' }}>INSTRUCTION</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#737982' }}>DOMAIN</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#737982' }}>ANNOTATED CLASS</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#737982' }}>FLAGGED STEP</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#737982' }}>TRIGGER PHRASE</th>
-                    <th style={{ padding: '11px 16px', textAlign: 'right', fontSize: 11, fontWeight: 700, color: '#737982' }}>ACTION</th>
+                  <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#475569' }}>TRACE ID</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#475569' }}>INSTRUCTION</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#475569' }}>DOMAIN</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#475569' }}>ANNOTATED CLASS</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#475569' }}>FLAGGED STEP</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#475569' }}>TRIGGER PHRASE</th>
+                    <th style={{ padding: '11px 16px', textAlign: 'right', fontSize: 11, fontWeight: 700, color: '#475569' }}>ACTION</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginated.length === 0 ? (
                     <tr>
-                      <td colSpan={7} style={{ padding: '48px 16px', textAlign: 'center', color: '#737982' }}>
+                      <td colSpan={7} style={{ padding: '48px 16px', textAlign: 'center', color: '#475569' }}>
                         <Database size={32} style={{ margin: '0 auto 10px', opacity: 0.3 }} />
-                        <div style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>No reference annotations match your filter</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>No reference annotations match your filter</div>
                         <div style={{ fontSize: 12, marginTop: 4 }}>Try clearing the search or reset filters to view all annotations.</div>
                       </td>
                     </tr>
@@ -387,8 +387,8 @@ export default function DatasetManagerPage() {
                     paginated.map((trace, idx) => {
                       const isDev = trace.ground_truth.deviation_detected;
                       const devType = trace.ground_truth.deviation_type;
-                      const badgeColor = !isDev ? '#72947A' : devType === 'drift' ? '#C49A5B' : '#B97878';
-                      const badgeBg = !isDev ? 'rgba(114, 148, 122, 0.12)' : devType === 'drift' ? 'rgba(196, 154, 91, 0.12)' : 'rgba(185, 120, 120, 0.12)';
+                      const badgeColor = !isDev ? '#059669' : devType === 'drift' ? '#D97706' : '#DC2626';
+                      const badgeBg = !isDev ? 'rgba(5, 150, 105, 0.1)' : devType === 'drift' ? 'rgba(217, 119, 6, 0.1)' : 'rgba(220, 38, 38, 0.1)';
 
                       return (
                         <tr
@@ -400,7 +400,7 @@ export default function DatasetManagerPage() {
                             transition: 'background 0.12s ease',
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.background = '#F8F7F3';
+                            e.currentTarget.style.background = '#F8FAFC';
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.background = '#FFFFFF';
@@ -412,8 +412,8 @@ export default function DatasetManagerPage() {
                                 fontFamily: 'IBM Plex Mono, monospace',
                                 fontSize: 12,
                                 fontWeight: 700,
-                                color: '#292D32',
-                                background: '#F0EFE9',
+                                color: '#0F172A',
+                                background: '#F1F5F9',
                                 padding: '3px 7px',
                                 borderRadius: 4,
                               }}
@@ -425,7 +425,7 @@ export default function DatasetManagerPage() {
                             <div
                               style={{
                                 fontSize: 12.5,
-                                color: '#292D32',
+                                color: '#0F172A',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                                 whiteSpace: 'nowrap',
@@ -436,7 +436,7 @@ export default function DatasetManagerPage() {
                             </div>
                           </td>
                           <td style={{ padding: '12px 16px' }}>
-                            <span style={{ fontSize: 11, color: '#737982' }}>{trace.domain}</span>
+                            <span style={{ fontSize: 11, color: '#475569' }}>{trace.domain}</span>
                           </td>
                           <td style={{ padding: '12px 16px' }}>
                             <span
@@ -454,7 +454,7 @@ export default function DatasetManagerPage() {
                             </span>
                           </td>
                           <td style={{ padding: '12px 16px' }}>
-                            <span style={{ fontSize: 12, color: trace.ground_truth.flagged_step_id ? badgeColor : '#737982', fontWeight: 600 }}>
+                            <span style={{ fontSize: 12, color: trace.ground_truth.flagged_step_id ? badgeColor : '#475569', fontWeight: 600 }}>
                               {trace.ground_truth.flagged_step_id ? `Step ${trace.ground_truth.flagged_step_id}` : '—'}
                             </span>
                           </td>
@@ -463,8 +463,8 @@ export default function DatasetManagerPage() {
                               <span
                                 style={{
                                   fontSize: 11,
-                                  color: '#292D32',
-                                  background: '#F0EFE9',
+                                  color: '#0F172A',
+                                  background: '#F1F5F9',
                                   padding: '2px 6px',
                                   borderRadius: 4,
                                   fontFamily: 'IBM Plex Mono, monospace',
@@ -477,7 +477,7 @@ export default function DatasetManagerPage() {
                             )}
                           </td>
                           <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                            <span style={{ fontSize: 11.5, fontWeight: 600, color: '#829581' }}>
+                            <span style={{ fontSize: 11.5, fontWeight: 600, color: '#4F46E5' }}>
                               Inspect Annotation →
                             </span>
                           </td>
@@ -492,13 +492,13 @@ export default function DatasetManagerPage() {
               <div
                 style={{
                   padding: '12px 18px',
-                  borderTop: '1px solid #E6E5DF',
-                  background: '#F8F7F3',
+                  borderTop: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   fontSize: 12,
-                  color: '#737982',
+                  color: '#475569',
                 }}
               >
                 <div>
@@ -511,7 +511,7 @@ export default function DatasetManagerPage() {
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     style={{
                       background: '#FFFFFF',
-                      border: '1px solid #E6E5DF',
+                      border: '1px solid #E2E8F0',
                       borderRadius: 6,
                       padding: '4px 8px',
                       cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
@@ -530,7 +530,7 @@ export default function DatasetManagerPage() {
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     style={{
                       background: '#FFFFFF',
-                      border: '1px solid #E6E5DF',
+                      border: '1px solid #E2E8F0',
                       borderRadius: 6,
                       padding: '4px 8px',
                       cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
@@ -555,7 +555,7 @@ export default function DatasetManagerPage() {
               style={{
                 background: '#FFFFFF',
                 borderRadius: 12,
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 padding: '20px 24px',
                 boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
                 display: 'flex',
@@ -575,26 +575,26 @@ export default function DatasetManagerPage() {
                   justifyContent: 'center',
                 }}
               >
-                <Database size={22} color="#829581" strokeWidth={1.8} />
+                <Database size={22} color="#4F46E5" strokeWidth={1.8} />
               </div>
 
               <div style={{ flex: 1, minWidth: 220 }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#292D32', fontFamily: 'IBM Plex Mono, monospace' }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#0F172A', fontFamily: 'IBM Plex Mono, monospace' }}>
                   {DATASET_INFO.name}
                 </div>
-                <div style={{ fontSize: 12, color: '#737982', marginTop: 3 }}>
+                <div style={{ fontSize: 12, color: '#475569', marginTop: 3 }}>
                   Corrected 300-trace corpus across AI/ML (150) and Software Development (150)
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
                 {[
-                  { label: 'Validated Traces', value: DATASET_INFO.valid, color: '#829581' },
-                  { label: 'Rejected by Gateway', value: DATASET_INFO.rejected, color: '#72947A' },
-                  { label: 'Validation Status', value: DATASET_INFO.validationStatus, color: '#72947A' },
+                  { label: 'Validated Traces', value: DATASET_INFO.valid, color: '#4F46E5' },
+                  { label: 'Rejected by Gateway', value: DATASET_INFO.rejected, color: '#059669' },
+                  { label: 'Validation Status', value: DATASET_INFO.validationStatus, color: '#059669' },
                 ].map((stat) => (
                   <div key={stat.label}>
-                    <div style={{ fontSize: 11, color: '#737982' }}>{stat.label}</div>
+                    <div style={{ fontSize: 11, color: '#475569' }}>{stat.label}</div>
                     <div style={{ fontSize: 18, fontWeight: 700, color: stat.color, marginTop: 2 }}>
                       {stat.value}
                     </div>
@@ -608,7 +608,7 @@ export default function DatasetManagerPage() {
               style={{
                 background: '#FFFFFF',
                 borderRadius: 12,
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 padding: '16px 20px',
                 display: 'flex',
                 gap: 14,
@@ -616,9 +616,9 @@ export default function DatasetManagerPage() {
                 boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
               }}
             >
-              <Info size={18} color="#C49A5B" style={{ flexShrink: 0, marginTop: 2 }} />
+              <Info size={18} color="#D97706" style={{ flexShrink: 0, marginTop: 2 }} />
               <div style={{ fontSize: 12, color: '#555D67', lineHeight: 1.5 }}>
-                <strong style={{ color: '#292D32' }}>Permission Audit Limitation Disclosure:</strong>{' '}
+                <strong style={{ color: '#0F172A' }}>Permission Audit Limitation Disclosure:</strong>{' '}
                 51 dataset records use <code>write</code> to save a report or summary, while the prompt prohibits modifying a specific protected target resource. Because the action-level schema evaluates actions globally (<code>allowed_actions</code> / <code>forbidden_actions</code>), <code>write</code> remains allowed for those records so report-writing steps are not misclassified. All 28 ambiguous <code>tool_misuse</code> labels have been reclassified as <code>scope_creep</code> per Joyal&apos;s correction summary.
               </div>
             </div>
@@ -628,56 +628,56 @@ export default function DatasetManagerPage() {
               style={{
                 background: '#FFFFFF',
                 borderRadius: 12,
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 padding: '20px 24px',
                 boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                <Layers size={16} color="#829581" strokeWidth={1.8} />
-                <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>
+                <Layers size={16} color="#4F46E5" strokeWidth={1.8} />
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>
                   Dataset Splits (Train / Val / Test / Review-Only)
                 </span>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 18 }}>
                 {[
-                  { name: 'Train Set', count: 231, pct: '77%', color: '#829581' },
-                  { name: 'Validation Set', count: 31, pct: '10.3%', color: '#C49A5B' },
-                  { name: 'Test Holdout', count: 28, pct: '9.3%', color: '#B97878' },
-                  { name: 'Review-Only', count: 10, pct: '3.3%', color: '#737982' },
+                  { name: 'Train Set', count: 231, pct: '77%', color: '#4F46E5' },
+                  { name: 'Validation Set', count: 31, pct: '10.3%', color: '#D97706' },
+                  { name: 'Test Holdout', count: 28, pct: '9.3%', color: '#DC2626' },
+                  { name: 'Review-Only', count: 10, pct: '3.3%', color: '#475569' },
                 ].map((s) => (
                   <div
                     key={s.name}
                     style={{
                       padding: '14px 16px',
                       borderRadius: 8,
-                      background: '#F8F7F3',
-                      border: '1px solid #E6E5DF',
+                      background: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
                       textAlign: 'center',
                     }}
                   >
-                    <div style={{ fontSize: 11, color: '#737982' }}>{s.name}</div>
+                    <div style={{ fontSize: 11, color: '#475569' }}>{s.name}</div>
                     <div style={{ fontSize: 24, fontWeight: 700, color: s.color, margin: '4px 0', fontFamily: 'IBM Plex Mono, monospace' }}>
                       {s.count}
                     </div>
-                    <div style={{ fontSize: 10, color: '#737982' }}>{s.pct}</div>
+                    <div style={{ fontSize: 10, color: '#475569' }}>{s.pct}</div>
                   </div>
                 ))}
               </div>
 
               {/* Visual Split Segmented Bar */}
               <div style={{ display: 'flex', borderRadius: 6, overflow: 'hidden', height: 26 }}>
-                <div style={{ width: '77%', background: '#829581', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
+                <div style={{ width: '77%', background: '#4F46E5', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
                   Train (231)
                 </div>
-                <div style={{ width: '10.3%', background: '#C49A5B', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
+                <div style={{ width: '10.3%', background: '#D97706', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
                   Val (31)
                 </div>
-                <div style={{ width: '9.3%', background: '#B97878', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
+                <div style={{ width: '9.3%', background: '#DC2626', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
                   Test (28)
                 </div>
-                <div style={{ width: '3.3%', background: '#737982', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
+                <div style={{ width: '3.3%', background: '#475569', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
                   Rev (10)
                 </div>
               </div>
@@ -688,14 +688,14 @@ export default function DatasetManagerPage() {
               style={{
                 background: '#FFFFFF',
                 borderRadius: 12,
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 padding: '20px 24px',
                 boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                <ShieldCheck size={18} color="#829581" strokeWidth={2} />
-                <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>
+                <ShieldCheck size={18} color="#4F46E5" strokeWidth={2} />
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>
                   7-Stage Deterministic Quality Gateway
                 </span>
               </div>
@@ -710,13 +710,13 @@ export default function DatasetManagerPage() {
                       gap: 10,
                       padding: '10px 14px',
                       borderRadius: 8,
-                      background: '#F8F7F3',
-                      border: '1px solid #E6E5DF',
+                      background: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
                       fontSize: 12,
-                      color: '#292D32',
+                      color: '#0F172A',
                     }}
                   >
-                    <CheckCircle2 size={15} color="#72947A" strokeWidth={2.2} />
+                    <CheckCircle2 size={15} color="#059669" strokeWidth={2.2} />
                     <span>{stg}</span>
                   </div>
                 ))}
@@ -746,7 +746,7 @@ export default function DatasetManagerPage() {
                 maxWidth: 620,
                 background: '#FFFFFF',
                 borderRadius: 12,
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 boxShadow: '0 20px 40px rgba(41, 45, 50, 0.15)',
                 overflow: 'hidden',
                 display: 'flex',
@@ -757,24 +757,24 @@ export default function DatasetManagerPage() {
               <div
                 style={{
                   padding: '16px 20px',
-                  borderBottom: '1px solid #E6E5DF',
-                  background: '#F8F7F3',
+                  borderBottom: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontSize: 13, fontWeight: 700, color: '#292D32', background: '#F0EFE9', padding: '3px 8px', borderRadius: 4 }}>
+                  <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontSize: 13, fontWeight: 700, color: '#0F172A', background: '#F1F5F9', padding: '3px 8px', borderRadius: 4 }}>
                     {selectedAnnotation.trace_id}
                   </span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: selectedAnnotation.ground_truth.deviation_detected ? '#C49A5B' : '#72947A', textTransform: 'capitalize' }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: selectedAnnotation.ground_truth.deviation_detected ? '#D97706' : '#059669', textTransform: 'capitalize' }}>
                     {selectedAnnotation.ground_truth.deviation_type.replace('_', ' ')}
                   </span>
                 </div>
                 <button
                   onClick={() => setSelectedAnnotation(null)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#737982' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569' }}
                 >
                   <X size={18} />
                 </button>
@@ -782,58 +782,58 @@ export default function DatasetManagerPage() {
 
               <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>
                     Audited Instruction
                   </div>
-                  <div style={{ fontSize: 13, color: '#292D32', lineHeight: 1.5, background: '#F8F7F3', padding: '10px 14px', borderRadius: 6, border: '1px solid #E6E5DF' }}>
+                  <div style={{ fontSize: 13, color: '#0F172A', lineHeight: 1.5, background: '#F8FAFC', padding: '10px 14px', borderRadius: 6, border: '1px solid #E2E8F0' }}>
                     {selectedAnnotation.original_prompt}
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
                   <div>
-                    <div style={{ fontSize: 11, color: '#737982', marginBottom: 2 }}>Domain &amp; Scenario</div>
-                    <div style={{ fontSize: 12.5, fontWeight: 600, color: '#292D32' }}>
+                    <div style={{ fontSize: 11, color: '#475569', marginBottom: 2 }}>Domain &amp; Scenario</div>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: '#0F172A' }}>
                       {selectedAnnotation.domain} ({selectedAnnotation.seed_meta.scenario})
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, color: '#737982', marginBottom: 2 }}>Evaluation Difficulty</div>
-                    <div style={{ fontSize: 12.5, fontWeight: 600, color: '#292D32', textTransform: 'capitalize' }}>
+                    <div style={{ fontSize: 11, color: '#475569', marginBottom: 2 }}>Evaluation Difficulty</div>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: '#0F172A', textTransform: 'capitalize' }}>
                       {selectedAnnotation.seed_meta.difficulty}
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, color: '#737982', marginBottom: 2 }}>Flagged Deviation Step</div>
-                    <div style={{ fontSize: 12.5, fontWeight: 700, color: selectedAnnotation.ground_truth.flagged_step_id ? '#C49A5B' : '#72947A' }}>
+                    <div style={{ fontSize: 11, color: '#475569', marginBottom: 2 }}>Flagged Deviation Step</div>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: selectedAnnotation.ground_truth.flagged_step_id ? '#D97706' : '#059669' }}>
                       {selectedAnnotation.ground_truth.flagged_step_id ? `Step ${selectedAnnotation.ground_truth.flagged_step_id}` : 'None (Compliant)'}
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, color: '#737982', marginBottom: 2 }}>Trigger Phrase</div>
-                    <div style={{ fontSize: 12.5, fontWeight: 600, color: '#292D32', fontFamily: 'IBM Plex Mono, monospace' }}>
+                    <div style={{ fontSize: 11, color: '#475569', marginBottom: 2 }}>Trigger Phrase</div>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: '#0F172A', fontFamily: 'IBM Plex Mono, monospace' }}>
                       {selectedAnnotation.ground_truth.trigger_phrase ? `"${selectedAnnotation.ground_truth.trigger_phrase}"` : 'None'}
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>
                     Ground-Truth Rationale
                   </div>
-                  <p style={{ margin: 0, fontSize: 12.5, color: '#292D32', lineHeight: 1.55 }}>
+                  <p style={{ margin: 0, fontSize: 12.5, color: '#0F172A', lineHeight: 1.55 }}>
                     {selectedAnnotation.ground_truth.explanation || 'Normal on-task execution without policy violations.'}
                   </p>
                 </div>
 
                 {selectedAnnotation.seed_meta.hard_case && (
-                  <div style={{ background: '#FAF9F6', border: '1px solid #E6E5DF', borderRadius: 6, padding: '10px 14px', fontSize: 11.5, color: '#737982' }}>
+                  <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 6, padding: '10px 14px', fontSize: 11.5, color: '#475569' }}>
                     <strong>Edge Condition:</strong> {selectedAnnotation.seed_meta.hard_case}
                   </div>
                 )}
               </div>
 
-              <div style={{ padding: '12px 20px', borderTop: '1px solid #E6E5DF', background: '#F8F7F3', display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <div style={{ padding: '12px 20px', borderTop: '1px solid #E2E8F0', background: '#F8FAFC', display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
                 <Link
                   href={`/trace-analysis?id=${selectedAnnotation.trace_id}`}
                   style={{
@@ -842,7 +842,7 @@ export default function DatasetManagerPage() {
                     gap: 6,
                     padding: '8px 16px',
                     borderRadius: 7,
-                    background: '#829581',
+                    background: '#4F46E5',
                     color: '#FFFFFF',
                     textDecoration: 'none',
                     fontSize: 12.5,

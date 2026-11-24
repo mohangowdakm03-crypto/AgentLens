@@ -202,7 +202,7 @@ function PromptCorrectionContent() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        background: '#F8F7F3',
+        background: '#F8FAFC',
         position: 'relative',
         overflowX: 'hidden',
       }}
@@ -223,8 +223,8 @@ function PromptCorrectionContent() {
         fill="none"
         preserveAspectRatio="none"
       >
-        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#829581" fillOpacity="0.08" />
-        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#829581" fillOpacity="0.05" />
+        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#4F46E5" fillOpacity="0.08" />
+        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#4F46E5" fillOpacity="0.05" />
       </svg>
 
       <Topbar
@@ -259,11 +259,11 @@ function PromptCorrectionContent() {
           }}
         >
           {isLoading ? (
-            <Loader2 size={18} color="#829581" className="animate-spin" style={{ flexShrink: 0 }} />
+            <Loader2 size={18} color="#4F46E5" className="animate-spin" style={{ flexShrink: 0 }} />
           ) : (
-            <Sparkles size={18} color="#829581" style={{ flexShrink: 0 }} />
+            <Sparkles size={18} color="#4F46E5" style={{ flexShrink: 0 }} />
           )}
-          <div style={{ fontSize: 12, color: '#292D32', lineHeight: 1.5 }}>
+          <div style={{ fontSize: 12, color: '#0F172A', lineHeight: 1.5 }}>
             <strong>Live Generative Repair Pipeline (Active):</strong> Connected to locally fine-tuned Mistral-7B QLoRA model (<code>agentlens:latest</code> via Ollama). {isLoading ? 'Synthesizing prompt repair...' : 'Displays real counterfactual prompt repair, word-level replacement diff tuples, and technical justifications.'}
           </div>
         </div>
@@ -272,7 +272,7 @@ function PromptCorrectionContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '12px 20px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
             display: 'flex',
@@ -283,7 +283,7 @@ function PromptCorrectionContent() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 11, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700 }}>
+            <span style={{ fontSize: 11, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700 }}>
               Audit Case:
             </span>
             <div style={{ display: 'flex', gap: 6 }}>
@@ -297,9 +297,9 @@ function PromptCorrectionContent() {
                     style={{
                       padding: '5px 12px',
                       borderRadius: 6,
-                      border: `1px solid ${active ? '#829581' : '#E6E5DF'}`,
-                      background: active ? '#829581' : '#FFFFFF',
-                      color: active ? '#FFFFFF' : '#292D32',
+                      border: `1px solid ${active ? '#4F46E5' : '#E2E8F0'}`,
+                      background: active ? '#4F46E5' : '#FFFFFF',
+                      color: active ? '#FFFFFF' : '#0F172A',
                       fontSize: 12,
                       fontWeight: active ? 700 : 500,
                       cursor: 'pointer',
@@ -314,8 +314,8 @@ function PromptCorrectionContent() {
 
           {/* View Mode Toggle */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 11, color: '#737982' }}>Diff Mode:</span>
-            <div style={{ display: 'flex', background: '#F0EFE9', borderRadius: 6, padding: 2 }}>
+            <span style={{ fontSize: 11, color: '#475569' }}>Diff Mode:</span>
+            <div style={{ display: 'flex', background: '#F1F5F9', borderRadius: 6, padding: 2 }}>
               <button
                 onClick={() => setViewMode('split')}
                 style={{
@@ -323,7 +323,7 @@ function PromptCorrectionContent() {
                   borderRadius: 5,
                   border: 'none',
                   background: viewMode === 'split' ? '#FFFFFF' : 'transparent',
-                  color: viewMode === 'split' ? '#292D32' : '#737982',
+                  color: viewMode === 'split' ? '#0F172A' : '#475569',
                   fontSize: 11.5,
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -341,7 +341,7 @@ function PromptCorrectionContent() {
                   borderRadius: 5,
                   border: 'none',
                   background: viewMode === 'unified' ? '#FFFFFF' : 'transparent',
-                  color: viewMode === 'unified' ? '#292D32' : '#737982',
+                  color: viewMode === 'unified' ? '#0F172A' : '#475569',
                   fontSize: 11.5,
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -375,26 +375,26 @@ function PromptCorrectionContent() {
                 style={{
                   padding: '12px 18px',
                   background: 'rgba(185, 120, 120, 0.08)',
-                  borderBottom: '1px solid rgba(185, 120, 120, 0.2)',
+                  borderBottom: '1px solid rgba(220, 38, 38, 0.15)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                 }}
               >
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#B97878' }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#DC2626' }}>
                   Original Prompt (Divergent Trigger)
                 </span>
-                <span style={{ fontSize: 11, color: '#B97878', background: 'rgba(185, 120, 120, 0.15)', padding: '2px 7px', borderRadius: 4 }}>
+                <span style={{ fontSize: 11, color: '#DC2626', background: 'rgba(220, 38, 38, 0.12)', padding: '2px 7px', borderRadius: 4 }}>
                   Ambiguous
                 </span>
               </div>
-              <div style={{ padding: '20px 22px', flex: 1, fontSize: 14, color: '#292D32', lineHeight: 1.6 }}>
+              <div style={{ padding: '20px 22px', flex: 1, fontSize: 14, color: '#0F172A', lineHeight: 1.6 }}>
                 {currentSample.diffHighlightOriginal.map((chunk, idx) => (
                   <span
                     key={idx}
                     style={{
-                      background: chunk.isTrigger ? 'rgba(185, 120, 120, 0.2)' : 'transparent',
-                      color: chunk.isTrigger ? '#B97878' : '#292D32',
+                      background: chunk.isTrigger ? 'rgba(220, 38, 38, 0.15)' : 'transparent',
+                      color: chunk.isTrigger ? '#DC2626' : '#0F172A',
                       fontWeight: chunk.isTrigger ? 700 : 400,
                       padding: chunk.isTrigger ? '2px 4px' : undefined,
                       borderRadius: 3,
@@ -422,26 +422,26 @@ function PromptCorrectionContent() {
                 style={{
                   padding: '12px 18px',
                   background: 'rgba(114, 148, 122, 0.08)',
-                  borderBottom: '1px solid rgba(114, 148, 122, 0.2)',
+                  borderBottom: '1px solid rgba(5, 150, 105, 0.15)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                 }}
               >
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#72947A' }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#059669' }}>
                   Counterfactual Repaired Prompt (Hard Boundaries)
                 </span>
-                <span style={{ fontSize: 11, color: '#72947A', background: 'rgba(114, 148, 122, 0.15)', padding: '2px 7px', borderRadius: 4 }}>
+                <span style={{ fontSize: 11, color: '#059669', background: 'rgba(5, 150, 105, 0.12)', padding: '2px 7px', borderRadius: 4 }}>
                   Guaranteed Compliant
                 </span>
               </div>
-              <div style={{ padding: '20px 22px', flex: 1, fontSize: 14, color: '#292D32', lineHeight: 1.6 }}>
+              <div style={{ padding: '20px 22px', flex: 1, fontSize: 14, color: '#0F172A', lineHeight: 1.6 }}>
                 {currentSample.diffHighlightRepaired.map((chunk, idx) => (
                   <span
                     key={idx}
                     style={{
                       background: chunk.isAdded ? 'rgba(114, 148, 122, 0.18)' : 'transparent',
-                      color: chunk.isAdded ? '#5F7C66' : '#292D32',
+                      color: chunk.isAdded ? '#5F7C66' : '#0F172A',
                       fontWeight: chunk.isAdded ? 700 : 400,
                       padding: chunk.isAdded ? '2px 4px' : undefined,
                       borderRadius: 3,
@@ -454,8 +454,8 @@ function PromptCorrectionContent() {
               <div
                 style={{
                   padding: '12px 18px',
-                  background: '#F8F7F3',
-                  borderTop: '1px solid #E6E5DF',
+                  background: '#F8FAFC',
+                  borderTop: '1px solid #E2E8F0',
                   display: 'flex',
                   justifyContent: 'flex-end',
                   gap: 10,
@@ -469,15 +469,15 @@ function PromptCorrectionContent() {
                     gap: 6,
                     padding: '7px 14px',
                     borderRadius: 7,
-                    border: '1px solid #E6E5DF',
+                    border: '1px solid #E2E8F0',
                     background: '#FFFFFF',
-                    color: '#292D32',
+                    color: '#0F172A',
                     fontSize: 12,
                     fontWeight: 600,
                     cursor: 'pointer',
                   }}
                 >
-                  {copied ? <Check size={13} color="#72947A" /> : <Copy size={13} />}
+                  {copied ? <Check size={13} color="#059669" /> : <Copy size={13} />}
                   {copied ? 'Copied to Clipboard' : 'Copy Prompt'}
                 </button>
                 <button
@@ -489,7 +489,7 @@ function PromptCorrectionContent() {
                     padding: '7px 14px',
                     borderRadius: 7,
                     border: 'none',
-                    background: '#829581',
+                    background: '#4F46E5',
                     color: '#FFFFFF',
                     fontSize: 12,
                     fontWeight: 600,
@@ -507,17 +507,17 @@ function PromptCorrectionContent() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '20px 24px',
               fontFamily: 'IBM Plex Mono, monospace',
               fontSize: 13,
               lineHeight: 1.7,
             }}
           >
-            <div style={{ color: '#B97878', background: 'rgba(185,120,120,0.1)', padding: '4px 8px', borderRadius: 4, marginBottom: 8, textDecoration: 'line-through' }}>
+            <div style={{ color: '#DC2626', background: 'rgba(185,120,120,0.1)', padding: '4px 8px', borderRadius: 4, marginBottom: 8, textDecoration: 'line-through' }}>
               - {currentSample.original}
             </div>
-            <div style={{ color: '#72947A', background: 'rgba(114,148,122,0.1)', padding: '4px 8px', borderRadius: 4 }}>
+            <div style={{ color: '#059669', background: 'rgba(114,148,122,0.1)', padding: '4px 8px', borderRadius: 4 }}>
               + {currentSample.repaired}
             </div>
           </div>
@@ -528,14 +528,14 @@ function PromptCorrectionContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '20px 24px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-            <ShieldCheck size={16} color="#72947A" />
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+            <ShieldCheck size={16} color="#059669" />
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
               Enforced Policy Safeguards
             </span>
           </div>
@@ -548,15 +548,15 @@ function PromptCorrectionContent() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  background: '#F8F7F3',
+                  background: '#F8FAFC',
                   padding: '10px 14px',
                   borderRadius: 8,
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                   fontSize: 12,
-                  color: '#292D32',
+                  color: '#0F172A',
                 }}
               >
-                <CheckCircle2 size={15} color="#72947A" />
+                <CheckCircle2 size={15} color="#059669" />
                 <span>{sg.rule}</span>
               </div>
             ))}
@@ -568,12 +568,12 @@ function PromptCorrectionContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '20px 24px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
           }}
         >
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 12 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 12 }}>
             Surgical Optimization Breakdown
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
@@ -581,16 +581,16 @@ function PromptCorrectionContent() {
               <div
                 key={idx}
                 style={{
-                  background: '#F8F7F3',
+                  background: '#F8FAFC',
                   borderRadius: 8,
                   padding: '12px 14px',
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                 }}
               >
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#292D32', marginBottom: 4 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#0F172A', marginBottom: 4 }}>
                   {imp.title}
                 </div>
-                <div style={{ fontSize: 11.5, color: '#737982', lineHeight: 1.4 }}>
+                <div style={{ fontSize: 11.5, color: '#475569', lineHeight: 1.4 }}>
                   {imp.desc}
                 </div>
               </div>
@@ -604,7 +604,7 @@ function PromptCorrectionContent() {
 
 export default function PromptCorrectionPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 40, color: '#737982' }}>Loading Prompt Correction Studio...</div>}>
+    <Suspense fallback={<div style={{ padding: 40, color: '#475569' }}>Loading Prompt Correction Studio...</div>}>
       <PromptCorrectionContent />
     </Suspense>
   );

@@ -372,7 +372,7 @@ export function AuditDashboard() {
       )}
 
       {/* Dataset quick-selector bar */}
-      <div className="mb-5 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-[#FAF9F6] p-2.5 text-xs">
+      <div className="mb-5 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-[#F8FAFC] p-2.5 text-xs">
         <span className="flex items-center gap-1.5 font-semibold text-slate-700">
           <Database className="h-3.5 w-3.5 text-violet-600" />
           Quick load repository trace:
@@ -409,7 +409,7 @@ export function AuditDashboard() {
                 setBackendResponse(null);
                 setIsDemoResult(false);
               }}
-              className="w-full rounded-lg border border-slate-200 bg-[#FAF9F6] px-3.5 py-3 text-sm text-slate-800 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+              className="w-full rounded-lg border border-slate-200 bg-[#F8FAFC] px-3.5 py-3 text-sm text-slate-800 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
               placeholder="Enter the instruction that guided this agent run"
             />
             <div className="mt-4"><InstructionViewer instruction={trace.userInstruction} /></div>
@@ -449,7 +449,7 @@ export function AuditDashboard() {
                 "group flex cursor-pointer items-center gap-3 rounded-lg border border-dashed px-4 py-3.5 transition",
                 isDraggingFile
                   ? "border-violet-500 bg-violet-50"
-                  : "border-slate-300 bg-[#FAF9F6] hover:border-violet-400 hover:bg-violet-50/40"
+                  : "border-slate-300 bg-[#F8FAFC] hover:border-violet-400 hover:bg-violet-50/40"
               )}
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 group-hover:text-violet-700"><Upload className="h-4 w-4" /></span>
@@ -541,7 +541,7 @@ export function AuditDashboard() {
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {["Similarity (MiniLM)", "Drift (PELT)", "Scope violations", "Audit outcome"].map((label) => (
-                  <div key={label} className="rounded-lg border border-slate-200 bg-[#FAF9F6] px-3 py-3">
+                  <div key={label} className="rounded-lg border border-slate-200 bg-[#F8FAFC] px-3 py-3">
                     <span className="block text-xs text-slate-500">{label}</span>
                     <span className="mt-1 block text-sm font-semibold text-slate-400">Unavailable</span>
                   </div>
@@ -690,7 +690,7 @@ function BackendTraceResponsePanel({
 
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* PELT Diagnostic Box */}
-          <div className="rounded-lg border border-slate-200 bg-[#FAF9F6] p-3.5">
+          <div className="rounded-lg border border-slate-200 bg-[#F8FAFC] p-3.5">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700">PELT Changepoint</h3>
             <div className="mt-2 space-y-1.5 text-xs text-slate-600">
               <div className="flex justify-between">
@@ -723,7 +723,7 @@ function BackendTraceResponsePanel({
           </div>
 
           {/* Fallback Single-Step Box */}
-          <div className="rounded-lg border border-slate-200 bg-[#FAF9F6] p-3.5">
+          <div className="rounded-lg border border-slate-200 bg-[#F8FAFC] p-3.5">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700">Single-Step Drop Fallback</h3>
             <div className="mt-2 space-y-1.5 text-xs text-slate-600">
               <div className="flex justify-between">
@@ -746,7 +746,7 @@ function BackendTraceResponsePanel({
         </div>
 
         {/* Scope Verification Violations */}
-        <div className="mt-4 rounded-lg border border-slate-200 bg-[#FAF9F6] p-3.5">
+        <div className="mt-4 rounded-lg border border-slate-200 bg-[#F8FAFC] p-3.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700">Scope Verification Analysis</h3>
             <span className="rounded-full bg-slate-200/70 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
@@ -882,7 +882,7 @@ function BackendTraceResponsePanel({
 
 function ResponseMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 rounded-lg border border-slate-100 bg-[#FAF9F6] px-3 py-2.5">
+    <div className="min-w-0 rounded-lg border border-slate-100 bg-[#F8FAFC] px-3 py-2.5">
       <span className="block text-[11px] text-slate-500">{label}</span>
       <span className="mt-1 block break-words text-sm font-semibold text-slate-800">{value}</span>
     </div>
@@ -910,7 +910,7 @@ function DetectorAnalysisCard({ result, deviationStep }: { result: AuditResult; 
       </div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {metrics.map(([label, value]) => (
-          <div key={label} className="min-w-0 rounded-lg border border-slate-100 bg-[#FAF9F6] px-3 py-2.5">
+          <div key={label} className="min-w-0 rounded-lg border border-slate-100 bg-[#F8FAFC] px-3 py-2.5">
             <span className="block text-[11px] text-slate-500">{label}</span>
             <span className="mt-1 block break-words text-sm font-semibold text-slate-800">{value}</span>
           </div>

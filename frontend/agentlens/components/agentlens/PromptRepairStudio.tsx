@@ -95,7 +95,7 @@ export function PromptRepairStudio({ originalPrompt, result, trace, isDemoResult
       </div>
 
       <div><div className="mb-2 flex items-center justify-between gap-2"><h3 className="text-xs font-semibold text-slate-700">Word-level diff</h3><div className="flex gap-3 text-[11px] text-slate-500"><span><i className="mr-1 inline-block h-2 w-2 rounded-sm bg-rose-300" />Removed</span><span><i className="mr-1 inline-block h-2 w-2 rounded-sm bg-emerald-300" />Added</span></div></div>
-        <div className="break-words rounded-lg border border-slate-200 bg-[#FAF9F6] p-3.5 font-mono text-[13px] leading-7 text-slate-700">
+        <div className="break-words rounded-lg border border-slate-200 bg-[#F8FAFC] p-3.5 font-mono text-[13px] leading-7 text-slate-700">
           {segments.map((segment, index) => segment.type === "removed" ? <del key={index} className="rounded bg-rose-100 px-1 py-0.5 text-rose-800 decoration-rose-500">{segment.text}</del> : segment.type === "added" ? <ins key={index} className="rounded bg-emerald-100 px-1 py-0.5 font-semibold text-emerald-800 no-underline">{segment.text}</ins> : <span key={index}>{segment.text}</span>)}
         </div>
       </div>

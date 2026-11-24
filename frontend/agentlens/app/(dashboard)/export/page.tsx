@@ -97,7 +97,7 @@ END OF REPORT — AGENTLENS AUDIT SECURITY ENGINE
       desc: 'Complete verified audit findings including trace analysis, detected deviations, and counterfactual repairs.',
       format: 'TXT / PDF Summary',
       icon: FileText,
-      color: '#829581',
+      color: '#4F46E5',
       handler: handleExportPDF,
     },
     {
@@ -105,7 +105,7 @@ END OF REPORT — AGENTLENS AUDIT SECURITY ENGINE
       desc: 'Accuracy, precision, recall, F1-scores, and per-class confusion matrix telemetry in tabular format.',
       format: 'CSV Telemetry',
       icon: BarChart2,
-      color: '#C49A5B',
+      color: '#D97706',
       handler: handleExportCSV,
     },
     {
@@ -113,7 +113,7 @@ END OF REPORT — AGENTLENS AUDIT SECURITY ENGINE
       desc: 'All 126 validated execution traces formatted according to AgentLens standard JSONL schema.',
       format: 'JSONL Dataset',
       icon: Table2,
-      color: '#B97878',
+      color: '#DC2626',
       handler: handleExportJSONL,
     },
   ];
@@ -125,7 +125,7 @@ END OF REPORT — AGENTLENS AUDIT SECURITY ENGINE
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        background: '#F8F7F3',
+        background: '#F8FAFC',
         position: 'relative',
         overflowX: 'hidden',
       }}
@@ -146,8 +146,8 @@ END OF REPORT — AGENTLENS AUDIT SECURITY ENGINE
         fill="none"
         preserveAspectRatio="none"
       >
-        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#829581" fillOpacity="0.08" />
-        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#829581" fillOpacity="0.05" />
+        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#4F46E5" fillOpacity="0.08" />
+        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#4F46E5" fillOpacity="0.05" />
       </svg>
 
       <Topbar
@@ -172,18 +172,18 @@ END OF REPORT — AGENTLENS AUDIT SECURITY ENGINE
         {downloadNotice && (
           <div
             style={{
-              background: 'rgba(114, 148, 122, 0.12)',
-              border: '1px solid #72947A',
+              background: 'rgba(5, 150, 105, 0.1)',
+              border: '1px solid #059669',
               borderRadius: 8,
               padding: '10px 16px',
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              color: '#292D32',
+              color: '#0F172A',
               fontSize: 12.5,
             }}
           >
-            <CheckCircle2 size={16} color="#72947A" />
+            <CheckCircle2 size={16} color="#059669" />
             <span>{downloadNotice}</span>
           </div>
         )}
@@ -194,7 +194,7 @@ END OF REPORT — AGENTLENS AUDIT SECURITY ENGINE
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '22px 24px',
               display: 'flex',
               alignItems: 'center',
@@ -218,8 +218,8 @@ END OF REPORT — AGENTLENS AUDIT SECURITY ENGINE
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>{opt.title}</div>
-              <div style={{ fontSize: 12, color: '#737982', marginTop: 3, lineHeight: 1.5 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>{opt.title}</div>
+              <div style={{ fontSize: 12, color: '#475569', marginTop: 3, lineHeight: 1.5 }}>
                 {opt.desc}
               </div>
             </div>
@@ -246,16 +246,16 @@ END OF REPORT — AGENTLENS AUDIT SECURITY ENGINE
                   gap: 6,
                   padding: '7px 14px',
                   borderRadius: 7,
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                   background: '#FFFFFF',
-                  color: '#292D32',
+                  color: '#0F172A',
                   fontSize: 12,
                   fontWeight: 600,
                   cursor: 'pointer',
                   transition: 'background 0.12s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#F8F7F3';
+                  e.currentTarget.style.background = '#F8FAFC';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = '#FFFFFF';

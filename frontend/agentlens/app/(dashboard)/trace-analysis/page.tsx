@@ -334,8 +334,8 @@ function TraceAnalysisContent() {
         : null)
     : currentTrace.ground_truth.flagged_step_id;
 
-  const statusColor = !isDeviation ? '#72947A' : devType === 'drift' ? '#C49A5B' : '#B97878';
-  const statusBg = !isDeviation ? 'rgba(114, 148, 122, 0.12)' : devType === 'drift' ? 'rgba(196, 154, 91, 0.12)' : 'rgba(185, 120, 120, 0.12)';
+  const statusColor = !isDeviation ? '#059669' : devType === 'drift' ? '#D97706' : '#DC2626';
+  const statusBg = !isDeviation ? 'rgba(5, 150, 105, 0.1)' : devType === 'drift' ? 'rgba(217, 119, 6, 0.1)' : 'rgba(220, 38, 38, 0.1)';
 
   // Execute Live Audit against /api/audit
   const handleExecuteAudit = async () => {
@@ -436,7 +436,7 @@ function TraceAnalysisContent() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        background: '#F8F7F3',
+        background: '#F8FAFC',
         position: 'relative',
         overflowX: 'hidden',
       }}
@@ -457,8 +457,8 @@ function TraceAnalysisContent() {
         fill="none"
         preserveAspectRatio="none"
       >
-        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#829581" fillOpacity="0.08" />
-        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#829581" fillOpacity="0.05" />
+        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#4F46E5" fillOpacity="0.08" />
+        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#4F46E5" fillOpacity="0.05" />
       </svg>
 
       <Topbar
@@ -497,10 +497,10 @@ function TraceAnalysisContent() {
                 gap: 6,
                 fontSize: 12,
                 fontWeight: 600,
-                color: '#737982',
+                color: '#475569',
                 textDecoration: 'none',
                 background: '#FFFFFF',
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 padding: '6px 12px',
                 borderRadius: 7,
               }}
@@ -510,7 +510,7 @@ function TraceAnalysisContent() {
 
             {/* Trace Quick Switcher Dropdown */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 12, color: '#737982' }}>Select Trace Record:</span>
+              <span style={{ fontSize: 12, color: '#475569' }}>Select Trace Record:</span>
               <select
                 value={currentTrace.trace_id}
                 onChange={(e) => {
@@ -524,13 +524,13 @@ function TraceAnalysisContent() {
                 }}
                 style={{
                   background: '#FFFFFF',
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                   borderRadius: 7,
                   padding: '6px 10px',
                   fontSize: 12,
                   fontFamily: 'IBM Plex Mono, monospace',
                   fontWeight: 600,
-                  color: '#292D32',
+                  color: '#0F172A',
                   outline: 'none',
                   cursor: 'pointer',
                 }}
@@ -579,9 +579,9 @@ function TraceAnalysisContent() {
                   gap: 4,
                   fontSize: 12,
                   fontWeight: 600,
-                  color: '#292D32',
+                  color: '#0F172A',
                   background: '#FFFFFF',
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                   padding: '6px 12px',
                   borderRadius: 7,
                   textDecoration: 'none',
@@ -607,9 +607,9 @@ function TraceAnalysisContent() {
                   gap: 4,
                   fontSize: 12,
                   fontWeight: 600,
-                  color: '#292D32',
+                  color: '#0F172A',
                   background: '#FFFFFF',
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                   padding: '6px 12px',
                   borderRadius: 7,
                   textDecoration: 'none',
@@ -627,15 +627,15 @@ function TraceAnalysisContent() {
                 gap: 6,
                 fontSize: 12,
                 fontWeight: 600,
-                color: showContractPayload ? '#829581' : '#292D32',
-                background: showContractPayload ? '#F0EFE9' : '#FFFFFF',
-                border: '1px solid #E6E5DF',
+                color: showContractPayload ? '#4F46E5' : '#0F172A',
+                background: showContractPayload ? '#F1F5F9' : '#FFFFFF',
+                border: '1px solid #E2E8F0',
                 padding: '6px 12px',
                 borderRadius: 7,
                 cursor: 'pointer',
               }}
             >
-              <Terminal size={13} color="#829581" />
+              <Terminal size={13} color="#4F46E5" />
               {showContractPayload ? 'Hide Contract JSON' : 'Detector Contract V1'}
             </button>
           </div>
@@ -647,7 +647,7 @@ function TraceAnalysisContent() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '18px 22px',
               boxShadow: '0 2px 8px rgba(41,45,50,0.04)',
             }}
@@ -663,8 +663,8 @@ function TraceAnalysisContent() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Terminal size={16} color="#829581" />
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+                <Terminal size={16} color="#4F46E5" />
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
                   Detector Output Contract V1 Payload (POST /api/audit Consumer View)
                 </span>
                 <span
@@ -674,8 +674,8 @@ function TraceAnalysisContent() {
                     fontWeight: 700,
                     padding: '2px 8px',
                     borderRadius: 10,
-                    background: 'rgba(114, 148, 122, 0.12)',
-                    color: '#72947A',
+                    background: 'rgba(5, 150, 105, 0.1)',
+                    color: '#059669',
                   }}
                 >
                   SCHEMA: DetectorV1Response
@@ -694,16 +694,16 @@ function TraceAnalysisContent() {
                     alignItems: 'center',
                     gap: 6,
                     fontSize: 11.5,
-                    color: '#292D32',
-                    background: '#F8F7F3',
-                    border: '1px solid #E6E5DF',
+                    color: '#0F172A',
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
                     borderRadius: 6,
                     padding: '5px 10px',
                     cursor: 'pointer',
                     fontWeight: 600,
                   }}
                 >
-                  {copiedContract ? <Check size={12} color="#72947A" /> : <Copy size={12} />}
+                  {copiedContract ? <Check size={12} color="#059669" /> : <Copy size={12} />}
                   {copiedContract ? 'Copied Contract JSON' : 'Copy Contract JSON'}
                 </button>
               </div>
@@ -712,13 +712,13 @@ function TraceAnalysisContent() {
             <pre
               style={{
                 margin: 0,
-                background: '#F8F7F3',
-                border: '1px solid #E6E5DF',
+                background: '#F8FAFC',
+                border: '1px solid #E2E8F0',
                 borderRadius: 8,
                 padding: '12px 14px',
                 fontSize: 11,
                 fontFamily: 'IBM Plex Mono, monospace',
-                color: '#292D32',
+                color: '#0F172A',
                 overflowX: 'auto',
                 maxHeight: 280,
                 lineHeight: 1.5,
@@ -734,21 +734,21 @@ function TraceAnalysisContent() {
           <div
             style={{
               background: 'rgba(114, 148, 122, 0.1)',
-              border: '1px solid #72947A',
+              border: '1px solid #059669',
               borderRadius: 10,
               padding: '12px 18px',
               display: 'flex',
               alignItems: 'center',
               gap: 10,
               fontSize: 12.5,
-              color: '#292D32',
+              color: '#0F172A',
             }}
           >
-            <CheckCircle2 size={16} color="#72947A" />
+            <CheckCircle2 size={16} color="#059669" />
             <span style={{ flex: 1 }}>{auditSuccessNotice}</span>
             <button
               onClick={() => setAuditSuccessNotice(null)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#737982' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569' }}
             >
               ✕
             </button>
@@ -760,7 +760,7 @@ function TraceAnalysisContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '20px 24px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
             display: 'flex',
@@ -776,8 +776,8 @@ function TraceAnalysisContent() {
                     fontFamily: 'IBM Plex Mono, monospace',
                     fontSize: 14,
                     fontWeight: 700,
-                    color: '#292D32',
-                    background: '#F0EFE9',
+                    color: '#0F172A',
+                    background: '#F1F5F9',
                     padding: '3px 8px',
                     borderRadius: 6,
                   }}
@@ -805,9 +805,9 @@ function TraceAnalysisContent() {
                 <span
                   style={{
                     fontSize: 11,
-                    color: '#737982',
-                    background: '#F8F7F3',
-                    border: '1px solid #E6E5DF',
+                    color: '#475569',
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
                     padding: '2px 8px',
                     borderRadius: 6,
                   }}
@@ -815,7 +815,7 @@ function TraceAnalysisContent() {
                   {currentTrace.domain}
                 </span>
               </div>
-              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#292D32', lineHeight: 1.4 }}>
+              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#0F172A', lineHeight: 1.4 }}>
                 {currentTrace.original_prompt}
               </h2>
             </div>
@@ -833,7 +833,7 @@ function TraceAnalysisContent() {
                   fontSize: 12.5,
                   fontWeight: 600,
                   color: '#FFFFFF',
-                  background: isAuditing ? '#A3B0A2' : '#829581',
+                  background: isAuditing ? '#A3B0A2' : '#4F46E5',
                   border: 'none',
                   padding: '9px 16px',
                   borderRadius: 8,
@@ -860,15 +860,15 @@ function TraceAnalysisContent() {
                       gap: 6,
                       fontSize: 12,
                       fontWeight: 600,
-                      color: '#292D32',
-                      background: '#F0EFE9',
-                      border: '1px solid #E6E5DF',
+                      color: '#0F172A',
+                      background: '#F1F5F9',
+                      border: '1px solid #E2E8F0',
                       padding: '8px 14px',
                       borderRadius: 8,
                       textDecoration: 'none',
                     }}
                   >
-                    <GitBranch size={14} color="#829581" /> Causal DAG
+                    <GitBranch size={14} color="#4F46E5" /> Causal DAG
                   </Link>
 
                   <Link
@@ -879,15 +879,15 @@ function TraceAnalysisContent() {
                       gap: 6,
                       fontSize: 12,
                       fontWeight: 600,
-                      color: '#292D32',
-                      background: '#F0EFE9',
-                      border: '1px solid #E6E5DF',
+                      color: '#0F172A',
+                      background: '#F1F5F9',
+                      border: '1px solid #E2E8F0',
                       padding: '8px 14px',
                       borderRadius: 8,
                       textDecoration: 'none',
                     }}
                   >
-                    <Sparkles size={14} color="#829581" /> Prompt Repair Studio
+                    <Sparkles size={14} color="#4F46E5" /> Prompt Repair Studio
                   </Link>
                 </>
               )}
@@ -905,25 +905,25 @@ function TraceAnalysisContent() {
             }}
           >
             <div>
-              <div style={{ fontSize: 10, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Total Steps</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#292D32', marginTop: 2 }}>{currentTrace.steps.length} Steps</div>
+              <div style={{ fontSize: 10, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Total Steps</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', marginTop: 2 }}>{currentTrace.steps.length} Steps</div>
             </div>
             <div>
-              <div style={{ fontSize: 10, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Execution Duration</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#292D32', marginTop: 2 }}>{currentTrace.total_latency_ms} ms</div>
+              <div style={{ fontSize: 10, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Execution Duration</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', marginTop: 2 }}>{currentTrace.total_latency_ms} ms</div>
             </div>
             <div>
-              <div style={{ fontSize: 10, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Token Budget</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#292D32', marginTop: 2 }}>{currentTrace.total_tokens} tokens</div>
+              <div style={{ fontSize: 10, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Token Budget</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', marginTop: 2 }}>{currentTrace.total_tokens} tokens</div>
             </div>
             <div>
-              <div style={{ fontSize: 10, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Evaluation Difficulty</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#292D32', marginTop: 2, textTransform: 'capitalize' }}>
+              <div style={{ fontSize: 10, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Evaluation Difficulty</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', marginTop: 2, textTransform: 'capitalize' }}>
                 {currentTrace.seed_meta.difficulty}
               </div>
             </div>
             <div>
-              <div style={{ fontSize: 10, color: '#737982', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Failure Anchor</div>
+              <div style={{ fontSize: 10, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Failure Anchor</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: statusColor, marginTop: 2 }}>
                 {flaggedStepId ? `Step ${flaggedStepId}` : 'None (Compliant)'}
               </div>
@@ -936,19 +936,19 @@ function TraceAnalysisContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '18px 24px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Layers size={16} color="#829581" />
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+              <Layers size={16} color="#4F46E5" />
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
                 Step Deviation Map &amp; Policy Alignment
               </span>
             </div>
-            <span style={{ fontSize: 11, color: '#737982' }}>
+            <span style={{ fontSize: 11, color: '#475569' }}>
               Sequential step state verification against intent boundary
             </span>
           </div>
@@ -956,7 +956,7 @@ function TraceAnalysisContent() {
           <div style={{ display: 'grid', gridTemplateColumns: `repeat(${currentTrace.steps.length}, 1fr)`, gap: 8 }}>
             {currentTrace.steps.map((step) => {
               const isFlagged = flaggedStepId === step.step_id;
-              const cardColor = isFlagged ? statusColor : '#72947A';
+              const cardColor = isFlagged ? statusColor : '#059669';
               const cardBg = isFlagged ? statusBg : 'rgba(114, 148, 122, 0.08)';
 
               return (
@@ -983,14 +983,14 @@ function TraceAnalysisContent() {
                     {isFlagged ? (
                       <AlertTriangle size={13} color={statusColor} />
                     ) : (
-                      <CheckCircle2 size={13} color="#72947A" />
+                      <CheckCircle2 size={13} color="#059669" />
                     )}
                   </div>
                   <div
                     style={{
                       fontSize: 11.5,
                       fontWeight: 600,
-                      color: '#292D32',
+                      color: '#0F172A',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
@@ -998,7 +998,7 @@ function TraceAnalysisContent() {
                   >
                     {step.tool_called || step.action_type}
                   </div>
-                  <div style={{ fontSize: 10, color: isFlagged ? statusColor : '#737982', marginTop: 4, fontWeight: isFlagged ? 700 : 400 }}>
+                  <div style={{ fontSize: 10, color: isFlagged ? statusColor : '#475569', marginTop: 4, fontWeight: isFlagged ? 700 : 400 }}>
                     {isFlagged ? 'FLAGGED DEVIATION' : 'Nominal Action'}
                   </div>
                 </div>
@@ -1013,100 +1013,100 @@ function TraceAnalysisContent() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '18px 24px',
               boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Terminal size={16} color="#829581" />
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+                <Terminal size={16} color="#4F46E5" />
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
                   ML Core Diagnostic Breakdown (Verified FastAPI Contract)
                 </span>
               </div>
-              <span style={{ fontSize: 11, color: '#737982' }}>
+              <span style={{ fontSize: 11, color: '#475569' }}>
                 Statistical Change-Point &amp; Scope Policy Engine
               </span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               {/* PELT & Drift Section */}
-              <div style={{ background: '#F8F7F3', borderRadius: 8, padding: '12px 14px', border: '1px solid #EBEAE4' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#292D32', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <GitBranch size={13} color="#C49A5B" />
+              <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '12px 14px', border: '1px solid #EBEAE4' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#0F172A', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <GitBranch size={13} color="#D97706" />
                   PELT Cosine Drift Diagnostics
                 </div>
                 {auditResponse.detectorAnalysis.pelt ? (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, fontSize: 11 }}>
                     <div>
-                      <div style={{ color: '#737982' }}>Breakpoint Step</div>
-                      <div style={{ fontWeight: 600, color: '#292D32' }}>
+                      <div style={{ color: '#475569' }}>Breakpoint Step</div>
+                      <div style={{ fontWeight: 600, color: '#0F172A' }}>
                         {auditResponse.detectorAnalysis.pelt.breakpointStepId ? `Step ${auditResponse.detectorAnalysis.pelt.breakpointStepId}` : 'None'}
                       </div>
                     </div>
                     <div>
-                      <div style={{ color: '#737982' }}>Similarity Before</div>
-                      <div style={{ fontWeight: 600, color: '#292D32' }}>
+                      <div style={{ color: '#475569' }}>Similarity Before</div>
+                      <div style={{ fontWeight: 600, color: '#0F172A' }}>
                         {auditResponse.detectorAnalysis.pelt.similarityBefore !== null ? auditResponse.detectorAnalysis.pelt.similarityBefore.toFixed(3) : '—'}
                       </div>
                     </div>
                     <div>
-                      <div style={{ color: '#737982' }}>Similarity After</div>
-                      <div style={{ fontWeight: 600, color: '#292D32' }}>
+                      <div style={{ color: '#475569' }}>Similarity After</div>
+                      <div style={{ fontWeight: 600, color: '#0F172A' }}>
                         {auditResponse.detectorAnalysis.pelt.similarityAfter !== null ? auditResponse.detectorAnalysis.pelt.similarityAfter.toFixed(3) : '—'}
                       </div>
                     </div>
                     <div>
-                      <div style={{ color: '#737982' }}>Sustained Drop</div>
-                      <div style={{ fontWeight: 600, color: '#C49A5B' }}>
+                      <div style={{ color: '#475569' }}>Sustained Drop</div>
+                      <div style={{ fontWeight: 600, color: '#D97706' }}>
                         {auditResponse.detectorAnalysis.pelt.difference !== null ? auditResponse.detectorAnalysis.pelt.difference.toFixed(3) : '—'}
                       </div>
                     </div>
                     <div>
-                      <div style={{ color: '#737982' }}>Threshold Used</div>
-                      <div style={{ fontWeight: 600, color: '#292D32' }}>
+                      <div style={{ color: '#475569' }}>Threshold Used</div>
+                      <div style={{ fontWeight: 600, color: '#0F172A' }}>
                         {auditResponse.detectorAnalysis.pelt.thresholdUsed ?? 0.15}
                       </div>
                     </div>
                     <div>
-                      <div style={{ color: '#737982' }}>Fallback Drop</div>
-                      <div style={{ fontWeight: 600, color: '#292D32' }}>
+                      <div style={{ color: '#475569' }}>Fallback Drop</div>
+                      <div style={{ fontWeight: 600, color: '#0F172A' }}>
                         {auditResponse.detectorAnalysis.fallback?.triggered ? 'Triggered (≥0.20)' : 'Inactive'}
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div style={{ fontSize: 11, color: '#737982', fontStyle: 'italic' }}>
+                  <div style={{ fontSize: 11, color: '#475569', fontStyle: 'italic' }}>
                     No change-point breakpoint detected by PELT algorithm (sustained cosine similarity maintained).
                   </div>
                 )}
               </div>
 
               {/* Scope & Policy Section */}
-              <div style={{ background: '#F8F7F3', borderRadius: 8, padding: '12px 14px', border: '1px solid #EBEAE4' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#292D32', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <ShieldAlert size={13} color="#B97878" />
+              <div style={{ background: '#F8FAFC', borderRadius: 8, padding: '12px 14px', border: '1px solid #EBEAE4' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#0F172A', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <ShieldAlert size={13} color="#DC2626" />
                   Scope Boundary Policy Diagnostics
                 </div>
                 {auditResponse.detectorAnalysis.scopeDetails ? (
                   <div>
                     <div style={{ display: 'flex', gap: 12, marginBottom: 8, fontSize: 11 }}>
                       <div>
-                        <span style={{ color: '#737982' }}>Allowed: </span>
-                        <span style={{ fontWeight: 600, color: '#72947A' }}>
+                        <span style={{ color: '#475569' }}>Allowed: </span>
+                        <span style={{ fontWeight: 600, color: '#059669' }}>
                           {auditResponse.detectorAnalysis.scopeDetails.allowedActions.length > 0 ? auditResponse.detectorAnalysis.scopeDetails.allowedActions.join(', ') : 'None'}
                         </span>
                       </div>
                       <div>
-                        <span style={{ color: '#737982' }}>Forbidden: </span>
-                        <span style={{ fontWeight: 600, color: '#B97878' }}>
+                        <span style={{ color: '#475569' }}>Forbidden: </span>
+                        <span style={{ fontWeight: 600, color: '#DC2626' }}>
                           {auditResponse.detectorAnalysis.scopeDetails.forbiddenActions.length > 0 ? auditResponse.detectorAnalysis.scopeDetails.forbiddenActions.join(', ') : 'None'}
                         </span>
                       </div>
                     </div>
                     {auditResponse.detectorAnalysis.scopeDetails.violations.length > 0 ? (
-                      <div style={{ fontSize: 10.5, color: '#B97878', background: 'rgba(185,120,120,0.1)', padding: '6px 8px', borderRadius: 6 }}>
+                      <div style={{ fontSize: 10.5, color: '#DC2626', background: 'rgba(185,120,120,0.1)', padding: '6px 8px', borderRadius: 6 }}>
                         {auditResponse.detectorAnalysis.scopeDetails.violations.map((v, i) => (
                           <div key={i}>
                             <strong>Violation at Step {v.stepId}:</strong> Action &apos;{v.action}&apos; ({v.reason})
@@ -1114,13 +1114,13 @@ function TraceAnalysisContent() {
                         ))}
                       </div>
                     ) : (
-                      <div style={{ fontSize: 11, color: '#72947A', fontStyle: 'italic' }}>
+                      <div style={{ fontSize: 11, color: '#059669', fontStyle: 'italic' }}>
                         ✓ Zero forbidden tool actions executed. Conforms to intent whitelist.
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div style={{ fontSize: 11, color: '#737982', fontStyle: 'italic' }}>
+                  <div style={{ fontSize: 11, color: '#475569', fontStyle: 'italic' }}>
                     No explicit action constraints supplied or policy analysis unavailable.
                   </div>
                 )}
@@ -1129,7 +1129,7 @@ function TraceAnalysisContent() {
 
             {/* Phase 4 Status Disclaimer */}
             <div style={{ marginTop: 12, padding: '8px 12px', background: 'rgba(130,149,129,0.08)', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#555D67' }}>
-              <Info size={13} color="#829581" />
+              <Info size={13} color="#4F46E5" />
               <span>
                 <strong>System Transparency:</strong> Statistical ML Core is actively detecting deviations and change-points. Generative features (Mistral-7B QLoRA prompt repair and token attribution) are scheduled for Phase 4 offline deployment.
               </span>
@@ -1142,18 +1142,18 @@ function TraceAnalysisContent() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '18px 24px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Clock size={15} color="#829581" />
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+              <Clock size={15} color="#4F46E5" />
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
                 Execution Span Waterfall
               </span>
-              <span style={{ fontSize: 11, color: '#737982' }}>
+              <span style={{ fontSize: 11, color: '#475569' }}>
                 (Relative latency distribution across {currentTrace.steps.length} sequential execution spans)
               </span>
             </div>
@@ -1165,13 +1165,13 @@ function TraceAnalysisContent() {
                   border: 'none',
                   fontSize: 11.5,
                   fontWeight: 600,
-                  color: '#829581',
+                  color: '#4F46E5',
                   cursor: 'pointer',
                 }}
               >
                 Expand All
               </button>
-              <span style={{ color: '#E6E5DF' }}>•</span>
+              <span style={{ color: '#E2E8F0' }}>•</span>
               <button
                 onClick={collapseAll}
                 style={{
@@ -1179,7 +1179,7 @@ function TraceAnalysisContent() {
                   border: 'none',
                   fontSize: 11.5,
                   fontWeight: 600,
-                  color: '#737982',
+                  color: '#475569',
                   cursor: 'pointer',
                 }}
               >
@@ -1196,15 +1196,15 @@ function TraceAnalysisContent() {
               display: 'flex',
               borderRadius: 6,
               overflow: 'hidden',
-              background: '#F0EFE9',
-              border: '1px solid #E6E5DF',
+              background: '#F1F5F9',
+              border: '1px solid #E2E8F0',
             }}
           >
             {currentTrace.steps.map((step) => {
               const totalLat = currentTrace.total_latency_ms || 1000;
               const widthPct = Math.max(8, ((step.latency_ms || 300) / totalLat) * 100);
               const isFlagged = flaggedStepId === step.step_id;
-              const barColor = isFlagged ? statusColor : '#829581';
+              const barColor = isFlagged ? statusColor : '#4F46E5';
 
               return (
                 <div
@@ -1243,9 +1243,9 @@ function TraceAnalysisContent() {
           </div>
 
           {/* Span legend */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 10, fontSize: 11, color: '#737982' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 10, fontSize: 11, color: '#475569' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 10, height: 10, borderRadius: 2, background: '#829581' }} />
+              <div style={{ width: 10, height: 10, borderRadius: 2, background: '#4F46E5' }} />
               <span>Compliant Tool Execution</span>
             </div>
             {isDeviation && (
@@ -1271,7 +1271,7 @@ function TraceAnalysisContent() {
                 style={{
                   background: '#FFFFFF',
                   borderRadius: 12,
-                  border: `1px solid ${isFlagged ? statusColor : '#E6E5DF'}`,
+                  border: `1px solid ${isFlagged ? statusColor : '#E2E8F0'}`,
                   boxShadow: isFlagged
                     ? `0 2px 8px ${statusColor}22`
                     : '0 1px 3px rgba(41,45,50,0.03)',
@@ -1290,7 +1290,7 @@ function TraceAnalysisContent() {
                     justifyContent: 'space-between',
                     cursor: 'pointer',
                     userSelect: 'none',
-                    borderBottom: isExpanded ? '1px solid #E6E5DF' : 'none',
+                    borderBottom: isExpanded ? '1px solid #E2E8F0' : 'none',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -1300,7 +1300,7 @@ function TraceAnalysisContent() {
                         width: 28,
                         height: 28,
                         borderRadius: 8,
-                        background: isFlagged ? statusColor : '#829581',
+                        background: isFlagged ? statusColor : '#4F46E5',
                         color: '#FFFFFF',
                         fontWeight: 700,
                         fontSize: 12,
@@ -1314,15 +1314,15 @@ function TraceAnalysisContent() {
 
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
                           {step.tool_called ? `Tool: ${step.tool_called}` : `Action: ${step.action_type}`}
                         </span>
                         <span
                           style={{
                             fontSize: 10,
                             padding: '2px 7px',
-                            background: '#F0EFE9',
-                            color: '#737982',
+                            background: '#F1F5F9',
+                            color: '#475569',
                             borderRadius: 4,
                             fontWeight: 600,
                             textTransform: 'uppercase',
@@ -1350,7 +1350,7 @@ function TraceAnalysisContent() {
                       <div
                         style={{
                           fontSize: 11.5,
-                          color: '#737982',
+                          color: '#475569',
                           marginTop: 2,
                           maxWidth: 580,
                           overflow: 'hidden',
@@ -1368,15 +1368,15 @@ function TraceAnalysisContent() {
                       style={{
                         fontFamily: 'IBM Plex Mono, monospace',
                         fontSize: 11,
-                        color: '#737982',
-                        background: '#F8F7F3',
+                        color: '#475569',
+                        background: '#F8FAFC',
                         padding: '3px 8px',
                         borderRadius: 5,
                       }}
                     >
                       {step.latency_ms}ms • {step.tokens} tokens
                     </span>
-                    {isExpanded ? <ChevronUp size={16} color="#737982" /> : <ChevronDown size={16} color="#737982" />}
+                    {isExpanded ? <ChevronUp size={16} color="#475569" /> : <ChevronDown size={16} color="#475569" />}
                   </div>
                 </div>
 
@@ -1400,11 +1400,11 @@ function TraceAnalysisContent() {
                             Deviation Detected: {devType.toUpperCase()}
                           </span>
                         </div>
-                        <p style={{ margin: 0, fontSize: 12, color: '#292D32', lineHeight: 1.45 }}>
+                        <p style={{ margin: 0, fontSize: 12, color: '#0F172A', lineHeight: 1.45 }}>
                           {currentTrace.ground_truth.explanation}
                         </p>
                         {currentTrace.ground_truth.trigger_phrase && (
-                          <div style={{ marginTop: 8, fontSize: 11, color: '#737982' }}>
+                          <div style={{ marginTop: 8, fontSize: 11, color: '#475569' }}>
                             Trigger Phrase: <strong style={{ color: statusColor }}>&quot;{currentTrace.ground_truth.trigger_phrase}&quot;</strong>
                           </div>
                         )}
@@ -1415,7 +1415,7 @@ function TraceAnalysisContent() {
                     <div
                       style={{
                         display: 'flex',
-                        borderBottom: '1px solid #E6E5DF',
+                        borderBottom: '1px solid #E2E8F0',
                         gap: 8,
                         marginBottom: 14,
                       }}
@@ -1435,8 +1435,8 @@ function TraceAnalysisContent() {
                               padding: '8px 12px',
                               background: 'transparent',
                               border: 'none',
-                              borderBottom: `2px solid ${active ? '#829581' : 'transparent'}`,
-                              color: active ? '#829581' : '#737982',
+                              borderBottom: `2px solid ${active ? '#4F46E5' : 'transparent'}`,
+                              color: active ? '#4F46E5' : '#475569',
                               fontSize: 12,
                               fontWeight: active ? 600 : 500,
                               cursor: 'pointer',
@@ -1452,19 +1452,19 @@ function TraceAnalysisContent() {
                     {activeTab === 'reasoning' && (
                       <div
                         style={{
-                          background: '#F8F7F3',
-                          border: '1px solid #E6E5DF',
+                          background: '#F8FAFC',
+                          border: '1px solid #E2E8F0',
                           borderRadius: 8,
                           padding: '12px 16px',
                           fontSize: 12.5,
-                          color: '#292D32',
+                          color: '#0F172A',
                           lineHeight: 1.5,
                         }}
                       >
                         {step.agent_reasoning ? (
                           <span>&ldquo;{step.agent_reasoning}&rdquo;</span>
                         ) : (
-                          <span style={{ color: '#737982', fontStyle: 'italic' }}>
+                          <span style={{ color: '#475569', fontStyle: 'italic' }}>
                             No chain-of-thought reasoning logged for this step.
                           </span>
                         )}
@@ -1479,7 +1479,7 @@ function TraceAnalysisContent() {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            background: '#292D32',
+                            background: '#0F172A',
                             color: '#FFFFFF',
                             padding: '6px 12px',
                             borderTopLeftRadius: 8,
@@ -1503,7 +1503,7 @@ function TraceAnalysisContent() {
                               fontSize: 11,
                             }}
                           >
-                            {copiedStep === step.step_id ? <Check size={12} color="#72947A" /> : <Copy size={12} />}
+                            {copiedStep === step.step_id ? <Check size={12} color="#059669" /> : <Copy size={12} />}
                             {copiedStep === step.step_id ? 'Copied' : 'Copy'}
                           </button>
                         </div>
@@ -1511,7 +1511,7 @@ function TraceAnalysisContent() {
                           style={{
                             margin: 0,
                             background: '#1F2226',
-                            color: '#E6E5DF',
+                            color: '#E2E8F0',
                             padding: '14px 16px',
                             borderBottomLeftRadius: 8,
                             borderBottomRightRadius: 8,
@@ -1530,12 +1530,12 @@ function TraceAnalysisContent() {
                     {activeTab === 'output' && (
                       <div
                         style={{
-                          background: '#F8F7F3',
-                          border: '1px solid #E6E5DF',
+                          background: '#F8FAFC',
+                          border: '1px solid #E2E8F0',
                           borderRadius: 8,
                           padding: '14px 16px',
                           fontSize: 12,
-                          color: '#292D32',
+                          color: '#0F172A',
                           lineHeight: 1.45,
                           fontFamily: 'IBM Plex Mono, monospace',
                           whiteSpace: 'pre-wrap',
@@ -1551,8 +1551,8 @@ function TraceAnalysisContent() {
                     {activeTab === 'policy' && (
                       <div
                         style={{
-                          background: '#F8F7F3',
-                          border: '1px solid #E6E5DF',
+                          background: '#F8FAFC',
+                          border: '1px solid #E2E8F0',
                           borderRadius: 8,
                           padding: '14px 16px',
                           display: 'flex',
@@ -1561,12 +1561,12 @@ function TraceAnalysisContent() {
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          {isFlagged ? <ShieldAlert size={16} color="#B97878" /> : <ShieldCheck size={16} color="#72947A" />}
-                          <span style={{ fontSize: 12.5, fontWeight: 700, color: isFlagged ? '#B97878' : '#72947A' }}>
+                          {isFlagged ? <ShieldAlert size={16} color="#DC2626" /> : <ShieldCheck size={16} color="#059669" />}
+                          <span style={{ fontSize: 12.5, fontWeight: 700, color: isFlagged ? '#DC2626' : '#059669' }}>
                             {isFlagged ? 'Action Policy Violation' : 'Compliant with Execution Policy'}
                           </span>
                         </div>
-                        <div style={{ fontSize: 11.5, color: '#737982' }}>
+                        <div style={{ fontSize: 11.5, color: '#475569' }}>
                           Allowed Actions: {currentTrace.intent.allowed_actions.join(', ')} | Forbidden Actions: {currentTrace.intent.forbidden_actions.join(', ')}
                         </div>
                       </div>
@@ -1585,7 +1585,7 @@ function TraceAnalysisContent() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '20px 22px',
               boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
               display: 'flex',
@@ -1595,16 +1595,16 @@ function TraceAnalysisContent() {
           >
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                <GitBranch size={16} color="#829581" />
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+                <GitBranch size={16} color="#4F46E5" />
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
                   Causal Attribution (Record {currentTrace.trace_id})
                 </span>
               </div>
-              <p style={{ margin: 0, fontSize: 12.5, color: '#292D32', lineHeight: 1.55 }}>
+              <p style={{ margin: 0, fontSize: 12.5, color: '#0F172A', lineHeight: 1.55 }}>
                 {causalExplanationForTrace}
               </p>
               {currentTrace.ground_truth.trigger_phrase && (
-                <div style={{ marginTop: 10, fontSize: 11.5, color: '#737982' }}>
+                <div style={{ marginTop: 10, fontSize: 11.5, color: '#475569' }}>
                   Identified trigger phrase: <strong style={{ color: statusColor }}>&ldquo;{currentTrace.ground_truth.trigger_phrase}&rdquo;</strong>
                 </div>
               )}
@@ -1616,7 +1616,7 @@ function TraceAnalysisContent() {
                 style={{
                   fontSize: 12,
                   fontWeight: 600,
-                  color: '#829581',
+                  color: '#4F46E5',
                   textDecoration: 'none',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1633,7 +1633,7 @@ function TraceAnalysisContent() {
             style={{
               background: '#FFFFFF',
               borderRadius: 12,
-              border: '1px solid #E6E5DF',
+              border: '1px solid #E2E8F0',
               padding: '20px 22px',
               boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
               display: 'flex',
@@ -1644,23 +1644,23 @@ function TraceAnalysisContent() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Sparkles size={16} color="#72947A" />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#292D32' }}>
+                  <Sparkles size={16} color="#059669" />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
                     Counterfactual Corrected Prompt
                   </span>
                 </div>
-                <span style={{ fontSize: 10.5, fontWeight: 600, color: '#72947A', background: 'rgba(114, 148, 122, 0.12)', padding: '2px 7px', borderRadius: 4 }}>
+                <span style={{ fontSize: 10.5, fontWeight: 600, color: '#059669', background: 'rgba(5, 150, 105, 0.1)', padding: '2px 7px', borderRadius: 4 }}>
                   Policy Bounded
                 </span>
               </div>
               <div
                 style={{
-                  background: '#F8F7F3',
-                  border: '1px solid #E6E5DF',
+                  background: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
                   borderRadius: 8,
                   padding: '12px 14px',
                   fontSize: 12.5,
-                  color: '#292D32',
+                  color: '#0F172A',
                   lineHeight: 1.55,
                 }}
               >
@@ -1677,15 +1677,15 @@ function TraceAnalysisContent() {
                   gap: 5,
                   padding: '6px 12px',
                   borderRadius: 6,
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                   background: '#FFFFFF',
-                  color: '#292D32',
+                  color: '#0F172A',
                   fontSize: 11.5,
                   fontWeight: 600,
                   cursor: 'pointer',
                 }}
               >
-                {copiedPrompt ? <Check size={12} color="#72947A" /> : <Copy size={12} />}
+                {copiedPrompt ? <Check size={12} color="#059669" /> : <Copy size={12} />}
                 {copiedPrompt ? 'Copied' : 'Copy Corrected Prompt'}
               </button>
 
@@ -1698,7 +1698,7 @@ function TraceAnalysisContent() {
                   padding: '6px 12px',
                   borderRadius: 6,
                   border: 'none',
-                  background: '#829581',
+                  background: '#4F46E5',
                   color: '#FFFFFF',
                   fontSize: 11.5,
                   fontWeight: 600,
@@ -1717,7 +1717,7 @@ function TraceAnalysisContent() {
 
 export default function TraceAnalysisPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 40, color: '#737982' }}>Loading Trace Review &amp; Analysis Workbench...</div>}>
+    <Suspense fallback={<div style={{ padding: 40, color: '#475569' }}>Loading Trace Review &amp; Analysis Workbench...</div>}>
       <TraceAnalysisContent />
     </Suspense>
   );

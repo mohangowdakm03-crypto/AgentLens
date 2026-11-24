@@ -129,7 +129,7 @@ export default function AuditHistoryPage() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        background: '#F8F7F3',
+        background: '#F8FAFC',
         position: 'relative',
         overflowX: 'hidden',
       }}
@@ -150,8 +150,8 @@ export default function AuditHistoryPage() {
         fill="none"
         preserveAspectRatio="none"
       >
-        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#829581" fillOpacity="0.08" />
-        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#829581" fillOpacity="0.05" />
+        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#4F46E5" fillOpacity="0.08" />
+        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#4F46E5" fillOpacity="0.05" />
       </svg>
 
       <Topbar
@@ -174,17 +174,17 @@ export default function AuditHistoryPage() {
         {/* Stats Row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
           {[
-            { label: 'Total Audits Logged', value: '126', color: '#292D32', bar: '#829581' },
-            { label: 'Verified Correct', value: '54', color: '#72947A', bar: '#72947A' },
-            { label: 'Semantic Drift Cases', value: '37', color: '#C49A5B', bar: '#C49A5B' },
-            { label: 'Scope Creep Violations', value: '27', color: '#B97878', bar: '#B97878' },
+            { label: 'Total Audits Logged', value: '126', color: '#0F172A', bar: '#4F46E5' },
+            { label: 'Verified Correct', value: '54', color: '#059669', bar: '#059669' },
+            { label: 'Semantic Drift Cases', value: '37', color: '#D97706', bar: '#D97706' },
+            { label: 'Scope Creep Violations', value: '27', color: '#DC2626', bar: '#DC2626' },
           ].map((s) => (
             <div
               key={s.label}
               style={{
                 background: '#FFFFFF',
                 borderRadius: 12,
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 padding: '16px 20px',
                 boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
                 position: 'relative',
@@ -192,7 +192,7 @@ export default function AuditHistoryPage() {
               }}
             >
               <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: s.bar }} />
-              <div style={{ fontSize: 12, color: '#737982', marginBottom: 4 }}>{s.label}</div>
+              <div style={{ fontSize: 12, color: '#475569', marginBottom: 4 }}>{s.label}</div>
               <div style={{ fontSize: 26, fontWeight: 700, color: s.color, letterSpacing: '-0.02em' }}>{s.value}</div>
             </div>
           ))}
@@ -203,7 +203,7 @@ export default function AuditHistoryPage() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '14px 20px',
             display: 'flex',
             gap: 12,
@@ -217,23 +217,23 @@ export default function AuditHistoryPage() {
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              background: '#F8F7F3',
-              border: '1px solid #E6E5DF',
+              background: '#F8FAFC',
+              border: '1px solid #E2E8F0',
               borderRadius: 8,
               padding: '7px 12px',
               flex: 1,
               minWidth: 200,
             }}
           >
-            <Search size={14} color="#737982" strokeWidth={1.8} />
+            <Search size={14} color="#475569" strokeWidth={1.8} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search historical audit logs..."
-              style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: 13, color: '#292D32', width: '100%' }}
+              style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: 13, color: '#0F172A', width: '100%' }}
             />
             {search && (
-              <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#737982' }}>
+              <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569' }}>
                 <X size={13} />
               </button>
             )}
@@ -254,9 +254,9 @@ export default function AuditHistoryPage() {
                   style={{
                     padding: '6px 14px',
                     borderRadius: 7,
-                    border: `1px solid ${active ? '#829581' : '#E6E5DF'}`,
-                    background: active ? '#829581' : '#FFFFFF',
-                    color: active ? '#FFFFFF' : '#737982',
+                    border: `1px solid ${active ? '#4F46E5' : '#E2E8F0'}`,
+                    background: active ? '#4F46E5' : '#FFFFFF',
+                    color: active ? '#FFFFFF' : '#475569',
                     fontSize: 12,
                     fontWeight: active ? 600 : 500,
                     cursor: 'pointer',
@@ -276,9 +276,9 @@ export default function AuditHistoryPage() {
               style={{
                 padding: '6px 10px',
                 borderRadius: 7,
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 background: '#FFFFFF',
-                color: '#292D32',
+                color: '#0F172A',
                 fontSize: 12,
                 cursor: 'pointer',
                 outline: 'none',
@@ -297,9 +297,9 @@ export default function AuditHistoryPage() {
                 gap: 6,
                 padding: '6px 12px',
                 borderRadius: 7,
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 background: '#FFFFFF',
-                color: '#292D32',
+                color: '#0F172A',
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -316,14 +316,14 @@ export default function AuditHistoryPage() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
             overflow: 'hidden',
           }}
         >
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: '#F8F7F3', borderBottom: '1px solid #E6E5DF' }}>
+              <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
                 {['Audit ID', 'Instruction Mandate', 'Steps', 'Result', 'Anomaly Classification', 'Inference Latency', 'Audit Timestamp', 'Action'].map(
                   (h, i) => (
                     <th
@@ -333,7 +333,7 @@ export default function AuditHistoryPage() {
                         textAlign: i === 7 ? 'right' : 'left',
                         fontSize: 11,
                         fontWeight: 600,
-                        color: '#737982',
+                        color: '#475569',
                         whiteSpace: 'nowrap',
                       }}
                     >
@@ -347,8 +347,8 @@ export default function AuditHistoryPage() {
               {filtered.map((audit, idx) => {
                 const isDev = audit.ground_truth.deviation_detected;
                 const devType = audit.ground_truth.deviation_type;
-                const badgeColor = !isDev ? '#72947A' : devType === 'drift' ? '#C49A5B' : '#B97878';
-                const badgeBg = !isDev ? 'rgba(114, 148, 122, 0.12)' : devType === 'drift' ? 'rgba(196, 154, 91, 0.12)' : 'rgba(185, 120, 120, 0.12)';
+                const badgeColor = !isDev ? '#059669' : devType === 'drift' ? '#D97706' : '#DC2626';
+                const badgeBg = !isDev ? 'rgba(5, 150, 105, 0.1)' : devType === 'drift' ? 'rgba(217, 119, 6, 0.1)' : 'rgba(220, 38, 38, 0.1)';
 
                 return (
                   <tr
@@ -357,7 +357,7 @@ export default function AuditHistoryPage() {
                       borderBottom: idx < filtered.length - 1 ? '1px solid #F1F0E9' : 'none',
                       transition: 'background 0.1s',
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = '#F8F7F3')}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = '#F8FAFC')}
                     onMouseLeave={(e) => (e.currentTarget.style.background = '')}
                   >
                     <td style={{ padding: '11px 14px' }}>
@@ -367,7 +367,7 @@ export default function AuditHistoryPage() {
                           fontSize: 12,
                           fontWeight: 700,
                           fontFamily: 'IBM Plex Mono, monospace',
-                          color: '#292D32',
+                          color: '#0F172A',
                           textDecoration: 'none',
                         }}
                       >
@@ -378,7 +378,7 @@ export default function AuditHistoryPage() {
                       <span
                         style={{
                           fontSize: 12,
-                          color: '#292D32',
+                          color: '#0F172A',
                           display: '-webkit-box',
                           WebkitLineClamp: 1,
                           WebkitBoxOrient: 'vertical',
@@ -390,7 +390,7 @@ export default function AuditHistoryPage() {
                       </span>
                     </td>
                     <td style={{ padding: '11px 14px' }}>
-                      <span style={{ fontSize: 12, color: '#292D32', fontFamily: 'IBM Plex Mono, monospace', fontWeight: 600 }}>
+                      <span style={{ fontSize: 12, color: '#0F172A', fontFamily: 'IBM Plex Mono, monospace', fontWeight: 600 }}>
                         {audit.steps.length}
                       </span>
                     </td>
@@ -414,16 +414,16 @@ export default function AuditHistoryPage() {
                           {devType.replace('_', ' ')}
                         </span>
                       ) : (
-                        <span style={{ fontSize: 12, color: '#737982' }}>—</span>
+                        <span style={{ fontSize: 12, color: '#475569' }}>—</span>
                       )}
                     </td>
                     <td style={{ padding: '11px 14px' }}>
-                      <span style={{ fontSize: 12, color: '#737982', fontFamily: 'IBM Plex Mono, monospace' }}>
+                      <span style={{ fontSize: 12, color: '#475569', fontFamily: 'IBM Plex Mono, monospace' }}>
                         {audit.total_latency_ms != null ? `${audit.total_latency_ms}ms` : '—'}
                       </span>
                     </td>
                     <td style={{ padding: '11px 14px', whiteSpace: 'nowrap' }}>
-                      <span style={{ fontSize: 11, color: '#737982' }}>{audit.timestamp}</span>
+                      <span style={{ fontSize: 11, color: '#475569' }}>{audit.timestamp}</span>
                     </td>
                     <td style={{ padding: '11px 14px', textAlign: 'right', position: 'relative' }}>
                       <div style={{ display: 'inline-flex', gap: 6 }}>
@@ -432,11 +432,11 @@ export default function AuditHistoryPage() {
                           style={{
                             padding: '4px 8px',
                             borderRadius: 6,
-                            background: '#F0EFE9',
+                            background: '#F1F5F9',
                             display: 'flex',
                             alignItems: 'center',
                             gap: 4,
-                            color: '#292D32',
+                            color: '#0F172A',
                             textDecoration: 'none',
                             fontSize: 11.5,
                             fontWeight: 600,

@@ -1,19 +1,22 @@
 // AgentLens — Shared design tokens & utility helpers
 
 export const COLORS = {
-  bgMain: '#F8F7F3',
-  bgSidebar: '#F0EFE9',
+  bgMain: '#F8FAFC',
+  bgSidebar: '#090D16',
   bgCard: '#FFFFFF',
-  textPrimary: '#292D32',
-  textSecondary: '#737982',
-  border: '#E6E5DF',
-  accentPrimary: '#829581',
-  accentDrift: '#C49A5B',
-  accentScope: '#B97878',
-  accentSuccess: '#72947A',
-  driftLight: 'rgba(196, 154, 91, 0.12)',
-  scopeLight: 'rgba(185, 120, 120, 0.12)',
-  primaryLight: 'rgba(130, 149, 129, 0.12)',
+  textPrimary: '#0F172A',
+  textSecondary: '#475569',
+  textMuted: '#64748B',
+  border: '#E2E8F0',
+  borderSubtle: '#F1F5F9',
+  accentPrimary: '#4F46E5',
+  accentDrift: '#D97706',
+  accentScope: '#DC2626',
+  accentSuccess: '#059669',
+  driftLight: 'rgba(217, 119, 6, 0.12)',
+  scopeLight: 'rgba(220, 38, 38, 0.12)',
+  primaryLight: 'rgba(79, 70, 229, 0.12)',
+  successLight: 'rgba(5, 150, 105, 0.12)',
 } as const;
 
 export function cn(...classes: (string | undefined | null | false)[]): string {
@@ -60,8 +63,8 @@ export function deviationColor(type: DeviationType | string | null | undefined):
 }
 
 export function deviationBg(type: DeviationType | string | null | undefined): string {
-  if (!type || type === 'none') return 'rgba(114, 148, 122, 0.1)';
+  if (!type || type === 'none') return COLORS.successLight;
   if (type === 'drift') return COLORS.driftLight;
   if (type === 'scope_creep') return COLORS.scopeLight;
-  return 'rgba(115, 121, 130, 0.1)';
+  return 'rgba(100, 116, 139, 0.1)';
 }

@@ -68,7 +68,7 @@ export default function SettingsPage() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        background: '#F8F7F3',
+        background: '#F8FAFC',
         position: 'relative',
         overflowX: 'hidden',
       }}
@@ -89,8 +89,8 @@ export default function SettingsPage() {
         fill="none"
         preserveAspectRatio="none"
       >
-        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#829581" fillOpacity="0.08" />
-        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#829581" fillOpacity="0.05" />
+        <path d="M0 130 C 200 60, 450 170, 800 40 L 800 0 L 0 0 Z" fill="#4F46E5" fillOpacity="0.08" />
+        <path d="M100 160 C 350 90, 550 190, 800 100 L 800 0 L 100 0 Z" fill="#4F46E5" fillOpacity="0.05" />
       </svg>
 
       <Topbar
@@ -115,18 +115,18 @@ export default function SettingsPage() {
         {saveNotice && (
           <div
             style={{
-              background: 'rgba(114, 148, 122, 0.12)',
-              border: '1px solid #72947A',
+              background: 'rgba(5, 150, 105, 0.1)',
+              border: '1px solid #059669',
               borderRadius: 8,
               padding: '10px 16px',
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              color: '#292D32',
+              color: '#0F172A',
               fontSize: 12.5,
             }}
           >
-            <CheckCircle2 size={16} color="#72947A" />
+            <CheckCircle2 size={16} color="#059669" />
             <span>{saveNotice}</span>
           </div>
         )}
@@ -136,21 +136,21 @@ export default function SettingsPage() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '22px 24px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-            <Settings size={17} color="#829581" strokeWidth={1.8} />
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>Platform Defaults</span>
+            <Settings size={17} color="#4F46E5" strokeWidth={1.8} />
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>Platform Defaults</span>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 500, color: '#292D32' }}>Application Name</div>
-                <div style={{ fontSize: 11.5, color: '#737982', marginTop: 2 }}>Display name used across audit reports and telemetry</div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: '#0F172A' }}>Application Name</div>
+                <div style={{ fontSize: 11.5, color: '#475569', marginTop: 2 }}>Display name used across audit reports and telemetry</div>
               </div>
               <input
                 value={appName}
@@ -159,10 +159,10 @@ export default function SettingsPage() {
                   width: 240,
                   padding: '8px 12px',
                   borderRadius: 8,
-                  border: '1px solid #E6E5DF',
-                  background: '#F8F7F3',
+                  border: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
                   fontSize: 12.5,
-                  color: '#292D32',
+                  color: '#0F172A',
                   outline: 'none',
                 }}
               />
@@ -170,8 +170,8 @@ export default function SettingsPage() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 500, color: '#292D32' }}>Organization / Team</div>
-                <div style={{ fontSize: 11.5, color: '#737982', marginTop: 2 }}>Auditing entity name attached to ground-truth validations</div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: '#0F172A' }}>Organization / Team</div>
+                <div style={{ fontSize: 11.5, color: '#475569', marginTop: 2 }}>Auditing entity name attached to ground-truth validations</div>
               </div>
               <input
                 value={organization}
@@ -180,10 +180,10 @@ export default function SettingsPage() {
                   width: 240,
                   padding: '8px 12px',
                   borderRadius: 8,
-                  border: '1px solid #E6E5DF',
-                  background: '#F8F7F3',
+                  border: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
                   fontSize: 12.5,
-                  color: '#292D32',
+                  color: '#0F172A',
                   outline: 'none',
                 }}
               />
@@ -191,8 +191,8 @@ export default function SettingsPage() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 500, color: '#292D32' }}>Anomaly Threshold (τ)</div>
-                <div style={{ fontSize: 11.5, color: '#737982', marginTop: 2 }}>Confidence score threshold required to flag semantic drift</div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: '#0F172A' }}>Anomaly Threshold (τ)</div>
+                <div style={{ fontSize: 11.5, color: '#475569', marginTop: 2 }}>Confidence score threshold required to flag semantic drift</div>
               </div>
               <input
                 value={anomalyThreshold}
@@ -201,10 +201,10 @@ export default function SettingsPage() {
                   width: 240,
                   padding: '8px 12px',
                   borderRadius: 8,
-                  border: '1px solid #E6E5DF',
-                  background: '#F8F7F3',
+                  border: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
                   fontSize: 12.5,
-                  color: '#292D32',
+                  color: '#0F172A',
                   outline: 'none',
                   fontFamily: 'IBM Plex Mono, monospace',
                 }}
@@ -219,7 +219,7 @@ export default function SettingsPage() {
                 padding: '8px 16px',
                 borderRadius: 7,
                 border: 'none',
-                background: '#829581',
+                background: '#4F46E5',
                 color: '#FFFFFF',
                 fontSize: 12.5,
                 fontWeight: 600,
@@ -233,9 +233,9 @@ export default function SettingsPage() {
               style={{
                 padding: '8px 14px',
                 borderRadius: 7,
-                border: '1px solid #E6E5DF',
+                border: '1px solid #E2E8F0',
                 background: '#FFFFFF',
-                color: '#737982',
+                color: '#475569',
                 fontSize: 12.5,
                 fontWeight: 500,
                 cursor: 'pointer',
@@ -251,21 +251,21 @@ export default function SettingsPage() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '22px 24px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-            <Key size={17} color="#829581" strokeWidth={1.8} />
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>Audit Service Endpoint</span>
+            <Key size={17} color="#4F46E5" strokeWidth={1.8} />
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>Audit Service Endpoint</span>
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#292D32', marginBottom: 4 }}>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#0F172A', marginBottom: 4 }}>
               Active Endpoint Contract
             </div>
-            <div style={{ fontSize: 11.5, color: '#737982', marginBottom: 10 }}>
+            <div style={{ fontSize: 11.5, color: '#475569', marginBottom: 10 }}>
               Live destination for POST /api/audit payload contracts.
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
@@ -276,10 +276,10 @@ export default function SettingsPage() {
                   flex: 1,
                   padding: '8px 12px',
                   borderRadius: 8,
-                  border: '1px solid #E6E5DF',
-                  background: '#F8F7F3',
+                  border: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
                   fontSize: 12,
-                  color: '#292D32',
+                  color: '#0F172A',
                   outline: 'none',
                   fontFamily: 'IBM Plex Mono, monospace',
                 }}
@@ -290,9 +290,9 @@ export default function SettingsPage() {
                 style={{
                   padding: '8px 16px',
                   borderRadius: 7,
-                  border: '1px solid #E6E5DF',
+                  border: '1px solid #E2E8F0',
                   background: '#FFFFFF',
-                  color: '#292D32',
+                  color: '#0F172A',
                   fontSize: 12,
                   fontWeight: 600,
                   cursor: isPinging ? 'not-allowed' : 'pointer',
@@ -306,7 +306,7 @@ export default function SettingsPage() {
               </button>
             </div>
             {pingStatus && (
-              <div style={{ marginTop: 8, fontSize: 11.5, color: '#72947A', fontWeight: 600 }}>
+              <div style={{ marginTop: 8, fontSize: 11.5, color: '#059669', fontWeight: 600 }}>
                 ✓ {pingStatus}
               </div>
             )}
@@ -315,11 +315,11 @@ export default function SettingsPage() {
           <div
             style={{
               padding: '12px 16px',
-              background: 'rgba(130, 149, 129, 0.08)',
+              background: 'rgba(79, 70, 229, 0.06)',
               borderRadius: 8,
               border: '1px solid rgba(130, 149, 129, 0.25)',
               fontSize: 11.5,
-              color: '#737982',
+              color: '#475569',
               lineHeight: 1.6,
             }}
           >
@@ -332,14 +332,14 @@ export default function SettingsPage() {
           style={{
             background: '#FFFFFF',
             borderRadius: 12,
-            border: '1px solid #E6E5DF',
+            border: '1px solid #E2E8F0',
             padding: '22px 24px',
             boxShadow: '0 1px 3px rgba(41,45,50,0.03)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-            <Bell size={17} color="#829581" strokeWidth={1.8} />
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#292D32' }}>Alert Notifications</span>
+            <Bell size={17} color="#4F46E5" strokeWidth={1.8} />
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>Alert Notifications</span>
           </div>
 
           {[
@@ -362,15 +362,15 @@ export default function SettingsPage() {
                 }}
               >
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: '#292D32' }}>{s.label}</div>
-                  <div style={{ fontSize: 11.5, color: '#737982', marginTop: 2 }}>{s.desc}</div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: '#0F172A' }}>{s.label}</div>
+                  <div style={{ fontSize: 11.5, color: '#475569', marginTop: 2 }}>{s.desc}</div>
                 </div>
                 <div
                   style={{
                     width: 38,
                     height: 20,
                     borderRadius: 10,
-                    background: isEnabled ? '#829581' : '#E6E5DF',
+                    background: isEnabled ? '#4F46E5' : '#E2E8F0',
                     position: 'relative',
                     transition: 'background 0.2s ease',
                   }}

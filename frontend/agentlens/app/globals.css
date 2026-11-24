@@ -2,21 +2,23 @@
 @import "tailwindcss";
 
 :root {
-  --bg-main: #F8F7F3;
-  --bg-sidebar: #F0EFE9;
+  --bg-main: #F8FAFC;
+  --bg-sidebar: #090D16;
   --bg-card: #FFFFFF;
-  --text-primary: #292D32;
-  --text-secondary: #737982;
-  --border: #E6E5DF;
-  --accent-primary: #829581;
-  --accent-drift: #C49A5B;
-  --accent-scope: #B97878;
-  --accent-success: #72947A;
-  --accent-primary-light: #829581/15;
-  --accent-drift-light: rgba(196, 154, 91, 0.12);
-  --accent-scope-light: rgba(185, 120, 120, 0.12);
-  --shadow-sm: 0 1px 3px rgba(41, 45, 50, 0.06), 0 1px 2px rgba(41, 45, 50, 0.04);
-  --shadow-md: 0 4px 12px rgba(41, 45, 50, 0.08), 0 2px 4px rgba(41, 45, 50, 0.04);
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --border: #E2E8F0;
+  --border-subtle: #F1F5F9;
+  --accent-primary: #4F46E5;
+  --accent-drift: #D97706;
+  --accent-scope: #DC2626;
+  --accent-success: #059669;
+  --accent-primary-light: rgba(79, 70, 229, 0.1);
+  --accent-drift-light: rgba(217, 119, 6, 0.1);
+  --accent-scope-light: rgba(220, 38, 38, 0.1);
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
   color-scheme: light;
 }
 
@@ -52,12 +54,12 @@ html, body {
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #d0cec6;
+  background: #cbd5e1;
 }
 
 /* Selection */
 ::selection {
-  background: rgba(130, 149, 129, 0.2);
+  background: rgba(79, 70, 229, 0.2);
   color: var(--text-primary);
 }
 
