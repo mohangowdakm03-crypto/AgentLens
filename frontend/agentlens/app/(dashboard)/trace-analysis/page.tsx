@@ -81,13 +81,21 @@ function asStringArray(value: unknown): string[] {
 }
 
 function normalizeDeviationType(value: string | null | undefined): DeviationClassification {
-  if (value === 'drift' || value === 'scope_creep' || value === 'misinterpretation') return value;
+  if (!value) return 'none';
+  const v = value.toLowerCase().trim();
+  if (v === 'drift' || v.includes('drift')) return 'drift';
+  if (v === 'scope_creep' || v === 'scope' || v.includes('scope')) return 'scope_creep';
+  if (v === 'misinterpretation' || v.includes('misinterpret')) return 'misinterpretation';
   return 'none';
 }
 
 function normalizeBenchmarkDeviationType(value: string | null | undefined): BenchmarkTrace['ground_truth']['deviation_type'] {
-  if (value === 'drift' || value === 'scope_creep' || value === 'tool_misuse') return value;
-  if (value === 'misinterpretation') return 'prompt_misinterpretation';
+  if (!value) return 'none';
+  const v = value.toLowerCase().trim();
+  if (v === 'drift' || v.includes('drift')) return 'drift';
+  if (v === 'scope_creep' || v === 'scope' || v.includes('scope')) return 'scope_creep';
+  if (v === 'tool_misuse') return 'tool_misuse';
+  if (v === 'misinterpretation' || v.includes('misinterpret')) return 'prompt_misinterpretation';
   return 'none';
 }
 
@@ -170,7 +178,7 @@ function TraceAnalysisContent() {
     const loadingId = window.setTimeout(() => {
       if (isMounted) setIsLoadingTrace(true);
     }, 0);
-    getTrace(queryId, true)
+    getTrace(queryId, false)
       .then((backendModel) => {
         if (!isMounted) return;
         const mapped: BenchmarkTrace = {
@@ -209,7 +217,7 @@ function TraceAnalysisContent() {
         };
         setRepositoryTrace(mapped);
         setAuditResponse(backendTraceToAuditResult(backendModel));
-        setAuditSuccessNotice(`Loaded trace ${backendModel.traceId} with real ML Core & LLM diagnosis.`);
+        setAuditSuccessNotice(`Loaded trace ${backendModel.traceId} with real ML Core detector analysis.`);
       })
       .catch((err) => {
         console.warn(`Could not load trace ${queryId} from backend:`, err);
@@ -334,8 +342,20 @@ function TraceAnalysisContent() {
         : null)
     : currentTrace.ground_truth.flagged_step_id;
 
-  const statusColor = !isDeviation ? '#059669' : devType === 'drift' ? '#D97706' : '#DC2626';
-  const statusBg = !isDeviation ? 'rgba(5, 150, 105, 0.1)' : devType === 'drift' ? 'rgba(217, 119, 6, 0.1)' : 'rgba(220, 38, 38, 0.1)';
+  const statusColor = !isDeviation
+    ? '#059669'
+    : devType === 'drift'
+    ? '#D97706'
+    : devType === 'misinterpretation' || devType === 'prompt_misinterpretation'
+    ? '#7C3AED'
+    : '#DC2626';
+  const statusBg = !isDeviation
+    ? 'rgba(5, 150, 105, 0.1)'
+    : devType === 'drift'
+    ? 'rgba(217, 119, 6, 0.1)'
+    : devType === 'misinterpretation' || devType === 'prompt_misinterpretation'
+    ? 'rgba(124, 58, 237, 0.1)'
+    : 'rgba(220, 38, 38, 0.1)';
 
   // Execute Live Audit against /api/audit
   const handleExecuteAudit = async () => {

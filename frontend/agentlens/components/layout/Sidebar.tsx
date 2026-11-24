@@ -23,9 +23,9 @@ import {
 const NAV_ITEMS = [
   { href: '/overview', label: 'Overview', icon: LayoutDashboard },
   { href: '/new-audit', label: 'New Audit', icon: Plus },
-  { href: '/trace-explorer', label: 'Trace Explorer', icon: Layers, badge: '126' },
+  { href: '/trace-explorer', label: 'Trace Explorer', icon: Layers, badge: '300' },
   { href: '/trace-analysis', label: 'Trace Analysis', icon: FileText },
-  { href: '/deviation-analysis', label: 'Deviation Analysis', icon: AlertTriangle, badge: '64' },
+  { href: '/deviation-analysis', label: 'Deviation Analysis', icon: AlertTriangle, badge: '154' },
   { href: '/causal-explanation', label: 'Causal Explanation', icon: GitBranch },
   { href: '/prompt-correction', label: 'Prompt Correction', icon: Sparkles },
   { href: '/audit-history', label: 'Audit History', icon: Clock },

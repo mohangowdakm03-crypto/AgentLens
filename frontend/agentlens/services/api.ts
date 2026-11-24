@@ -35,7 +35,7 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 35000,
+  timeout: 90000,
 });
 
 // Client for direct FastAPI ML backend (port 8000)
@@ -49,7 +49,7 @@ export const backendClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 35000,
+  timeout: 90000,
 });
 
 export interface RunAuditParams {
@@ -113,7 +113,7 @@ export async function listTraces(): Promise<BackendTraceListItem[]> {
  * GET /api/traces/{trace_id}
  * Retrieve an individual trace evaluated against the ML detector and LLM engine.
  */
-export async function getTrace(traceId: string, runLlm: boolean = true): Promise<BackendTraceModel> {
+export async function getTrace(traceId: string, runLlm: boolean = false): Promise<BackendTraceModel> {
   const cleanId = encodeURIComponent(traceId.trim());
   const res = await backendClient.get<BackendTraceModel>(`/api/traces/${cleanId}?run_llm=${runLlm}`);
   return res.data;

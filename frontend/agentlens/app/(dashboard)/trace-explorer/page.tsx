@@ -30,8 +30,12 @@ import Button from '@/components/common/Button';
 import { BENCHMARK_TRACES, BenchmarkTrace } from '@/lib/benchmark-traces';
 import { listTraces, getTrace } from '@/services/api';
 function normalizeDeviationType(value: string | null | undefined): BenchmarkTrace['ground_truth']['deviation_type'] {
-  if (value === 'drift' || value === 'scope_creep' || value === 'tool_misuse') return value;
-  if (value === 'misinterpretation') return 'prompt_misinterpretation';
+  if (!value) return 'none';
+  const v = value.toLowerCase().trim();
+  if (v === 'drift' || v.includes('drift')) return 'drift';
+  if (v === 'scope_creep' || v === 'scope' || v.includes('scope')) return 'scope_creep';
+  if (v === 'tool_misuse') return 'tool_misuse';
+  if (v === 'misinterpretation' || v.includes('misinterpret')) return 'prompt_misinterpretation';
   return 'none';
 }
 
@@ -44,6 +48,7 @@ export default function TraceExplorerPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedTraces, setSelectedTraces] = useState<Set<string>>(new Set());
   const [activeDrawerTrace, setActiveDrawerTrace] = useState<BenchmarkTrace | null>(null);
+  const [isLoadingDrawer, setIsLoadingDrawer] = useState(false);
   const [drawerTab, setDrawerTab] = useState<'timeline' | 'json' | 'policy'>('timeline');
   const [currentPage, setCurrentPage] = useState(1);
   const [backendTraces, setBackendTraces] = useState<BenchmarkTrace[]>([]);
@@ -56,9 +61,13 @@ export default function TraceExplorerPage() {
       .then((items) => {
         if (Array.isArray(items) && items.length > 0) {
           const mapped: BenchmarkTrace[] = items.map((item) => {
-            const isDev = item.groundTruth?.isDeviated ?? false;
-            const devType = normalizeDeviationType(item.groundTruth?.deviationType);
+            const gt = item.groundTruth;
+            const isDev = Boolean(gt?.isDeviated ?? false);
+            const devType = normalizeDeviationType(gt?.deviationType);
             const domain = item.traceId.includes('00') ? 'Software Development' : 'AI/ML';
+            const flaggedStep = gt?.flaggedStepId
+              ? Number(gt.flaggedStepId)
+              : (gt?.flaggedSteps?.[0] ? Number(gt.flaggedSteps[0]) : (isDev ? 3 : null));
             return {
               trace_id: item.traceId,
               original_prompt: item.label.replace(/^Trace [^:]+:\s*\[[^\]]+\]\s*/, ''),
@@ -78,9 +87,7 @@ export default function TraceExplorerPage() {
               ground_truth: {
                 deviation_detected: isDev,
                 deviation_type: devType,
-                flagged_step_id: item.groundTruth?.flaggedSteps?.[0]
-                  ? parseInt(String(item.groundTruth.flaggedSteps[0]), 10) || (isDev ? 3 : null)
-                  : (isDev ? 3 : null),
+                flagged_step_id: flaggedStep,
                 trigger_phrase: null,
                 explanation: isDev ? `Deviation (${devType}) annotated in ground truth.` : 'Nominal compliant trace.',
               },
@@ -119,14 +126,24 @@ export default function TraceExplorerPage() {
     const nominal = tracesSource.filter((t) => !t.ground_truth.deviation_detected).length;
     const drift = tracesSource.filter((t) => t.ground_truth.deviation_type === 'drift').length;
     const scope = tracesSource.filter((t) => t.ground_truth.deviation_type === 'scope_creep').length;
+    const other = tracesSource.filter(
+      (t) =>
+        t.ground_truth.deviation_detected &&
+        t.ground_truth.deviation_type !== 'drift' &&
+        t.ground_truth.deviation_type !== 'scope_creep'
+    ).length;
+    const deviated = total - nominal;
     return {
       total,
+      deviated,
       nominal,
       nominalPct: total > 0 ? ((nominal / total) * 100).toFixed(1) : '0',
       drift,
       driftPct: total > 0 ? ((drift / total) * 100).toFixed(1) : '0',
       scope,
       scopePct: total > 0 ? ((scope / total) * 100).toFixed(1) : '0',
+      other,
+      otherPct: total > 0 ? ((other / total) * 100).toFixed(1) : '0',
     };
   }, [tracesSource]);
 
@@ -134,6 +151,7 @@ export default function TraceExplorerPage() {
   const filtered = useMemo(() => {
     return tracesSource.filter((t) => {
       // Classification filter
+      if (filterDev === 'deviated' && !t.ground_truth.deviation_detected) return false;
       if (filterDev === 'clean' && t.ground_truth.deviation_detected) return false;
       if (filterDev === 'drift' && t.ground_truth.deviation_type !== 'drift') return false;
       if (filterDev === 'scope_creep' && t.ground_truth.deviation_type !== 'scope_creep') return false;
@@ -175,7 +193,58 @@ export default function TraceExplorerPage() {
       }
       return 0;
     });
-  }, [search, filterDev, filterDomain, filterDifficulty, sortField, sortOrder]);
+  }, [tracesSource, search, filterDev, filterDomain, filterDifficulty, sortField, sortOrder]);
+
+  const handleOpenDrawer = async (trace: BenchmarkTrace) => {
+    setActiveDrawerTrace(trace);
+    setIsLoadingDrawer(true);
+    try {
+      const full = await getTrace(trace.trace_id, false);
+      if (full && full.steps && full.steps.length > 0) {
+        const mappedSteps = full.steps.map((s, idx) => ({
+          step_id: parseInt(s.stepId, 10) || idx + 1,
+          action_type: s.action || 'action',
+          tool_called: s.action || null,
+          tool_input: s.tool_input || null,
+          agent_reasoning: s.reasoning || null,
+          tool_output: s.tool_output || null,
+          latency_ms: (idx + 1) * 35,
+          tokens: 80,
+        }));
+        const gt = full.groundTruth;
+        const isDev = Boolean(gt?.isDeviated ?? trace.ground_truth.deviation_detected);
+        const devType = normalizeDeviationType(gt?.deviationType) || trace.ground_truth.deviation_type;
+        const flaggedStep = typeof gt?.flaggedStepId === 'number'
+          ? gt.flaggedStepId
+          : (gt?.flaggedSteps?.[0] ? Number(gt.flaggedSteps[0]) : trace.ground_truth.flagged_step_id);
+
+        setActiveDrawerTrace((prev) => {
+          if (!prev || prev.trace_id !== trace.trace_id) return prev;
+          const explanationStr: string = full.audit?.explanation || gt?.annotationExplanation || gt?.notes || prev.ground_truth.explanation || '';
+          return {
+            ...prev,
+            original_prompt: full.prompt || prev.original_prompt,
+            steps: mappedSteps,
+            ground_truth: {
+              ...prev.ground_truth,
+              deviation_detected: isDev,
+              deviation_type: devType,
+              flagged_step_id: flaggedStep,
+              explanation: explanationStr,
+            },
+            intent: {
+              allowed_actions: full.detection?.scope?.allowedActions || prev.intent?.allowed_actions || [],
+              forbidden_actions: full.detection?.scope?.forbiddenActions || prev.intent?.forbidden_actions || [],
+            },
+          };
+        });
+      }
+    } catch (err) {
+      console.warn('Could not load full drawer details:', err);
+    } finally {
+      setIsLoadingDrawer(false);
+    }
+  };
 
   // Paginated traces
   const totalPages = Math.ceil(filtered.length / pageSize) || 1;
@@ -443,13 +512,14 @@ export default function TraceExplorerPage() {
           </div>
 
           {/* Classification Filter Pills */}
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {[
-              { id: 'all', label: 'All Traces (126)' },
-              { id: 'clean', label: 'Nominal (54)' },
-              { id: 'drift', label: 'Drift (37)' },
-              { id: 'scope_creep', label: 'Scope Creep (27)' },
-              { id: 'other', label: 'Other (8)' },
+              { id: 'all', label: `All Traces (${stats.total})` },
+              { id: 'deviated', label: `Deviated (${stats.deviated})` },
+              { id: 'drift', label: `Drift (${stats.drift})` },
+              { id: 'scope_creep', label: `Scope Creep (${stats.scope})` },
+              { id: 'other', label: `Other (${stats.other})` },
+              { id: 'clean', label: `Nominal (${stats.nominal})` },
             ].map((f) => {
               const active = filterDev === f.id;
               return (
@@ -715,13 +785,25 @@ export default function TraceExplorerPage() {
                   const isSelected = selectedTraces.has(trace.trace_id);
                   const isDrawerActive = activeDrawerTrace?.trace_id === trace.trace_id;
 
-                  const badgeColor = !isDev ? '#059669' : devType === 'drift' ? '#D97706' : '#DC2626';
-                  const badgeBg = !isDev ? 'rgba(5, 150, 105, 0.1)' : devType === 'drift' ? 'rgba(217, 119, 6, 0.1)' : 'rgba(220, 38, 38, 0.1)';
+                  const badgeColor = !isDev
+                    ? '#059669'
+                    : devType === 'drift'
+                    ? '#D97706'
+                    : devType === 'prompt_misinterpretation'
+                    ? '#7C3AED'
+                    : '#DC2626';
+                  const badgeBg = !isDev
+                    ? 'rgba(5, 150, 105, 0.1)'
+                    : devType === 'drift'
+                    ? 'rgba(217, 119, 6, 0.1)'
+                    : devType === 'prompt_misinterpretation'
+                    ? 'rgba(124, 58, 237, 0.1)'
+                    : 'rgba(220, 38, 38, 0.1)';
 
                   return (
                     <tr
                       key={trace.trace_id}
-                      onClick={() => setActiveDrawerTrace(trace)}
+                      onClick={() => handleOpenDrawer(trace)}
                       style={{
                         borderBottom: idx < paginatedTraces.length - 1 ? '1px solid #F1F0E9' : 'none',
                         background: isDrawerActive
@@ -868,7 +950,7 @@ export default function TraceExplorerPage() {
                           }}
                         >
                           {!isDev ? <CheckCircle2 size={11} /> : <AlertTriangle size={11} />}
-                          {devType === 'none' ? 'Correct' : devType.replace('_', ' ')}
+                          {!isDev ? 'Nominal' : devType === 'prompt_misinterpretation' ? 'Misinterpretation' : devType.replace('_', ' ')}
                         </span>
                       </td>
 
@@ -1033,13 +1115,27 @@ export default function TraceExplorerPage() {
                     fontWeight: 600,
                     padding: '3px 9px',
                     borderRadius: 12,
-                    color: !activeDrawerTrace.ground_truth.deviation_detected ? '#059669' : '#D97706',
-                    background: !activeDrawerTrace.ground_truth.deviation_detected ? 'rgba(5, 150, 105, 0.1)' : 'rgba(217, 119, 6, 0.1)',
+                    color: !activeDrawerTrace.ground_truth.deviation_detected
+                      ? '#059669'
+                      : activeDrawerTrace.ground_truth.deviation_type === 'drift'
+                      ? '#D97706'
+                      : activeDrawerTrace.ground_truth.deviation_type === 'prompt_misinterpretation'
+                      ? '#7C3AED'
+                      : '#DC2626',
+                    background: !activeDrawerTrace.ground_truth.deviation_detected
+                      ? 'rgba(5, 150, 105, 0.1)'
+                      : activeDrawerTrace.ground_truth.deviation_type === 'drift'
+                      ? 'rgba(217, 119, 6, 0.1)'
+                      : activeDrawerTrace.ground_truth.deviation_type === 'prompt_misinterpretation'
+                      ? 'rgba(124, 58, 237, 0.1)'
+                      : 'rgba(220, 38, 38, 0.1)',
                     textTransform: 'capitalize',
                   }}
                 >
-                  {activeDrawerTrace.ground_truth.deviation_type === 'none'
-                    ? 'Nominal / Correct'
+                  {!activeDrawerTrace.ground_truth.deviation_detected
+                    ? 'Nominal Compliant'
+                    : activeDrawerTrace.ground_truth.deviation_type === 'prompt_misinterpretation'
+                    ? 'Prompt Misinterpretation'
                     : activeDrawerTrace.ground_truth.deviation_type.replace('_', ' ')}
                 </span>
               </div>
@@ -1114,23 +1210,30 @@ export default function TraceExplorerPage() {
               </div>
 
               {/* Tab 1: Execution Timeline */}
+              {isLoadingDrawer && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(79, 70, 229, 0.08)', border: '1px solid #4F46E5', borderRadius: 8, marginBottom: 14, fontSize: 12, color: '#4F46E5', fontWeight: 600 }}>
+                  <Sparkles size={14} />
+                  Fetching full trace execution steps & ML evaluation...
+                </div>
+              )}
+
               {drawerTab === 'timeline' && (
                 <div>
                   {/* Flagged Deviation Anomaly Banner */}
                   {activeDrawerTrace.ground_truth.deviation_detected && (
                     <div
                       style={{
-                        background: 'rgba(196, 154, 91, 0.1)',
-                        border: '1px solid #D97706',
+                        background: activeDrawerTrace.ground_truth.deviation_type === 'drift' ? 'rgba(217, 119, 6, 0.08)' : 'rgba(220, 38, 38, 0.08)',
+                        border: `1px solid ${activeDrawerTrace.ground_truth.deviation_type === 'drift' ? '#D97706' : '#DC2626'}`,
                         borderRadius: 8,
                         padding: '12px 16px',
                         marginBottom: 16,
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <AlertTriangle size={15} color="#D97706" />
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#D97706' }}>
-                          Failure Localized at Step {activeDrawerTrace.ground_truth.flagged_step_id}
+                        <AlertTriangle size={15} color={activeDrawerTrace.ground_truth.deviation_type === 'drift' ? '#D97706' : '#DC2626'} />
+                        <span style={{ fontSize: 12, fontWeight: 700, color: activeDrawerTrace.ground_truth.deviation_type === 'drift' ? '#D97706' : '#DC2626' }}>
+                          Deviation Classified: {activeDrawerTrace.ground_truth.deviation_type.replace('_', ' ').toUpperCase()} {activeDrawerTrace.ground_truth.flagged_step_id ? `(Fault at Step ${activeDrawerTrace.ground_truth.flagged_step_id})` : ''}
                         </span>
                       </div>
                       <div style={{ fontSize: 11.5, color: '#0F172A', lineHeight: 1.4 }}>
