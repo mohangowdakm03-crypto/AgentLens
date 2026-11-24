@@ -90,3 +90,36 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Model weights and checkpoints (large binaries)
+*.gguf
+*.bin
+*.safetensors
+*.pt
+models/
+agentlens-mistral.gguf
+
+# Conference papers, reviews, and private documents
+paper/
+*.docx
+*.pdf
+*.tex
+*.synctex.gz
+*.aux
+*.fls
+*.fdb_latexmk
+scripts/
+
+# Internal notes, diagrams, and research scratchpads
+memory.md
+architecture_diagram.*
+agentlens_qlora_colab.ipynb
+format_for_mistral.py
+generate_architecture_diagram.py
+generate_test_dataset.py
+synthetic_expansion.py
+compare_models.py
+data/d1_*
+data/d2_*
+data/test_*
+data/agentlens_combined_*

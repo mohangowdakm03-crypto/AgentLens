@@ -69,6 +69,27 @@ class AuditResultModel(BaseModel):
     explanation: str = ""
 
 
+class CausalAttributionModel(BaseModel):
+    explanation: str = ""
+    triggerTokens: List[str] = Field(default_factory=list, alias="trigger_tokens")
+
+    model_config = {"populate_by_name": True}
+
+
+class PromptDiffModel(BaseModel):
+    old: str = ""
+    new: str = ""
+    reason: str = ""
+
+
+class PromptRepairModel(BaseModel):
+    correctedPrompt: str = Field(default="", alias="corrected_prompt")
+    diff: List[PromptDiffModel] = Field(default_factory=list)
+    justification: str = ""
+
+    model_config = {"populate_by_name": True}
+
+
 class TraceModel(BaseModel):
     dataNote: str = Field(
         default="REAL ML DETECTOR OUTPUT — Computed via SentenceTransformer MiniLM embeddings & PELT changepoint detection.",
@@ -81,6 +102,8 @@ class TraceModel(BaseModel):
     steps: List[StepModel]
     detection: DetectionModel
     audit: AuditResultModel
+    causalAttribution: Optional[CausalAttributionModel] = Field(default=None, alias="causal_attribution")
+    promptRepair: Optional[PromptRepairModel] = Field(default=None, alias="prompt_repair")
 
     model_config = {"populate_by_name": True}
 
@@ -108,3 +131,5 @@ class DetectRequest(BaseModel):
     allowed_verbs: Optional[List[str]] = None
     forbidden_verbs: Optional[List[str]] = None
     steps: Optional[List[Dict[str, Any]]] = None
+    generate_repair: Optional[bool] = Field(default=True, alias="generateRepair")
+    generate_attribution: Optional[bool] = Field(default=True, alias="generateAttribution")

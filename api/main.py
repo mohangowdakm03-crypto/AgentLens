@@ -97,7 +97,7 @@ def list_traces():
 
 
 @app.get("/api/traces/{trace_id}", response_model=TraceModel, tags=["Traces"])
-def get_trace_endpoint(trace_id: str):
+def get_trace_endpoint(trace_id: str, run_llm: bool = False):
     """Retrieve an individual trace with real ML detector evaluation."""
     loaded = repository.get_trace(trace_id)
     if not loaded:
@@ -106,7 +106,7 @@ def get_trace_endpoint(trace_id: str):
             detail=f"Trace with ID '{trace_id}' not found.",
         )
     try:
-        result = detector_service.run_detection(loaded)
+        result = detector_service.run_detection(loaded, run_llm=run_llm)
         return result
     except Exception as e:
         raise HTTPException(
@@ -117,9 +117,9 @@ def get_trace_endpoint(trace_id: str):
 
 @app.post("/api/traces/{trace_id}/detect", response_model=TraceModel, tags=["Detection"])
 @app.get("/api/traces/{trace_id}/detect", response_model=TraceModel, tags=["Detection"])
-def run_detect_on_trace(trace_id: str):
+def run_detect_on_trace(trace_id: str, run_llm: bool = True):
     """Run detector on a selected trace from the repository."""
-    return get_trace_endpoint(trace_id)
+    return get_trace_endpoint(trace_id, run_llm=run_llm)
 
 
 @app.post("/api/detect", response_model=TraceModel, tags=["Detection"])
@@ -133,7 +133,8 @@ def detect_custom_trace(req: DetectRequest):
         )
     try:
         loaded = _normalize_trace_dict(raw_dict, default_idx=999)
-        return detector_service.run_detection(loaded)
+        should_run_llm = req.generate_repair if req.generate_repair is not None else True
+        return detector_service.run_detection(loaded, run_llm=should_run_llm)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

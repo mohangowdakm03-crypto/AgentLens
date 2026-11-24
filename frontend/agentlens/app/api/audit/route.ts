@@ -398,6 +398,45 @@ export async function POST(request: NextRequest) {
       ? `Deviation (${deviationType}) detected by ML core.`
       : "No deviation detected by ML core.");
 
+  // Extract real generative causal attribution and prompt repair from fine-tuned Mistral model
+  const rawCausal = (isRecord(detectorOutput.causal_attribution)
+    ? detectorOutput.causal_attribution
+    : isRecord(detectorOutput.causalAttribution)
+    ? detectorOutput.causalAttribution
+    : null) as JsonRecord | null;
+
+  const rawRepair = (isRecord(detectorOutput.prompt_repair)
+    ? detectorOutput.prompt_repair
+    : isRecord(detectorOutput.promptRepair)
+    ? detectorOutput.promptRepair
+    : null) as JsonRecord | null;
+
+  const causalExplanation =
+    asString(rawCausal?.explanation) ||
+    explanation;
+
+  const triggerTokens = asStringArray(rawCausal?.trigger_tokens || rawCausal?.triggerTokens);
+
+  const correctedPrompt =
+    asString(rawRepair?.corrected_prompt) ||
+    asString(rawRepair?.correctedPrompt) ||
+    (isDeviated ? "Unavailable" : prompt);
+
+  let repairDiff: Array<{ old: string; new: string; reason: string }> = [];
+  if (Array.isArray(rawRepair?.diff)) {
+    repairDiff = rawRepair.diff.map((d: any) => ({
+      old: String(d.old || ""),
+      new: String(d.new || ""),
+      reason: String(d.reason || ""),
+    }));
+  }
+
+  const repairJustification =
+    asString(rawRepair?.justification) ||
+    (isDeviated
+      ? "Prompt repair is not provided by the statistical ML detector."
+      : "The original prompt is well-scoped and led to faithful agent execution.");
+
   const responsePayload: DetectorV1Response & {
     status: string;
     causal_attribution: { explanation: string; trigger_tokens: string[] };
@@ -434,16 +473,14 @@ export async function POST(request: NextRequest) {
     result: v1Result,
     ground_truth: null, // Isolated from detector output
 
-    // Statistical explanations preserved; generative features honestly marked unavailable
     causal_attribution: {
-      explanation,
-      trigger_tokens: [],
+      explanation: causalExplanation,
+      trigger_tokens: triggerTokens,
     },
     prompt_repair: {
-      corrected_prompt: "Unavailable",
-      diff: [],
-      justification:
-        "Prompt repair is not provided by the statistical ML detector.",
+      corrected_prompt: correctedPrompt,
+      diff: repairDiff,
+      justification: repairJustification,
     },
   };
 

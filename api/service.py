@@ -39,7 +39,11 @@ from api.models import (
     ScopeViolationModel,
     AuditResultModel,
     GroundTruthModel,
+    CausalAttributionModel,
+    PromptRepairModel,
+    PromptDiffModel,
 )
+from api.llm import generate_causal_attribution, generate_prompt_repair
 
 
 class DetectorService:
@@ -53,7 +57,7 @@ class DetectorService:
         except Exception as e:
             print(f"Warning: could not initialize SentenceTransformer: {e}")
 
-    def run_detection(self, loaded_trace: LoadedTrace) -> TraceModel:
+    def run_detection(self, loaded_trace: LoadedTrace, run_llm: bool = False) -> TraceModel:
         """Run ML detector on a LoadedTrace and return complete TraceModel."""
         steps = loaded_trace.steps
         n = len(steps)
@@ -255,6 +259,55 @@ class DetectorService:
             notes=gt_data.get("notes", ""),
         )
 
+        # 10. Optional Step 4 (Causal Attribution) and Step 5 (Prompt Rewriter) via fine-tuned Mistral
+        causal_model: Optional[CausalAttributionModel] = None
+        repair_model: Optional[PromptRepairModel] = None
+
+        if run_llm and loaded_trace.prompt:
+            if is_deviated:
+                primary_step_label = (
+                    flagged_step_ids[0] if flagged_step_ids else "N/A"
+                )
+                causal_text, triggers = generate_causal_attribution(
+                    user_instruction=loaded_trace.prompt,
+                    steps=steps,
+                    deviation_step=primary_step_label,
+                    failure_type=dev_type or "Deviation",
+                )
+                causal_model = CausalAttributionModel(
+                    explanation=causal_text,
+                    trigger_tokens=triggers,
+                )
+
+                repair_dict = generate_prompt_repair(
+                    original_instruction=loaded_trace.prompt,
+                    causal_explanation=causal_text,
+                    observed_failure=explanation,
+                )
+                diff_models = [
+                    PromptDiffModel(
+                        old=d.get("old", ""),
+                        new=d.get("new", ""),
+                        reason=d.get("reason", ""),
+                    )
+                    for d in repair_dict.get("diff", [])
+                ]
+                repair_model = PromptRepairModel(
+                    corrected_prompt=repair_dict.get("corrected_prompt", loaded_trace.prompt),
+                    diff=diff_models,
+                    justification=repair_dict.get("justification", ""),
+                )
+            else:
+                causal_model = CausalAttributionModel(
+                    explanation="No deviation detected. The agent execution remained faithful to the user's prompt within authorized boundaries.",
+                    trigger_tokens=[],
+                )
+                repair_model = PromptRepairModel(
+                    corrected_prompt=loaded_trace.prompt,
+                    diff=[],
+                    justification="The original prompt is well-scoped and led to faithful agent execution.",
+                )
+
         return TraceModel(
             dataNote="REAL ML DETECTOR OUTPUT — Computed via SentenceTransformer MiniLM embeddings & PELT changepoint detection.",
             traceId=loaded_trace.trace_id,
@@ -264,6 +317,8 @@ class DetectorService:
             steps=step_models,
             detection=detection_model,
             audit=audit_model,
+            causal_attribution=causal_model,
+            prompt_repair=repair_model,
         )
 
 
