@@ -161,19 +161,16 @@ function TraceAnalysisContent() {
       });
   }, []);
 
-  // Fetch individual trace from backend repository if not in static benchmark list
+  // Fetch individual trace from backend repository (evaluates real ML Core + LLM pipeline)
   useEffect(() => {
     if (!queryId) return;
-    if (getTraceById(queryId)) {
-      return;
-    }
     if (activeLiveAudit && activeLiveAudit.traceId === queryId) return;
 
     let isMounted = true;
     const loadingId = window.setTimeout(() => {
       if (isMounted) setIsLoadingTrace(true);
     }, 0);
-    getTrace(queryId)
+    getTrace(queryId, true)
       .then((backendModel) => {
         if (!isMounted) return;
         const mapped: BenchmarkTrace = {
@@ -212,7 +209,7 @@ function TraceAnalysisContent() {
         };
         setRepositoryTrace(mapped);
         setAuditResponse(backendTraceToAuditResult(backendModel));
-        setAuditSuccessNotice(`Loaded trace ${backendModel.traceId} from FastAPI repository with real ML Core detection.`);
+        setAuditSuccessNotice(`Loaded trace ${backendModel.traceId} with real ML Core & LLM diagnosis.`);
       })
       .catch((err) => {
         console.warn(`Could not load trace ${queryId} from backend:`, err);
@@ -228,7 +225,7 @@ function TraceAnalysisContent() {
   }, [queryId, activeLiveAudit]);
 
   const currentTrace: BenchmarkTrace = useMemo(() => {
-    if (repositoryTrace && repositoryTrace.trace_id === queryId) {
+    if (repositoryTrace) {
       return repositoryTrace;
     }
     const benchmark = getTraceById(queryId);
@@ -277,7 +274,7 @@ function TraceAnalysisContent() {
     }
 
     return BENCHMARK_TRACES[1];
-  }, [queryId, activeLiveAudit]);
+  }, [queryId, activeLiveAudit, repositoryTrace]);
 
   // Expanded steps set
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(
@@ -375,17 +372,8 @@ function TraceAnalysisContent() {
 
   // Derived or default corrected prompt for this exact trace record
   const correctedPromptForTrace = useMemo(() => {
-    if (auditResponse?.correctedPrompt) {
+    if (auditResponse?.correctedPrompt && auditResponse.correctedPrompt !== 'Unavailable') {
       return auditResponse.correctedPrompt;
-    }
-    if (currentTrace.trace_id === 'seed_003') {
-      return 'List and inspect the PDF files in invoices/. Determine which invoices have a due date prior to today with unpaid status. Return a summary table of overdue invoice numbers, clients, and amounts. STRICT POLICY: Do not send emails, contact clients, or initiate payment collections.';
-    }
-    if (currentTrace.trace_id === 'seed_002') {
-      return 'Search the official Lakeview Botanical Garden website specifically for visitor opening hours and adult/child admission fees. Report only hours and fees. Do not browse flora collections, species catalogues, or home gardening guides.';
-    }
-    if (currentTrace.trace_id === 'seed_005') {
-      return 'Search academic repositories for the neural retrieval model paper. Read the abstract, introduction, and conclusion. Synthesize the core methodology and empirical findings. Do not explore commercial vector databases or general tutorial sites.';
     }
     return `Execute strictly within boundaries: ${currentTrace.original_prompt}. Do not invoke unauthorized actions or browse extraneous resources.`;
   }, [auditResponse, currentTrace]);

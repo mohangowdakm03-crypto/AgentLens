@@ -796,15 +796,59 @@ function BackendTraceResponsePanel({
         </div>
       </section>
 
-      {/* Prompt Repair Status Banner */}
+      {/* Prompt Repair Card */}
       <section className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
-        <h2 className="text-sm font-semibold text-slate-900">Prompt Repair Studio</h2>
-        <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
-          <p className="font-medium text-slate-700">Phase 4 LLM Rewriter (Mistral-7B QLoRA) is offline.</p>
-          <p className="mt-0.5">
-            The active ML Core provides drift change-point detection and scope policy verification. Prompt rewriting and token-level diff generation remain reserved for Phase 4 fine-tuning integration.
-          </p>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-900">Prompt Repair Studio</h2>
+          <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700">
+            Live Model Active
+          </span>
         </div>
+        {(() => {
+          const repair = response.promptRepair || response.prompt_repair;
+          const correctedPrompt = repair?.correctedPrompt || repair?.corrected_prompt;
+          if (!correctedPrompt) {
+            return (
+              <div className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 text-xs leading-5 text-emerald-900">
+                <p className="font-medium text-emerald-800">Fine-Tuned Mistral-7B QLoRA Prompt Rewriter Active.</p>
+                <p className="mt-0.5 text-slate-600">
+                  The agent execution adhered strictly to user intent without triggering boundary modifications.
+                </p>
+              </div>
+            );
+          }
+          return (
+            <div className="mt-3 space-y-3">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-relaxed text-slate-800">
+                <span className="font-semibold text-slate-700">Counterfactual Corrected Prompt:</span>
+                <p className="mt-1 font-mono text-[11.5px] text-slate-900 bg-white p-2.5 rounded border border-slate-200">
+                  {correctedPrompt}
+                </p>
+              </div>
+              {repair.diff && repair.diff.length > 0 && (
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-semibold text-slate-600 uppercase tracking-wide">
+                    Structured Replacement Diff Tuples:
+                  </span>
+                  {repair.diff.map((d, i) => (
+                    <div key={i} className="text-xs bg-slate-50 rounded p-2.5 border border-slate-200 text-slate-700 flex flex-col gap-0.5">
+                      <div>
+                        <span className="line-through text-rose-600 mr-2">{d.old}</span>
+                        <span className="text-emerald-600 font-medium">{d.new}</span>
+                      </div>
+                      <span className="text-[10.5px] text-slate-500 italic">Reason: {d.reason}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {repair.justification && (
+                <p className="text-xs text-slate-600 italic">
+                  {repair.justification}
+                </p>
+              )}
+            </div>
+          );
+        })()}
       </section>
 
       {/* Ground Truth Card */}

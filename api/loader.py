@@ -863,15 +863,30 @@ class TraceRepository:
         return out
 
     def get_trace(self, trace_id: str) -> Optional[LoadedTrace]:
-        """Look up a trace by its exact trace_id without mutating IDs."""
+        """Look up a trace by its exact trace_id, with robust alias resolution for legacy and seed IDs."""
         tid = str(trace_id).strip()
-        return self._traces.get(tid)
+        if tid in self._traces:
+            return self._traces[tid]
+        for prefix in ("seed_", "al_sample_", "sample_", "trace_"):
+            if tid.startswith(prefix):
+                num_str = tid[len(prefix):]
+                if num_str.isdigit():
+                    alt = f"al_trace_{int(num_str):03d}"
+                    if alt in self._traces:
+                        return self._traces[alt]
+        if tid.isdigit():
+            alt = f"al_trace_{int(tid):03d}"
+            if alt in self._traces:
+                return self._traces[alt]
+        return None
 
     def get_ground_truth(self, trace_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve isolated ground-truth metadata for a trace (evaluation layer only)."""
-        tid = str(trace_id).strip()
-        gt = self._ground_truth.get(tid)
-        return dict(gt) if gt is not None else None
+        lt = self.get_trace(trace_id)
+        if lt:
+            gt = self._ground_truth.get(lt.trace_id, lt.ground_truth)
+            return dict(gt) if gt is not None else None
+        return None
 
     def get_sample_split(self, trace_id: str) -> Optional[str]:
         """Retrieve the dataset split label (e.g. 'test', 'train', 'validation') for a trace."""

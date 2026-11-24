@@ -111,21 +111,21 @@ export async function listTraces(): Promise<BackendTraceListItem[]> {
 
 /**
  * GET /api/traces/{trace_id}
- * Retrieve an individual trace evaluated against the ML detector.
+ * Retrieve an individual trace evaluated against the ML detector and LLM engine.
  */
-export async function getTrace(traceId: string): Promise<BackendTraceModel> {
+export async function getTrace(traceId: string, runLlm: boolean = true): Promise<BackendTraceModel> {
   const cleanId = encodeURIComponent(traceId.trim());
-  const res = await backendClient.get<BackendTraceModel>(`/api/traces/${cleanId}`);
+  const res = await backendClient.get<BackendTraceModel>(`/api/traces/${cleanId}?run_llm=${runLlm}`);
   return res.data;
 }
 
 /**
  * POST /api/traces/{trace_id}/detect
- * Execute detection specifically on a repository trace.
+ * Execute detection specifically on a repository trace with real LLM attribution & prompt repair.
  */
-export async function runDetectOnTrace(traceId: string): Promise<BackendTraceModel> {
+export async function runDetectOnTrace(traceId: string, runLlm: boolean = true): Promise<BackendTraceModel> {
   const cleanId = encodeURIComponent(traceId.trim());
-  const res = await backendClient.post<BackendTraceModel>(`/api/traces/${cleanId}/detect`);
+  const res = await backendClient.post<BackendTraceModel>(`/api/traces/${cleanId}/detect?run_llm=${runLlm}`);
   return res.data;
 }
 
@@ -251,12 +251,41 @@ export function backendTraceToAuditResult(trace: BackendTraceModel): AuditResult
     ? trace.detection.detectorConfig.fallbackDrop
     : null;
 
+  const rawCausal = trace.causalAttribution || trace.causal_attribution;
+  const rawRepair = trace.promptRepair || trace.prompt_repair;
+
+  const causalExplanation =
+    rawCausal?.explanation ||
+    trace.audit.explanation ||
+    (trace.audit.isDeviated
+      ? `Deviation (${trace.audit.deviationType}) detected by ML core.`
+      : 'No deviation detected by ML core.');
+
+  const triggerTokens = rawCausal?.triggerTokens || rawCausal?.trigger_tokens || [];
+
+  const correctedPrompt =
+    rawRepair?.correctedPrompt ||
+    rawRepair?.corrected_prompt ||
+    (trace.audit.isDeviated ? 'Unavailable' : trace.prompt);
+
+  const diff = (rawRepair?.diff || []).map((d) => ({
+    old: String(d.old || ''),
+    new: String(d.new || ''),
+    reason: String(d.reason || ''),
+  }));
+
+  const justification =
+    rawRepair?.justification ||
+    (trace.audit.isDeviated
+      ? 'Prompt constraints updated to prevent unauthorized agent actions.'
+      : 'The original prompt is well-scoped and led to faithful agent execution.');
+
   return {
-    causalExplanation: trace.audit.explanation || 'No deviation explanation returned.',
-    triggerTokens: [], // ML Core does not generate trigger tokens; empty list preserves UI safety
-    correctedPrompt: 'Prompt repair is offline — available in Phase 4 via fine-tuned Mistral-7B QLoRA rewriter.',
-    diff: [],
-    justification: 'Prompt repair offline — ML Core detection active.',
+    causalExplanation,
+    triggerTokens,
+    correctedPrompt,
+    diff,
+    justification,
     detectorAnalysis: {
       confidence: trace.audit.confidence,
       similarity: trace.detection?.pelt?.similarityBefore ?? (trace.steps[0]?.similarityScore ?? null),

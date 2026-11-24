@@ -168,6 +168,25 @@ export interface BackendAuditResultModel {
   explanation: string;
 }
 
+export interface BackendCausalAttributionModel {
+  explanation?: string;
+  trigger_tokens?: string[];
+  triggerTokens?: string[];
+}
+
+export interface BackendPromptDiffModel {
+  old: string;
+  new: string;
+  reason: string;
+}
+
+export interface BackendPromptRepairModel {
+  corrected_prompt?: string;
+  correctedPrompt?: string;
+  diff?: BackendPromptDiffModel[];
+  justification?: string;
+}
+
 /** Full trace response matching api.models.TraceModel */
 export interface BackendTraceModel {
   _dataNote?: string;
@@ -179,6 +198,10 @@ export interface BackendTraceModel {
   steps: BackendStepModel[];
   detection: BackendDetectionModel;
   audit: BackendAuditResultModel;
+  causal_attribution?: BackendCausalAttributionModel;
+  causalAttribution?: BackendCausalAttributionModel;
+  prompt_repair?: BackendPromptRepairModel;
+  promptRepair?: BackendPromptRepairModel;
 }
 
 /** Catalog item matching api.models.TraceListItem */
